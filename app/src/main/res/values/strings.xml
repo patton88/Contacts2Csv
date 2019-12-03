@@ -1,3 +1,17 @@
 <resources>
-    <string name="app_name">Contacts2Csv</string>
+    <string name="app_name_0">Contacts2Csv</string>
+    <string name="hello">Hello World, ContactToolActivity!</string>
+    <string name="app_name">联系人导入导出工具</string>
+    <string name="insert_contact">导入联系人</string>
+    <string name="read_file">导入文件</string>
+    <string name="choose_os">请选择你的操作系统</string>
+    <string name="radio_win">windows系统</string>
+    <string name="radio_linux">linux系统</string>
+    <string name="choose_mode">请选择模式</string>
+    <string name="insert">导入</string>
+    <string name="output">导出</string>
+    <string name="output_contact">导出联系人</string>
+    <string name="input_file_name">请输入文件名</string>
+    <string name="help">阅读使用说明</string>
+
 </resources>
