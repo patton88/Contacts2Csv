@@ -24,7 +24,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button mOutputButton;
     private TextView mResultTextView;
     private TextView mOsTextView;
-    //private RadioButton[] mOsSetButtons = new RadioButton[2];
+    private RadioButton[] mOsSetButtons = new RadioButton[2];
     private RadioButton[] mModeButtons = new RadioButton[2];
 
     private Handler mHandler = new Handler() {
@@ -73,11 +73,11 @@ public class MainActivity extends Activity implements OnClickListener {
         mOutputButton = (Button) findViewById(R.id.output_button);
         mOutputButton.setOnClickListener(this);
         mResultTextView = (TextView) findViewById(R.id.result_view);
-        //mOsTextView = (TextView)findViewById(R.id.os_text);
-        //mOsSetButtons[0] = (RadioButton) findViewById(R.id.radio_button_win);
+        mOsTextView = (TextView)findViewById(R.id.os_text);
+        mOsSetButtons[0] = (RadioButton) findViewById(R.id.radio_button_win);
         // set gbk default
-        //mOsSetButtons[0].setChecked(true);
-        //mOsSetButtons[1] = (RadioButton) findViewById(R.id.radio_button_linux);
+        mOsSetButtons[0].setChecked(true);
+        mOsSetButtons[1] = (RadioButton) findViewById(R.id.radio_button_linux);
         mModeButtons[0] = (RadioButton) findViewById(R.id.radio_insert);
         mModeButtons[0].setOnClickListener(this);
         mModeButtons[1] = (RadioButton) findViewById(R.id.radio_output);
@@ -95,7 +95,7 @@ public class MainActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.help_button:
-                createDialog(this, ContactContant.HELP_DIALOG_TITLE, ContactContant.HELP_MESSAGE,false,
+                createDialog(this,ContactContant.HELP_DIALOG_TITLE,ContactContant.HELP_MESSAGE,false,
                         ContactContant.DIALOG_TYPE_HELP);
                 break;
             case R.id.insert_button:
@@ -149,14 +149,14 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void setInsertWidgetEnabled(boolean enable) {
-//        mOsSetButtons[0].setEnabled(enable);
-//        mOsSetButtons[1].setEnabled(enable);
+        mOsSetButtons[0].setEnabled(enable);
+        mOsSetButtons[1].setEnabled(enable);
         mInsertButton.setEnabled(enable);
         mEditText.setEnabled(enable);
         int visable = enable ? View.VISIBLE : View.INVISIBLE;
-//        mOsSetButtons[0].setVisibility(visable);
-//        mOsSetButtons[1].setVisibility(visable);
-        //mOsTextView.setVisibility(visable);
+        mOsSetButtons[0].setVisibility(visable);
+        mOsSetButtons[1].setVisibility(visable);
+        mOsTextView.setVisibility(visable);
         if(!enable){
             mResultTextView.setText(ContactContant.NO_TEXT);
         }
@@ -181,16 +181,16 @@ public class MainActivity extends Activity implements OnClickListener {
             mInsertThread.interrupt();
             mInsertThread = null;
         }
-//        String charset = mOsSetButtons[0].isChecked() ? ContactContant.CHARSET_GBK
-//                : ContactContant.CHARSET_UTF8;
-//        mInsertThread = new Thread(new InsertRunnable(this, path, charset));
-//        createDialog(this, ContactContant.WARNDIALOG_TITLE,
-//                ContactContant.INSERT_WARNDIALOG_MESSAGE, true,
-//                ContactContant.DIALOG_TYPE_INSERT);
+        String charset = mOsSetButtons[0].isChecked() ? ContactContant.CHARSET_GBK
+                : ContactContant.CHARSET_UTF8;
+        mInsertThread = new Thread(new InsertRunnable(this, path, charset));
+        createDialog(this, ContactContant.WARNDIALOG_TITLE,
+                ContactContant.INSERT_WARNDIALOG_MESSAGE, true,
+                ContactContant.DIALOG_TYPE_INSERT);
     }
 
     private void doInsertContact() {
-        //setInsertWidgetEnabled(false);
+        setInsertWidgetEnabled(false);
         mResultTextView.setText(ContactContant.STATUS_INSERTING);
         if (mInsertThread != null) {
             mInsertThread.start();
@@ -199,7 +199,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void endInsertContact() {
         mEditText.setText(ContactContant.NO_TEXT);
-        //setInsertWidgetEnabled(true);
+        setInsertWidgetEnabled(true);
     }
 
     private Thread mInsertThread;
