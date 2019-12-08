@@ -2,6 +2,7 @@ package com.example.contacts2csv;
 
 import java.io.File;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,8 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends BaseActivity implements OnClickListener {
     private int iSum;
     private EditText mEditText;
     private Button mHelpButton;
@@ -235,14 +237,24 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void outputContact(){
-        File file = new File(ContactContant.OUTPUT_PATH);
-        if(file.exists()){
-            createDialog(this, ContactContant.WARNDIALOG_TITLE,
-                    ContactContant.OUTPUT_WARNDIALOG_MESSAGE, true,
-                    ContactContant.DIALOG_TYPE_OUTPUT);
-        }else {
-            doOutputContact();
-        }
+
+        performCodeWithPermission("读取联系人权限", new PermissionCallback() {
+            @Override
+            public void hasPermission() {
+                File file = new File(ContactContant.OUTPUT_PATH);
+                if(file.exists()){
+                    createDialog(getParent(), ContactContant.WARNDIALOG_TITLE,
+                            ContactContant.OUTPUT_WARNDIALOG_MESSAGE, true,
+                            ContactContant.DIALOG_TYPE_OUTPUT);
+                }else {
+                    doOutputContact();
+                }
+            }
+            @Override
+            public void noPermission() {
+                Toast.makeText(MainActivity.this,"没有授权", Toast.LENGTH_SHORT).show();
+            }
+        }, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private void doOutputContact(){
