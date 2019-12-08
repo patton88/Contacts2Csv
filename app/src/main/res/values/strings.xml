@@ -13,5 +13,6 @@
     <string name="output_contact">导出联系人</string>
     <string name="input_file_name">请输入文件名</string>
     <string name="help">阅读使用说明</string>
+    <string name="hint_text1">文件路径</string>
 
 </resources>
