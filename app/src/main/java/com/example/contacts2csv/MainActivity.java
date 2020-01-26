@@ -97,8 +97,11 @@ public class MainActivity extends Activity implements OnClickListener {
         mModeButtons[0].setOnClickListener(this);
         mModeButtons[1] = (RadioButton) findViewById(R.id.radio_output);
         mModeButtons[1].setOnClickListener(this);
+
+        //启动时选中导出联系人
+        mModeButtons[1].setChecked(true);
         setInsertWidgetEnabled(false);
-        setOutputWidgetEnabled(false);
+        setOutputWidgetEnabled(true);
     }
 
     @Override
