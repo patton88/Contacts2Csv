@@ -20,48 +20,44 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends Activity implements OnClickListener {
     public static MainActivity m_MA;
-    private int iSum;
-    private EditText mEditText;
-    private Button mHelpButton;
-    private Button mInsertButton;
-    private Button mOutputButton;
-    private TextView mResultTextView;
-    private TextView mOsTextView;
-    private RadioButton[] mOsSetButtons = new RadioButton[2];
-    private RadioButton[] mModeButtons = new RadioButton[2];
+    private EditText m_etInfo;
+    private Button m_btnHelp;
+    private Button m_btnInsert;
+    private Button m_btnOutput;
+    private TextView m_tvResult;
+    private TextView m_tvOs;
+    private RadioButton[] m_rbtnOs = new RadioButton[2];
+    private RadioButton[] m_rbtnMode = new RadioButton[2];
 
-    private Handler mHandler = new Handler() {
+    private Handler m_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case ContactContant.INSERT_FAIL:
-                    mResultTextView.setText(ContactContant.FAIL_INSERT);
+                    m_tvResult.setText(ContactContant.FAIL_INSERT);
                     endInsertContact();
                     break;
                 case ContactContant.INSERT_SUCCESS:
-                    mResultTextView.setText(String.format(
+                    m_tvResult.setText(String.format(
                             ContactContant.SUCCESS_INSERT,
                             ContactToolInsertUtils.getSuccessCount(),
                             ContactToolInsertUtils.getFailCount()));
                     endInsertContact();
                     break;
                 case ContactContant.OUTPUT_FAIL:
-                    mResultTextView.setText(ContactContant.FAIL_OUTPUT);
+                    m_tvResult.setText(ContactContant.FAIL_OUTPUT);
                     endOutputContact();
                     break;
                 case ContactContant.OUTPUT_SUCCESS:
-                    mResultTextView.setText((String.format(
+                    m_tvResult.setText((String.format(
                             ContactContant.SUCCESS_OUTPUT,
                             ContactToolOutputUtils.getCount())));
                     endOutputContact();
@@ -80,26 +76,26 @@ public class MainActivity extends Activity implements OnClickListener {
 
     /*init widgets*/
     private void init() {
-        mEditText = (EditText) findViewById(R.id.edit_text);
-        mHelpButton = (Button) findViewById(R.id.help_button);
-        mHelpButton.setOnClickListener(this);
-        mInsertButton = (Button) findViewById(R.id.insert_button);
-        mInsertButton.setOnClickListener(this);
-        mOutputButton = (Button) findViewById(R.id.output_button);
-        mOutputButton.setOnClickListener(this);
-        mResultTextView = (TextView) findViewById(R.id.result_view);
-        mOsTextView = (TextView)findViewById(R.id.os_text);
-        mOsSetButtons[0] = (RadioButton) findViewById(R.id.radio_button_win);
+        m_etInfo = (EditText) findViewById(R.id.edit_text);
+        m_btnHelp = (Button) findViewById(R.id.help_button);
+        m_btnHelp.setOnClickListener(this);
+        m_btnInsert = (Button) findViewById(R.id.insert_button);
+        m_btnInsert.setOnClickListener(this);
+        m_btnOutput = (Button) findViewById(R.id.output_button);
+        m_btnOutput.setOnClickListener(this);
+        m_tvResult = (TextView) findViewById(R.id.result_view);
+        m_tvOs = (TextView)findViewById(R.id.os_text);
+        m_rbtnOs[0] = (RadioButton) findViewById(R.id.radio_button_win);
         // set gbk default
-        mOsSetButtons[0].setChecked(true);
-        mOsSetButtons[1] = (RadioButton) findViewById(R.id.radio_button_linux);
-        mModeButtons[0] = (RadioButton) findViewById(R.id.radio_insert);
-        mModeButtons[0].setOnClickListener(this);
-        mModeButtons[1] = (RadioButton) findViewById(R.id.radio_output);
-        mModeButtons[1].setOnClickListener(this);
+        m_rbtnOs[0].setChecked(true);
+        m_rbtnOs[1] = (RadioButton) findViewById(R.id.radio_button_linux);
+        m_rbtnMode[0] = (RadioButton) findViewById(R.id.radio_insert);
+        m_rbtnMode[0].setOnClickListener(this);
+        m_rbtnMode[1] = (RadioButton) findViewById(R.id.radio_output);
+        m_rbtnMode[1].setOnClickListener(this);
 
         //启动时选中导出联系人
-        mModeButtons[1].setChecked(true);
+        m_rbtnMode[1].setChecked(true);
         setInsertWidgetEnabled(false);
         setOutputWidgetEnabled(true);
     }
@@ -123,8 +119,8 @@ public class MainActivity extends Activity implements OnClickListener {
                 outputContact();
                 break;
             case R.id.radio_insert:
-                setOutputWidgetEnabled(false);
                 setInsertWidgetEnabled(true);
+                setOutputWidgetEnabled(false);
                 break;
             case R.id.radio_output:
                 setInsertWidgetEnabled(false);
@@ -166,113 +162,108 @@ public class MainActivity extends Activity implements OnClickListener {
         builder.show();
     }
 
-    private void setInsertWidgetEnabled(boolean enable) {
-        mOsSetButtons[0].setEnabled(enable);
-        mOsSetButtons[1].setEnabled(enable);
-        mInsertButton.setEnabled(enable);
-        mEditText.setEnabled(enable);
-        int visable = enable ? View.VISIBLE : View.INVISIBLE;
-        mOsSetButtons[0].setVisibility(visable);
-        mOsSetButtons[1].setVisibility(visable);
-        mOsTextView.setVisibility(visable);
-        if(!enable){
-            mResultTextView.setText(ContactContant.NO_TEXT);
+    private void setInsertWidgetEnabled(boolean bEnable) {
+        m_rbtnOs[0].setEnabled(bEnable);
+        m_rbtnOs[1].setEnabled(bEnable);
+        m_btnInsert.setEnabled(bEnable);
+        m_etInfo.setEnabled(bEnable);
+        int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
+        m_rbtnOs[0].setVisibility(iVisable);
+        m_rbtnOs[1].setVisibility(iVisable);
+        m_tvOs.setVisibility(iVisable);
+        if(!bEnable){
+            m_tvResult.setText(ContactContant.NO_TEXT);
         }
     }
 
     private void insertContact() {
-        String path = mEditText.getText().toString();
-        if (path == null || path.equals(ContactContant.NO_TEXT)) {
-            ContactToolUtils.showToast(this,
-                    ContactContant.FAIL_EDITTEXT_NOT_INPUT);
-            mResultTextView.setText(ContactContant.FAIL_EDITTEXT_NOT_INPUT);
+        String sPath = m_etInfo.getText().toString();
+        if (sPath == null || sPath.equals(ContactContant.NO_TEXT)) {
+            ContactToolUtils.showToast(this, ContactContant.FAIL_EDITTEXT_NOT_INPUT);
+            m_tvResult.setText(ContactContant.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
-        path = ContactContant.FILE_NAME_PARENT + path;
-        if (!new File(path).exists()) {
-            ContactToolUtils
-                    .showToast(this, ContactContant.FAIL_FIRE_NOT_EXIST);
-            mResultTextView.setText(ContactContant.FAIL_FIRE_NOT_EXIST);
+        sPath = ContactContant.FILE_NAME_PARENT + sPath;
+        if (!new File(sPath).exists()) {
+            ContactToolUtils.showToast(this, ContactContant.FAIL_FIRE_NOT_EXIST);
+            m_tvResult.setText(ContactContant.FAIL_FIRE_NOT_EXIST);
             return;
         }
-        if (mInsertThread != null) {
-            mInsertThread.interrupt();
-            mInsertThread = null;
+        if (m_threadInsert != null) {
+            m_threadInsert.interrupt();
+            m_threadInsert = null;
         }
-        String charset = mOsSetButtons[0].isChecked() ? ContactContant.CHARSET_GBK
-                : ContactContant.CHARSET_UTF8;
-        mInsertThread = new Thread(new InsertRunnable(this, path, charset));
-        createDialog(this, ContactContant.WARNDIALOG_TITLE,
-                ContactContant.INSERT_WARNDIALOG_MESSAGE, true,
-                ContactContant.DIALOG_TYPE_INSERT);
+        String sCharset = m_rbtnOs[0].isChecked() ? ContactContant.CHARSET_GBK : ContactContant.CHARSET_UTF8;
+        m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
+        createDialog(this, ContactContant.WARNDIALOG_TITLE, ContactContant.INSERT_WARNDIALOG_MESSAGE,
+                true, ContactContant.DIALOG_TYPE_INSERT);
     }
 
     private void doInsertContact() {
         setInsertWidgetEnabled(false);
-        mResultTextView.setText(ContactContant.STATUS_INSERTING);
-        if (mInsertThread != null) {
-            mInsertThread.start();
+        m_tvResult.setText(ContactContant.STATUS_INSERTING);
+        if (m_threadInsert != null) {
+            m_threadInsert.start();
         }
     }
 
     private void endInsertContact() {
-        mEditText.setText(ContactContant.NO_TEXT);
+        m_etInfo.setText(ContactContant.NO_TEXT);
         setInsertWidgetEnabled(true);
     }
 
-    private Thread mInsertThread;
+    private Thread m_threadInsert;
 
     class InsertRunnable implements Runnable {
-        private Context mContext;
-        private String mPath;
-        private String mCharset;
+        private Context m_context;
+        private String m_sPath;
+        private String m_sCharset;
 
-        public InsertRunnable(Context context, String path, String charset) {
-            mPath = path;
-            mContext = context;
-            mCharset = charset;
+        public InsertRunnable(Context context, String sPath, String sCharset) {
+            m_sPath = sPath;
+            m_context = context;
+            m_sCharset = sCharset;
         }
 
         @Override
         public void run() {
-            boolean result = ContactToolInsertUtils.insertIntoContact(mContext,
-                    mPath, mCharset);
-            if (result) {
-                mHandler.sendEmptyMessage(ContactContant.INSERT_SUCCESS);
+            boolean bResult = ContactToolInsertUtils.insertIntoContact(m_context, m_sPath, m_sCharset);
+            if (bResult) {
+                m_handler.sendEmptyMessage(ContactContant.INSERT_SUCCESS);
             } else {
-                mHandler.sendEmptyMessage(ContactContant.INSERT_FAIL);
+                m_handler.sendEmptyMessage(ContactContant.INSERT_FAIL);
             }
         }
     }
 
-    private void setOutputWidgetEnabled(boolean enable) {
-        mOutputButton.setEnabled(enable);
-        if(!enable){
-            mResultTextView.setText(ContactContant.NO_TEXT);
+    private void setOutputWidgetEnabled(boolean bEnable) {
+        m_btnOutput.setEnabled(bEnable);
+        if(!bEnable){
+            m_tvResult.setText(ContactContant.NO_TEXT);
         }
     }
 
     private static final int NOT_NOTICE = 2;//如果勾选了不再询问
-    private AlertDialog alertDialog;
-    private AlertDialog mDialog;
+    private AlertDialog m_dla;
+    private AlertDialog m_dlgAlert;
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onRequestPermissionsResult(int iRequestCode, String[] sPermissions, int[] iGrantResults) {
+        super.onRequestPermissionsResult(iRequestCode, sPermissions, iGrantResults);
 
-        if (requestCode == 1) {
-            for (int i = 0; i < permissions.length; i++) {
-                if (grantResults[i] == PERMISSION_GRANTED) {//选择了“始终允许”
-                    //Toast.makeText(this, "" + "权限" + permissions[i] + "申请成功", Toast.LENGTH_SHORT).show();
+        if (iRequestCode == 1) {
+            for (int i = 0; i < sPermissions.length; i++) {
+                if (iGrantResults[i] == PERMISSION_GRANTED) {//选择了“始终允许”
+                    //Toast.makeText(this, "" + "权限" + sPermissions[i] + "申请成功", Toast.LENGTH_SHORT).show();
                 } else {
-                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])){//用户选择了禁止不再询问
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, sPermissions[i])){//用户选择了禁止不再询问
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle("permission")
                                 .setMessage("点击允许才可以使用我们的app哦")
                                 .setPositiveButton("去允许", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        if (mDialog != null && mDialog.isShowing()) {
-                                            mDialog.dismiss();
+                                        if (m_dla != null && m_dla.isShowing()) {
+                                            m_dla.dismiss();
                                         }
                                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                         Uri uri = Uri.fromParts("package", getPackageName(), null);//注意就是"package",不用改成自己的包名
@@ -280,25 +271,25 @@ public class MainActivity extends Activity implements OnClickListener {
                                         startActivityForResult(intent, NOT_NOTICE);
                                     }
                                 });
-                        mDialog = builder.create();
-                        mDialog.setCanceledOnTouchOutside(false);
-                        mDialog.show();
+                        m_dla = builder.create();
+                        m_dla.setCanceledOnTouchOutside(false);
+                        m_dla.show();
                     }else {//选择禁止
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle("permission")
                                 .setMessage("点击允许才可以使用我们的app哦")
                                 .setPositiveButton("去允许", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        if (alertDialog != null && alertDialog.isShowing()) {
-                                            alertDialog.dismiss();
+                                        if (m_dlgAlert != null && m_dlgAlert.isShowing()) {
+                                            m_dlgAlert.dismiss();
                                         }
                                         ActivityCompat.requestPermissions(MainActivity.this,
                                                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                                     }
                                 });
-                        alertDialog = builder.create();
-                        alertDialog.setCanceledOnTouchOutside(false);
-                        alertDialog.show();
+                        m_dlgAlert = builder.create();
+                        m_dlgAlert.setCanceledOnTouchOutside(false);
+                        m_dlgAlert.show();
                     }
                 }
             }
@@ -308,18 +299,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void outputContact(){
         //使用兼容库就无需判断系统版本
-        int hasWriteStoragePermission = -11;
-        int hasReadContacts = -11;
+        int iHasWriteStoragePermission = -11;
+        int iHasReadContacts = -11;
         //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
-        //if (hasWriteStoragePermission == PackageManager.PERMISSION_GRANTED && hasReadContacts == PackageManager.PERMISSION_GRANTED) {
+        //if (iHasWriteStoragePermission == PackageManager.PERMISSION_GRANTED && iHasReadContacts == PackageManager.PERMISSION_GRANTED) {
         //拥有权限，执行操作
 
         //权限不足，就进入申请权限死循环
-        while (hasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || hasReadContacts != PackageManager.PERMISSION_GRANTED) {
+        while (iHasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || iHasReadContacts != PackageManager.PERMISSION_GRANTED) {
             //Toast.makeText(this, "权限不足。需要读写联系人权限、读写外部存储权限！", Toast.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
-            hasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            hasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
+            iHasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            iHasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
         }
 
         //拥有权限，执行操作
@@ -338,33 +329,33 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void doOutputContact(){
         setOutputWidgetEnabled(false);
-        mResultTextView.setText(ContactContant.STATUS_OUTPUTING);
-        if (mOutputThread != null) {
-            mOutputThread.interrupt();
-            mOutputThread = null;
+        m_tvResult.setText(ContactContant.STATUS_OUTPUTING);
+        if (m_threadOutput != null) {
+            m_threadOutput.interrupt();
+            m_threadOutput = null;
         }
-        mOutputThread = new Thread(new OutputRunnable(this));
-        if (mOutputThread != null) {
-            mOutputThread.start();
+        m_threadOutput = new Thread(new OutputRunnable(this));
+        if (m_threadOutput != null) {
+            m_threadOutput.start();
         }
     }
 
-    private Thread mOutputThread;
+    private Thread m_threadOutput;
 
     class OutputRunnable implements Runnable {
-        private Context mContext;
+        private Context m_context;
 
         public OutputRunnable(Context context) {
-            mContext = context;
+            m_context = context;
         }
 
         @Override
         public void run() {
-            boolean result = ContactToolOutputUtils.outputContacts(mContext);
+            boolean result = ContactToolOutputUtils.outputContacts(m_context);
             if (result) {
-                mHandler.sendEmptyMessage(ContactContant.OUTPUT_SUCCESS);
+                m_handler.sendEmptyMessage(ContactContant.OUTPUT_SUCCESS);
             } else {
-                mHandler.sendEmptyMessage(ContactContant.OUTPUT_FAIL);
+                m_handler.sendEmptyMessage(ContactContant.OUTPUT_FAIL);
             }
         }
     }
