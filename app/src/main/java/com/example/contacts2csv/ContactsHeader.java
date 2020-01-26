@@ -29,15 +29,16 @@ import java.util.LinkedHashMap;
 public class ContactsHeader {
     //public Map<String, String> mMapCol;            //联系人信息列表头
     //public Vector<Pair<String, String>> mVecCol;   //联系人信息列表头，Map会自动排序，用Vector也不合理
-    public JSONObject mJsonHeader;     //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
+    public JSONObject m_jsonHeader;     //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
 
     public void init() throws JSONException {
         // ------------------- 联系人信息列表头 - Begin
-        mJsonHeader = new JSONObject(new LinkedHashMap());         //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
+        //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
+        m_jsonHeader = new JSONObject(new LinkedHashMap());
 
         //1.00、mJsonG00StructName，获得通讯录中联系人的名字。1个大项，9个小项
-        mJsonHeader.put("mJsonG00StructName", new JSONObject(new LinkedHashMap()));
-        String strJsonG00StructName[][] = {
+        m_jsonHeader.put("mJsonG00StructName", new JSONObject(new LinkedHashMap()));
+        String sJsonG00StructName[][] = {
                 {"displayName", StructuredName.DISPLAY_NAME},	                //DISPLAY_NAME = "data1";
                 {"lastName", StructuredName.GIVEN_NAME},			            //GIVEN_NAME = "data2";
                 {"firstName", StructuredName.FAMILY_NAME},                      //FAMILY_NAME = "data3";
@@ -48,16 +49,11 @@ public class ContactsHeader {
                 {"phoneticFirstName", StructuredName.PHONETIC_FAMILY_NAME},	    //PHONETIC_MIDDLE_NAME = "data8";
                 {"phoneticMiddleName", StructuredName.PHONETIC_MIDDLE_NAME},    //PHONETIC_FAMILY_NAME = "data9";
         };
-        add2Json(strJsonG00StructName, mJsonHeader.getJSONObject("mJsonG00StructName"));
-        //        for(String[] strArr : strJsonG00StructName){
-        //            JSONObject json = new JSONObject(new LinkedHashMap());
-        //            json.put(strArr[0], strArr[1]);
-        //            mJsonG01Phone.put(strArr[0], json);
-        //        }
+        Arr2Json(sJsonG00StructName, m_jsonHeader.getJSONObject("mJsonG00StructName"));
 
         //1.01、mJsonG01Phone，获取电话信息。1个大项，20个小项，共20项
-        mJsonHeader.put("mJsonG01Phone", new JSONObject(new LinkedHashMap()));
-        String strJsonG01Phone[][] = {
+        m_jsonHeader.put("mJsonG01Phone", new JSONObject(new LinkedHashMap()));
+        String sJsonG01Phone[][] = {
                 {"homeNum", Phone.NUMBER},         //TYPE_HOME = 1;
                 {"mobile", Phone.NUMBER},          //TYPE_MOBILE = 2;
                 {"workNum", Phone.NUMBER},         //TYPE_WORK = 3;
@@ -79,31 +75,31 @@ public class ContactsHeader {
                 {"assistantNum", Phone.NUMBER},		//TYPE_ASSISTANT = 19;
                 {"mms", Phone.NUMBER},			    //TYPE_MMS = 20;
         };
-        add2Json(strJsonG01Phone, mJsonHeader.getJSONObject("mJsonG01Phone"));
+        Arr2Json(sJsonG01Phone, m_jsonHeader.getJSONObject("mJsonG01Phone"));
 
         //1.02、mJsonG02Email，查找Email地址。1个大项，4个小项
-        mJsonHeader.put("mJsonG02Email", new JSONObject(new LinkedHashMap()));
-        String strJsonG02Email[][] = {
+        m_jsonHeader.put("mJsonG02Email", new JSONObject(new LinkedHashMap()));
+        String sJsonG02Email[][] = {
                 {"homeEmail", Email.DATA},         //TYPE_HOME = 1;
                 {"workEmail", Email.DATA},         //TYPE_WORK = 2;
                 {"otherEmail", Email.DATA},        //TYPE_OTHER = 3;
                 {"mobileEmail", Email.DATA},       //TYPE_MOBILE = 4;
         };
-        add2Json(strJsonG02Email, mJsonHeader.getJSONObject("mJsonG02Email"));
+        Arr2Json(sJsonG02Email, m_jsonHeader.getJSONObject("mJsonG02Email"));
 
         //1.03、mJsonG03Event，查找Event地址。1个大项，3个小项
-        mJsonHeader.put("mJsonG03Event", new JSONObject(new LinkedHashMap()));
-        String strJsonG03Event[][] = {
+        m_jsonHeader.put("mJsonG03Event", new JSONObject(new LinkedHashMap()));
+        String sJsonG03Event[][] = {
                 {"anniversary", Event.START_DATE}, //TYPE_ANNIVERSARY = 1;
                 {"otherday", Event.START_DATE},    //TYPE_OTHER = 2;
                 {"birthday", Event.START_DATE},    //TYPE_BIRTHDAY = 3;
         };
-        add2Json(strJsonG03Event, mJsonHeader.getJSONObject("mJsonG03Event"));
+        Arr2Json(sJsonG03Event, m_jsonHeader.getJSONObject("mJsonG03Event"));
 
 
         //1.04、mJsonG04Im，即时消息。1个大项，13个小项
-        mJsonHeader.put("mJsonG04Im", new JSONObject(new LinkedHashMap()));
-        String strJsonG04Im[][] = {
+        m_jsonHeader.put("mJsonG04Im", new JSONObject(new LinkedHashMap()));
+        String sJsonG04Im[][] = {
                 {"homeMsg", Im.DATA},         //TYPE_HOME = 1;
                 {"workMsg", Im.DATA},         //TYPE_WORK = 2;
                 {"otherMsg", Im.DATA},        //TYPE_OTHER = 3;
@@ -118,33 +114,33 @@ public class ContactsHeader {
                 {"jabberIm", Im.DATA},        //PROTOCOL_JABBER = 7;
                 {"netmeetingIm", Im.DATA},    //PROTOCOL_NETMEETING = 8;
         };
-        add2Json(strJsonG04Im, mJsonHeader.getJSONObject("mJsonG04Im"));
+        Arr2Json(sJsonG04Im, m_jsonHeader.getJSONObject("mJsonG04Im"));
 
         //1.05、mJsonG05Remark，获取备注信息。1个大项，1个小项
-        mJsonHeader.put("mJsonG05Remark", new JSONObject(new LinkedHashMap()));
-        String strJsonG05Remark[][] = {
+        m_jsonHeader.put("mJsonG05Remark", new JSONObject(new LinkedHashMap()));
+        String sJsonG05Remark[][] = {
                 {"remark", Note.NOTE}
         };
-        add2Json(strJsonG05Remark, mJsonHeader.getJSONObject("mJsonG05Remark"));
+        Arr2Json(sJsonG05Remark, m_jsonHeader.getJSONObject("mJsonG05Remark"));
 
         //1.06、mJsonG06NickName，获取昵称信息。1个大项，5个小项
-        mJsonHeader.put("mJsonG06NickName", new JSONObject(new LinkedHashMap()));
-        String strJsonG06NickName[][] = {
+        m_jsonHeader.put("mJsonG06NickName", new JSONObject(new LinkedHashMap()));
+        String sJsonG06NickName[][] = {
                 {"defaultNickName", Nickname.NAME},     //TYPE_DEFAULT = 1;
                 {"otherNickName", Nickname.NAME},       //TYPE_OTHER_NAME = 2;
                 {"maindenNickName", Nickname.NAME},     //TYPE_MAINDEN_NAME = 3;
                 {"shortNickName", Nickname.NAME},       //TYPE_SHORT_NAME = 4;
                 {"initialsNickName", Nickname.NAME},    //TYPE_INITIALS = 5;
         };
-        add2Json(strJsonG06NickName, mJsonHeader.getJSONObject("mJsonG06NickName"));
+        Arr2Json(sJsonG06NickName, m_jsonHeader.getJSONObject("mJsonG06NickName"));
 
         //1.07、mJsonG07OrgType，获取组织信息
         JSONObject mJsonG07OrgType = new JSONObject(new LinkedHashMap());
-        mJsonHeader.put("mJsonG07OrgType", mJsonG07OrgType);
+        m_jsonHeader.put("mJsonG07OrgType", mJsonG07OrgType);
 
         //1.07.00、mJsonG07_00WorkOrgType，单位组织信息，TYPE_WORK = 1。1个大项，7个小项;
         mJsonG07OrgType.put("mJsonG07_00WorkOrgType", new JSONObject(new LinkedHashMap()));
-        String strJsonG07_00WorkOrgType[][] = {
+        String sJsonG07_00WorkOrgType[][] = {
                 {"workCompany", Organization.COMPANY},               //COMPANY = "data1";
                 {"workJobTitle", Organization.TITLE},                //TITLE = "data4";
                 {"workDepartment", Organization.DEPARTMENT},         //DEPARTMENT = "data5";
@@ -153,11 +149,11 @@ public class ContactsHeader {
                 {"workPhoneticName", Organization.DEPARTMENT},       //PHONETIC_NAME = "data8";
                 {"workOfficeLocation", Organization.DEPARTMENT},     //OFFICE_LOCATION = "data9";
         };
-        add2Json(strJsonG07_00WorkOrgType, mJsonG07OrgType.getJSONObject("mJsonG07_00WorkOrgType"));
+        Arr2Json(sJsonG07_00WorkOrgType, mJsonG07OrgType.getJSONObject("mJsonG07_00WorkOrgType"));
 
         //1.07.01、mJsonG07_01OtherOrgType，其他组织信息，TYPE_OTHER = 2。1个大项，7个小项;
         mJsonG07OrgType.put("mJsonG07_01OtherOrgType", new JSONObject(new LinkedHashMap()));
-        String strJsonG07_01OtherOrgType[][] = {
+        String sJsonG07_01OtherOrgType[][] = {
                 {"otherCompany", Organization.COMPANY},              //COMPANY = "data1";
                 {"otherJobTitle", Organization.TITLE},               //TITLE = "data4";
                 {"otherDepartment", Organization.DEPARTMENT},        //DEPARTMENT = "data5";
@@ -166,11 +162,11 @@ public class ContactsHeader {
                 {"otherPhoneticName", Organization.DEPARTMENT},      //PHONETIC_NAME = "data8";
                 {"otherOfficeLocation", Organization.DEPARTMENT},    //OFFICE_LOCATION = "data9";
         };
-        add2Json(strJsonG07_01OtherOrgType, mJsonG07OrgType.getJSONObject("mJsonG07_01OtherOrgType"));
+        Arr2Json(sJsonG07_01OtherOrgType, mJsonG07OrgType.getJSONObject("mJsonG07_01OtherOrgType"));
 
         //1.08、mJsonG08WebType，获取网站信息
-        mJsonHeader.put("mJsonG08WebType", new JSONObject(new LinkedHashMap()));
-        String strJsonG08WebType[][] = {
+        m_jsonHeader.put("mJsonG08WebType", new JSONObject(new LinkedHashMap()));
+        String sJsonG08WebType[][] = {
                 {"homepage", Website.URL},           //TYPE_HOMEPAGE = 1;
                 {"blog", Website.URL},               //TYPE_BLOG = 2;
                 {"profile", Website.URL},            //TYPE_PROFILE = 3;
@@ -179,15 +175,15 @@ public class ContactsHeader {
                 {"ftpPage", Website.URL},            //TYPE_FTP = 6;
                 {"otherPage", Website.URL},          //TYPE_OTHER = 7;
         };
-        add2Json(strJsonG08WebType, mJsonHeader.getJSONObject("mJsonG08WebType"));
+        Arr2Json(sJsonG08WebType, m_jsonHeader.getJSONObject("mJsonG08WebType"));
 
         //1.09、mJsonG09PostalType，查找通讯地址
         JSONObject mJsonG09PostalType = new JSONObject(new LinkedHashMap());
-        mJsonHeader.put("mJsonG09PostalType", mJsonG09PostalType);
+        m_jsonHeader.put("mJsonG09PostalType", mJsonG09PostalType);
 
         //1.09.00、mJsonG09_00WorkPostal，单位通讯地址，TYPE_HOME = 1。1个大项，8个小项;
         mJsonG09PostalType.put("mJsonG09_00WorkPostal", new JSONObject(new LinkedHashMap()));
-        String strJsonG09_00WorkPostal[][] = {
+        String sJsonG09_00WorkPostal[][] = {
                 {"workFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},  //FORMATTED_ADDRESS = "data1";
                 {"workStreet", StructuredPostal.STREET},                       //STREET = "data4";
                 {"workBox", StructuredPostal.POBOX},                           //POBOX = "data5";
@@ -197,11 +193,11 @@ public class ContactsHeader {
                 {"workZip", StructuredPostal.POSTCODE},                        //POSTCODE = "data9";
                 {"workCountry", StructuredPostal.COUNTRY},                     //COUNTRY = "data10";
         };
-        add2Json(strJsonG09_00WorkPostal, mJsonG09PostalType.getJSONObject("mJsonG09_00WorkPostal"));
+        Arr2Json(sJsonG09_00WorkPostal, mJsonG09PostalType.getJSONObject("mJsonG09_00WorkPostal"));
 
         //1.09.01、mJsonG09_01HomePostal，住宅通讯地址，TYPE_WORK = 2。1个大项，8个小项;
         mJsonG09PostalType.put("mJsonG09_01HomePostal", new JSONObject(new LinkedHashMap()));
-        String strJsonG09_01HomePostal[][] = {
+        String sJsonG09_01HomePostal[][] = {
                 {"homeFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},  //FORMATTED_ADDRESS = "data1";
                 {"homeStreet", StructuredPostal.STREET},                       //STREET = "data4";
                 {"homeBox", StructuredPostal.POBOX},                           //POBOX = "data5";
@@ -211,11 +207,11 @@ public class ContactsHeader {
                 {"homeZip", StructuredPostal.POSTCODE},                        //POSTCODE = "data9";
                 {"homeCountry", StructuredPostal.COUNTRY},                     //COUNTRY = "data10";
         };
-        add2Json(strJsonG09_01HomePostal, mJsonG09PostalType.getJSONObject("mJsonG09_01HomePostal"));
+        Arr2Json(sJsonG09_01HomePostal, mJsonG09PostalType.getJSONObject("mJsonG09_01HomePostal"));
 
         //1.09.02、mJsonG09_02OtherPostal，其他通讯地址，TYPE_OTHER = 3。1个大项，8个小项;
         mJsonG09PostalType.put("mJsonG09_02OtherPostal", new JSONObject(new LinkedHashMap()));
-        String strJsonG09_02OtherPostal[][] = {
+        String sJsonG09_02OtherPostal[][] = {
                 {"otherFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},  //FORMATTED_ADDRESS = "data1";
                 {"otherStreet", StructuredPostal.STREET},                       //STREET = "data4";
                 {"otherBox", StructuredPostal.POBOX},                           //POBOX = "data5";
@@ -225,21 +221,17 @@ public class ContactsHeader {
                 {"otherZip", StructuredPostal.POSTCODE},                        //POSTCODE = "data9";
                 {"otherCountry", StructuredPostal.COUNTRY},                     //COUNTRY = "data10";
         };
-        add2Json(strJsonG09_02OtherPostal, mJsonG09PostalType.getJSONObject("mJsonG09_02OtherPostal"));
+        Arr2Json(sJsonG09_02OtherPostal, mJsonG09PostalType.getJSONObject("mJsonG09_02OtherPostal"));
 
         // ------------------- 联系人信息列表头 - End
     }
 
-    private void add2Json(String[][] str2Arr, JSONObject jsonObject) throws JSONException {
-        for(String[] strArr : str2Arr){
+    private void Arr2Json(String[][] s2Arr, JSONObject jsonObject) throws JSONException {
+        for(String[] sArr : s2Arr){
             JSONObject json = new JSONObject(new LinkedHashMap());
-            json.put("__first", strArr[1]);     //为避免与联系人信息标识重名，前面添加双斜杠
-            json.put("__second", "0");          //为避免与联系人信息标识重名，前面添加双斜杠
-            jsonObject.put(strArr[0], json);
-            //System.out.println("strArr_my : " + strArr[0] + ", " + strArr[1]);
-            //            JSONObject json = new JSONObject(new LinkedHashMap());
-            //            json.put(strArr[0], strArr[1]);
-            //            jsonObject.put(strArr[0], json);
+            json.put("__first", sArr[1]);       //为避免与联系人信息标识重名，前面添加双下划线
+            json.put("__second", "0");  //为避免与联系人信息标识重名，前面添加双下划线
+            jsonObject.put(sArr[0], json);
         }
     }
 }

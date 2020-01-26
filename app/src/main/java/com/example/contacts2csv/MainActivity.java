@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends Activity implements OnClickListener {
+    public static MainActivity m_MA;
     private int iSum;
     private EditText mEditText;
     private Button mHelpButton;
@@ -73,6 +74,7 @@ public class MainActivity extends Activity implements OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        m_MA = this;
         init();
     }
 
