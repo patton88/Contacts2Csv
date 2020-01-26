@@ -41,25 +41,25 @@ public class MainActivity extends Activity implements OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case ContactContant.INSERT_FAIL:
-                    m_tvResult.setText(ContactContant.FAIL_INSERT);
+                case ContactStrings.INSERT_FAIL:
+                    m_tvResult.setText(ContactStrings.FAIL_INSERT);
                     endInsertContact();
                     break;
-                case ContactContant.INSERT_SUCCESS:
+                case ContactStrings.INSERT_SUCCESS:
                     m_tvResult.setText(String.format(
-                            ContactContant.SUCCESS_INSERT,
-                            ContactToolInsertUtils.getSuccessCount(),
-                            ContactToolInsertUtils.getFailCount()));
+                            ContactStrings.SUCCESS_INSERT,
+                            ContactUtilsInsert.getSuccessCount(),
+                            ContactUtilsInsert.getFailCount()));
                     endInsertContact();
                     break;
-                case ContactContant.OUTPUT_FAIL:
-                    m_tvResult.setText(ContactContant.FAIL_OUTPUT);
+                case ContactStrings.OUTPUT_FAIL:
+                    m_tvResult.setText(ContactStrings.FAIL_OUTPUT);
                     endOutputContact();
                     break;
-                case ContactContant.OUTPUT_SUCCESS:
+                case ContactStrings.OUTPUT_SUCCESS:
                     m_tvResult.setText((String.format(
-                            ContactContant.SUCCESS_OUTPUT,
-                            ContactToolOutputUtils.getCount())));
+                            ContactStrings.SUCCESS_OUTPUT,
+                            ContactUtilsOutput.getCount())));
                     endOutputContact();
                     break;
             }
@@ -109,8 +109,8 @@ public class MainActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.help_button:
-                createDialog(this,ContactContant.HELP_DIALOG_TITLE,ContactContant.HELP_MESSAGE,false,
-                        ContactContant.DIALOG_TYPE_HELP);
+                createDialog(this, ContactStrings.HELP_DIALOG_TITLE, ContactStrings.HELP_MESSAGE,false,
+                        ContactStrings.DIALOG_TYPE_HELP);
                 break;
             case R.id.insert_button:
                 insertContact();
@@ -134,24 +134,24 @@ public class MainActivity extends Activity implements OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton(ContactContant.DIALOG_OK,
+        builder.setPositiveButton(ContactStrings.DIALOG_OK,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         switch (type) {
-                            case ContactContant.DIALOG_TYPE_HELP:
+                            case ContactStrings.DIALOG_TYPE_HELP:
                                 dialog.cancel();
                                 break;
-                            case ContactContant.DIALOG_TYPE_INSERT:
+                            case ContactStrings.DIALOG_TYPE_INSERT:
                                 doInsertContact();
                                 break;
-                            case ContactContant.DIALOG_TYPE_OUTPUT:
+                            case ContactStrings.DIALOG_TYPE_OUTPUT:
                                 doOutputContact();
                                 break;
                         }
                     }
                 });
         if (hasCancel) {
-            builder.setNeutralButton(ContactContant.DIALOG_CANCEL,
+            builder.setNeutralButton(ContactStrings.DIALOG_CANCEL,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog,
                                             int whichButton) {
@@ -172,43 +172,43 @@ public class MainActivity extends Activity implements OnClickListener {
         m_rbtnOs[1].setVisibility(iVisable);
         m_tvOs.setVisibility(iVisable);
         if(!bEnable){
-            m_tvResult.setText(ContactContant.NO_TEXT);
+            m_tvResult.setText(ContactStrings.NO_TEXT);
         }
     }
 
     private void insertContact() {
         String sPath = m_etInfo.getText().toString();
-        if (sPath == null || sPath.equals(ContactContant.NO_TEXT)) {
-            ContactToolUtils.showToast(this, ContactContant.FAIL_EDITTEXT_NOT_INPUT);
-            m_tvResult.setText(ContactContant.FAIL_EDITTEXT_NOT_INPUT);
+        if (sPath == null || sPath.equals(ContactStrings.NO_TEXT)) {
+            ContactUtils.showToast(this, ContactStrings.FAIL_EDITTEXT_NOT_INPUT);
+            m_tvResult.setText(ContactStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
-        sPath = ContactContant.FILE_NAME_PARENT + sPath;
+        sPath = ContactStrings.FILE_NAME_PARENT + sPath;
         if (!new File(sPath).exists()) {
-            ContactToolUtils.showToast(this, ContactContant.FAIL_FIRE_NOT_EXIST);
-            m_tvResult.setText(ContactContant.FAIL_FIRE_NOT_EXIST);
+            ContactUtils.showToast(this, ContactStrings.FAIL_FIRE_NOT_EXIST);
+            m_tvResult.setText(ContactStrings.FAIL_FIRE_NOT_EXIST);
             return;
         }
         if (m_threadInsert != null) {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        String sCharset = m_rbtnOs[0].isChecked() ? ContactContant.CHARSET_GBK : ContactContant.CHARSET_UTF8;
+        String sCharset = m_rbtnOs[0].isChecked() ? ContactStrings.CHARSET_GBK : ContactStrings.CHARSET_UTF8;
         m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
-        createDialog(this, ContactContant.WARNDIALOG_TITLE, ContactContant.INSERT_WARNDIALOG_MESSAGE,
-                true, ContactContant.DIALOG_TYPE_INSERT);
+        createDialog(this, ContactStrings.WARNDIALOG_TITLE, ContactStrings.INSERT_WARNDIALOG_MESSAGE,
+                true, ContactStrings.DIALOG_TYPE_INSERT);
     }
 
     private void doInsertContact() {
         setInsertWidgetEnabled(false);
-        m_tvResult.setText(ContactContant.STATUS_INSERTING);
+        m_tvResult.setText(ContactStrings.STATUS_INSERTING);
         if (m_threadInsert != null) {
             m_threadInsert.start();
         }
     }
 
     private void endInsertContact() {
-        m_etInfo.setText(ContactContant.NO_TEXT);
+        m_etInfo.setText(ContactStrings.NO_TEXT);
         setInsertWidgetEnabled(true);
     }
 
@@ -227,11 +227,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean bResult = ContactToolInsertUtils.insertIntoContact(m_context, m_sPath, m_sCharset);
+            boolean bResult = ContactUtilsInsert.insertIntoContact(m_context, m_sPath, m_sCharset);
             if (bResult) {
-                m_handler.sendEmptyMessage(ContactContant.INSERT_SUCCESS);
+                m_handler.sendEmptyMessage(ContactStrings.INSERT_SUCCESS);
             } else {
-                m_handler.sendEmptyMessage(ContactContant.INSERT_FAIL);
+                m_handler.sendEmptyMessage(ContactStrings.INSERT_FAIL);
             }
         }
     }
@@ -239,7 +239,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private void setOutputWidgetEnabled(boolean bEnable) {
         m_btnOutput.setEnabled(bEnable);
         if(!bEnable){
-            m_tvResult.setText(ContactContant.NO_TEXT);
+            m_tvResult.setText(ContactStrings.NO_TEXT);
         }
     }
 
@@ -314,11 +314,11 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         //拥有权限，执行操作
-        File file = new File(ContactContant.OUTPUT_PATH);
+        File file = new File(ContactStrings.OUTPUT_PATH);
         if(file.exists()){
-            createDialog(this, ContactContant.WARNDIALOG_TITLE,
-                    ContactContant.OUTPUT_WARNDIALOG_MESSAGE, true,
-                    ContactContant.DIALOG_TYPE_OUTPUT);
+            createDialog(this, ContactStrings.WARNDIALOG_TITLE,
+                    ContactStrings.OUTPUT_WARNDIALOG_MESSAGE, true,
+                    ContactStrings.DIALOG_TYPE_OUTPUT);
         }else {
             doOutputContact();
         }
@@ -329,7 +329,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void doOutputContact(){
         setOutputWidgetEnabled(false);
-        m_tvResult.setText(ContactContant.STATUS_OUTPUTING);
+        m_tvResult.setText(ContactStrings.STATUS_OUTPUTING);
         if (m_threadOutput != null) {
             m_threadOutput.interrupt();
             m_threadOutput = null;
@@ -351,11 +351,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean result = ContactToolOutputUtils.outputContacts(m_context);
+            boolean result = ContactUtilsOutput.outputContacts(m_context);
             if (result) {
-                m_handler.sendEmptyMessage(ContactContant.OUTPUT_SUCCESS);
+                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
             } else {
-                m_handler.sendEmptyMessage(ContactContant.OUTPUT_FAIL);
+                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_FAIL);
             }
         }
     }

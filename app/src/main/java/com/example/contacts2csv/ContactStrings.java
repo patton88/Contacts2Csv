@@ -1,7 +1,7 @@
 package com.example.contacts2csv;
 
 
-public class ContactContant {
+public class ContactStrings {
 	//dialog message
 	public static final String DIALOG_OK = "确认";
 	public static final String DIALOG_CANCEL = "取消";

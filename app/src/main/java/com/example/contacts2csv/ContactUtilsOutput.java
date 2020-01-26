@@ -11,23 +11,22 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-public class ContactToolOutputUtils extends ContactToolUtils {
-	private static final String TAG = "ContactOutputTool";
-	private static int mSum = 0;
-
-	private static List<Person> personList;
+public class ContactUtilsOutput extends ContactUtils {
+	private static final String m_sTAG = "ContactUtilsOutput";
+	private static int m_iSum = 0;
+	private static List<Person> m_listPerson;
 
 	public static boolean outputContacts(Context context) {
 		init();
 		try {
 			//String result = getFromContactDatabase(context);
-			GetContactsInfo getContactsInfo = new GetContactsInfo(context);
-			String result = getContactsInfo.getContactInfo();
-			writeFile(ContactContant.OUTPUT_PATH, result);
-			//System.out.println(getContactsInfo.mIntSum);
-			mSum = getContactsInfo.GetContactsSum();
+			GetContactInfo getContactInfo = new GetContactInfo(context);
+			String result = getContactInfo.getContactInfo();
+			writeFile(ContactStrings.OUTPUT_PATH, result);
+			//System.out.println(getContactInfo.mIntSum);
+			m_iSum = getContactInfo.GetContactsSum();
 		} catch (Exception e) {
-			Log.e(TAG, "Error in outputContacts " + e.getMessage());
+			Log.e(m_sTAG, "Error in outputContacts " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -37,7 +36,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 		queryContacts(context);
 
 		String strResult = "";
-		for(Person p : personList){
+		for(Person p : m_listPerson){
 			//System.out.println(p.toString());
 			strResult += p.getName() + ',' + p.getPhone() + '\n';
 		}
@@ -46,8 +45,8 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 	}
 
 		private static void init() {
-		mSum = 0;
-		personList = new ArrayList<Person>();
+		m_iSum = 0;
+		m_listPerson = new ArrayList<Person>();
 	}
 
 	private static void writeFile(String path, String buffer) {
@@ -62,8 +61,8 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 	}
 
 	public static int getCount(){
-		//return personList.size();
-		return mSum;
+		//return m_listPerson.size();
+		return m_iSum;
 	}
 
 	/**
@@ -92,7 +91,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 						data1 = funRemove(data1);
 
 						if("vnd.android.cursor.item/phone_v2".equals(mimetype)) {
-							//Log.i(TAG, "号码: " + data1);
+							//Log.i(m_sTAG, "号码: " + data1);
 							//p.setPhone(p.getPhone() + "," + data1);
                             if(null == p.getPhone()){
                                 p.setPhone(data1);
@@ -100,25 +99,25 @@ public class ContactToolOutputUtils extends ContactToolUtils {
                                 p.setPhone(p.getPhone() + "," + data1);
                             }
 						} else if("vnd.android.cursor.item/name".equals(mimetype)) {
-							//Log.i(TAG, "姓名: " + data1);
+							//Log.i(m_sTAG, "姓名: " + data1);
 							p.setName(data1);
 						} else if("vnd.android.cursor.item/email_v2".equals(mimetype)) {
-							//Log.i(TAG, "邮箱: " + data1);
+							//Log.i(m_sTAG, "邮箱: " + data1);
 							p.setEmail(data1);
 						}
 					}
 					c.close();
 					if(null != p.getName()){
-						personList.add(p);
+						m_listPerson.add(p);
 					}
 				}
 			}
 			cursor.close();
 		}
 
-		for(Person p : personList){
+		for(Person p : m_listPerson){
 			//System.out.println(p.toString());
-            //Log.i(TAG, p.toString());
+            //Log.i(m_sTAG, p.toString());
 		}
 
 		return "";

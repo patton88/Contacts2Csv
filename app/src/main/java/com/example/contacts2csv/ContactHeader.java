@@ -26,7 +26,7 @@ import java.util.LinkedHashMap;
  * @updateAuthor $
  * @updateDes
  */
-public class ContactsHeader {
+public class ContactHeader {
     //public Map<String, String> mMapCol;            //联系人信息列表头
     //public Vector<Pair<String, String>> mVecCol;   //联系人信息列表头，Map会自动排序，用Vector也不合理
     public JSONObject m_jsonHeader;     //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject

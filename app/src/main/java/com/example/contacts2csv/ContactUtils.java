@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.widget.Toast;
 
-public class ContactToolUtils {
+public class ContactUtils {
     public static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }

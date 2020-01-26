@@ -16,9 +16,8 @@ import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
-public class ContactToolInsertUtils extends ContactToolUtils {
-    private static final String m_sTAG = "ContactToolInsertUtils";
-
+public class ContactUtilsInsert extends ContactUtils {
+    private static final String m_sTAG = "ContactUtilsInsert";
     private static int m_iSuccessCount = 0;
     private static int m_iFailCount = 0;
     private static boolean m_bGbk = false;
@@ -47,7 +46,7 @@ public class ContactToolInsertUtils extends ContactToolUtils {
     private static void init(String charset) {
         m_iSuccessCount = 0;
         m_iFailCount = 0;
-        m_bGbk = charset.equals(ContactContant.CHARSET_GBK);
+        m_bGbk = charset.equals(ContactStrings.CHARSET_GBK);
     }
 
     /**
@@ -68,20 +67,20 @@ public class ContactToolInsertUtils extends ContactToolUtils {
         FileInputStream inStream = null;
         ArrayList<String> arrList = new ArrayList<String>();
         try {
-            byte[] byteArr = new byte[ContactContant.BUFFER_SIZE];
+            byte[] byteArr = new byte[ContactStrings.BUFFER_SIZE];
             inStream = new FileInputStream(sPath);
             while (inStream.read(byteArr) != -1) {
                 int iLen = 0;
                 int iFirst = iLen;
                 for (int i = 0; i < byteArr.length; i++) {
-                    if (byteArr[i] == ContactContant.ENTER_CHAR_LINUX) {
+                    if (byteArr[i] == ContactStrings.ENTER_CHAR_LINUX) {
                         iLen = i;
                         byte[] nowBytes = new byte[iLen - iFirst];
                         System.arraycopy(byteArr, iFirst, nowBytes, 0, iLen - iFirst);
                         if (m_bGbk) {
-                            arrList.add(new String(nowBytes, ContactContant.CHARSET_GBK).trim());
+                            arrList.add(new String(nowBytes, ContactStrings.CHARSET_GBK).trim());
                         } else {
-                            arrList.add(new String(nowBytes, ContactContant.CHARSET_UTF8).trim());
+                            arrList.add(new String(nowBytes, ContactStrings.CHARSET_UTF8).trim());
                         }
                         iFirst = i + 1;
                     }
@@ -107,7 +106,7 @@ public class ContactToolInsertUtils extends ContactToolUtils {
         Iterator<String> it = arrList.iterator();
         while (it.hasNext()) {
             String sInfo = it.next();
-            String[] sArrInfo = sInfo.split(ContactContant.SPACE_REGULAR);
+            String[] sArrInfo = sInfo.split(ContactStrings.SPACE_REGULAR);
             String sDisplayName = null;
             String sMobileNum = null;
             String sHomeNum = null;
@@ -120,7 +119,7 @@ public class ContactToolInsertUtils extends ContactToolUtils {
                     break;
                 case 2:
                     sDisplayName = sArrInfo[0];
-                    if (sArrInfo[1].length() == ContactContant.MOBILE_NUM_LENGTH) {
+                    if (sArrInfo[1].length() == ContactStrings.MOBILE_NUM_LENGTH) {
                         sMobileNum = sArrInfo[1];
                     } else {
                         sHomeNum = sArrInfo[1];
@@ -133,19 +132,19 @@ public class ContactToolInsertUtils extends ContactToolUtils {
                     sHomeNum = sArrInfo[2];
             }
             //check sDisplayName sMobileNum and sHomeNum
-            if (sDisplayName == null || sDisplayName.matches(ContactContant.NUM_REGULAR)) {
+            if (sDisplayName == null || sDisplayName.matches(ContactStrings.NUM_REGULAR)) {
                 Log.e(m_sTAG, "Error in readArrList sDisplayName == null");
                 m_iFailCount++;
                 continue;
             }
-            if (sMobileNum != null && (sMobileNum.length() != ContactContant.MOBILE_NUM_LENGTH
-                    || !sMobileNum.matches(ContactContant.NUM_REGULAR))) {
+            if (sMobileNum != null && (sMobileNum.length() != ContactStrings.MOBILE_NUM_LENGTH
+                    || !sMobileNum.matches(ContactStrings.NUM_REGULAR))) {
                 Log.e(m_sTAG, "Error in readArrList sMobileNum is not all num or sMobileNum == null");
                 m_iFailCount++;
                 continue;
             }
-            if (sHomeNum != null && !(sHomeNum.matches(ContactContant.HOME_REGULAR_01) ||
-                    sHomeNum.matches(ContactContant.HOME_REGULAR_02))) {
+            if (sHomeNum != null && !(sHomeNum.matches(ContactStrings.HOME_REGULAR_01) ||
+                    sHomeNum.matches(ContactStrings.HOME_REGULAR_02))) {
                 Log.e(m_sTAG, "Error in readArrList sHomeNum is not all num");
                 m_iFailCount++;
                 continue;
