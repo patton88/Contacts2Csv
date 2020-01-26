@@ -16,6 +16,10 @@ import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
+import com.example.contacts2csv.ContactContant;
+import com.example.contacts2csv.ContactInfo;
+import com.example.contacts2csv.ContactToolUtils;
+
 public class ContactToolInsertUtils extends ContactToolUtils {
 	private static final String TAG = "ContactToolInsertUtils";
 	

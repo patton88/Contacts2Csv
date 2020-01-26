@@ -7,9 +7,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -18,7 +22,14 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends BaseActivity implements OnClickListener {
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+public class MainActivity extends Activity implements OnClickListener {
     private int iSum;
     private EditText mEditText;
     private Button mHelpButton;
@@ -236,25 +247,88 @@ public class MainActivity extends BaseActivity implements OnClickListener {
         }
     }
 
-    private void outputContact(){
+    private static final int NOT_NOTICE = 2;//如果勾选了不再询问
+    private AlertDialog alertDialog;
+    private AlertDialog mDialog;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        performCodeWithPermission("读取联系人权限", new PermissionCallback() {
-            @Override
-            public void hasPermission() {
-                File file = new File(ContactContant.OUTPUT_PATH);
-                if(file.exists()){
-                    createDialog(getParent(), ContactContant.WARNDIALOG_TITLE,
-                            ContactContant.OUTPUT_WARNDIALOG_MESSAGE, true,
-                            ContactContant.DIALOG_TYPE_OUTPUT);
-                }else {
-                    doOutputContact();
+        if (requestCode == 1) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] == PERMISSION_GRANTED) {//选择了“始终允许”
+                    //Toast.makeText(this, "" + "权限" + permissions[i] + "申请成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])){//用户选择了禁止不再询问
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("permission")
+                                .setMessage("点击允许才可以使用我们的app哦")
+                                .setPositiveButton("去允许", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        if (mDialog != null && mDialog.isShowing()) {
+                                            mDialog.dismiss();
+                                        }
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getPackageName(), null);//注意就是"package",不用改成自己的包名
+                                        intent.setData(uri);
+                                        startActivityForResult(intent, NOT_NOTICE);
+                                    }
+                                });
+                        mDialog = builder.create();
+                        mDialog.setCanceledOnTouchOutside(false);
+                        mDialog.show();
+                    }else {//选择禁止
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("permission")
+                                .setMessage("点击允许才可以使用我们的app哦")
+                                .setPositiveButton("去允许", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        if (alertDialog != null && alertDialog.isShowing()) {
+                                            alertDialog.dismiss();
+                                        }
+                                        ActivityCompat.requestPermissions(MainActivity.this,
+                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                                    }
+                                });
+                        alertDialog = builder.create();
+                        alertDialog.setCanceledOnTouchOutside(false);
+                        alertDialog.show();
+                    }
                 }
             }
-            @Override
-            public void noPermission() {
-                Toast.makeText(MainActivity.this,"没有授权", Toast.LENGTH_SHORT).show();
-            }
-        }, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+
+    private void outputContact(){
+        //使用兼容库就无需判断系统版本
+        int hasWriteStoragePermission = -11;
+        int hasReadContacts = -11;
+        //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
+        //if (hasWriteStoragePermission == PackageManager.PERMISSION_GRANTED && hasReadContacts == PackageManager.PERMISSION_GRANTED) {
+        //拥有权限，执行操作
+
+        //权限不足，就进入申请权限死循环
+        while (hasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || hasReadContacts != PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(this, "权限不足。需要读写联系人权限、读写外部存储权限！", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
+            hasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            hasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
+        }
+
+        //拥有权限，执行操作
+        File file = new File(ContactContant.OUTPUT_PATH);
+        if(file.exists()){
+            createDialog(this, ContactContant.WARNDIALOG_TITLE,
+                    ContactContant.OUTPUT_WARNDIALOG_MESSAGE, true,
+                    ContactContant.DIALOG_TYPE_OUTPUT);
+        }else {
+            doOutputContact();
+        }
+        //}else{
+        //	//没有权限，向用户请求权限
+        //}
     }
 
     private void doOutputContact(){

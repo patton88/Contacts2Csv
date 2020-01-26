@@ -9,19 +9,11 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.Contacts.Data;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import javax.crypto.NullCipher;
 
 public class ContactToolOutputUtils extends ContactToolUtils {
 	private static final String TAG = "ContactOutputTool";
-	private static int mCount = 0;
+	private static int mSum = 0;
 
 	private static List<Person> personList;
 
@@ -33,7 +25,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 			String result = getContactsInfo.getContactInfo();
 			writeFile(ContactContant.OUTPUT_PATH, result);
 			//System.out.println(getContactsInfo.mIntSum);
-			mCount = getContactsInfo.mIntSum;
+			mSum = getContactsInfo.GetContactsSum();
 		} catch (Exception e) {
 			Log.e(TAG, "Error in outputContacts " + e.getMessage());
 			return false;
@@ -54,7 +46,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 	}
 
 		private static void init() {
-		mCount = 0;
+		mSum = 0;
 		personList = new ArrayList<Person>();
 	}
 
@@ -71,7 +63,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 
 	public static int getCount(){
 		//return personList.size();
-		return mCount;
+		return mSum;
 	}
 
 	/**
@@ -125,7 +117,7 @@ public class ContactToolOutputUtils extends ContactToolUtils {
 		}
 
 		for(Person p : personList){
-			System.out.println(p.toString());
+			//System.out.println(p.toString());
             //Log.i(TAG, p.toString());
 		}
 
