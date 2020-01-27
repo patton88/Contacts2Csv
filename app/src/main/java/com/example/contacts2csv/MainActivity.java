@@ -12,9 +12,11 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -29,7 +31,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends Activity implements OnClickListener {
     public static MainActivity m_MA;
-    private EditText m_etInfo;
+    private EditText m_etFilePath;
     private Button m_btnHelp;
     private Button m_btnInsert;
     private Button m_btnOutput;
@@ -39,6 +41,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private RadioButton[] m_rbtnArrMode = new RadioButton[2];
     public static String m_sPathDownloads;    //存储数据的默认路径
     public String m_sFilePath;              //文件路径
+    public String m_sInsertFilePath;        //导入文件路径
     public static CommonFun m_Fun;    //通用函数类
 
     public ContactOutput m_output;      //导出联系人
@@ -105,10 +108,11 @@ public class MainActivity extends Activity implements OnClickListener {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
         m_sFilePath = "";
+        m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
         m_output = new ContactOutput();      //导出联系人
         m_insert = new ContactInsert();      //导入联系人
 
-        m_etInfo = (EditText) findViewById(R.id.et_filepath);
+        m_etFilePath = (EditText) findViewById(R.id.et_filepath);
         m_btnHelp = (Button) findViewById(R.id.btn_help);
         m_btnHelp.setOnClickListener(this);
         m_btnInsert = (Button) findViewById(R.id.btn_insert);
@@ -158,6 +162,8 @@ public class MainActivity extends Activity implements OnClickListener {
             case R.id.rbtn_insert:
                 setInsertWidgetEnabled(true);
                 setOutputWidgetEnabled(false);
+                File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
+                m_etFilePath.setText(file.getAbsolutePath());
                 break;
             case R.id.rbtn_output:
                 setInsertWidgetEnabled(false);
@@ -171,7 +177,7 @@ public class MainActivity extends Activity implements OnClickListener {
         m_rbtnArrOs[0].setEnabled(bEnable);
         m_rbtnArrOs[1].setEnabled(bEnable);
         m_btnInsert.setEnabled(bEnable);
-        m_etInfo.setEnabled(bEnable);
+        m_etFilePath.setEnabled(bEnable);
         int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
         m_rbtnArrOs[0].setVisibility(iVisable);
         m_rbtnArrOs[1].setVisibility(iVisable);
@@ -220,13 +226,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
     //导入联系人
     private void insertContact() {
-        String sPath = m_etInfo.getText().toString();
-        if (sPath == null || sPath.equals(ExtraStrings.NO_TEXT)) {
+        String sPath = m_etFilePath.getText().toString();
+        if (TextUtils.isEmpty(sPath)) {
             m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
-        sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
+        //sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
         if (!new File(sPath).exists()) {
             m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
@@ -252,7 +258,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void endInsertContact() {
-        m_etInfo.setText(ExtraStrings.NO_TEXT);
+        m_etFilePath.setText(ExtraStrings.NO_TEXT);
         setInsertWidgetEnabled(true);
     }
 
