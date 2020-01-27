@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ContactStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.m_iSum)));
+                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.getSum())));
                     endOutputContact();
                     break;
             }
@@ -327,7 +327,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean result = m_output.outputContacts(m_context, m_sFilePath);
+            boolean result = m_output.outputAllContacts(m_context, m_sFilePath);
             if (result) {
                 m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
             } else {
