@@ -98,19 +98,24 @@ public class MainActivity extends Activity implements OnClickListener {
         m_rbtnMode[1].setChecked(true);
         setInsertWidgetEnabled(false);
         setOutputWidgetEnabled(true);
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+        //处理动态权限申请。权限不足，就进入申请权限死循环
+        int iHasWriteStoragePermission = -11;
+        int iHasReadContacts = -11;
+        while (iHasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || iHasReadContacts != PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(this, "权限不足。需要读写联系人权限、读写外部存储权限！", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
+            iHasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            iHasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
+        }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.help_button:
-                createDialog(this, ContactStrings.HELP_DIALOG_TITLE, ContactStrings.HELP_MESSAGE,false,
-                        ContactStrings.DIALOG_TYPE_HELP);
+                createDialog(this, ContactStrings.HELP_DIALOG_TITLE, ContactStrings.HELP_MESSAGE,
+                        false, ContactStrings.DIALOG_TYPE_HELP);
                 break;
             case R.id.insert_button:
                 insertContact();
@@ -153,8 +158,7 @@ public class MainActivity extends Activity implements OnClickListener {
         if (hasCancel) {
             builder.setNeutralButton(ContactStrings.DIALOG_CANCEL,
                     new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,
-                                            int whichButton) {
+                        public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.cancel();
                         }
                     });
@@ -176,6 +180,14 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
+    private void setOutputWidgetEnabled(boolean bEnable) {
+        m_btnOutput.setEnabled(bEnable);
+        if(!bEnable){
+            m_tvResult.setText(ContactStrings.NO_TEXT);
+        }
+    }
+
+    //导入联系人
     private void insertContact() {
         String sPath = m_etInfo.getText().toString();
         if (sPath == null || sPath.equals(ContactStrings.NO_TEXT)) {
@@ -199,6 +211,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 true, ContactStrings.DIALOG_TYPE_INSERT);
     }
 
+    //处理导入联系人线程的代码 Begin
     private void doInsertContact() {
         setInsertWidgetEnabled(false);
         m_tvResult.setText(ContactStrings.STATUS_INSERTING);
@@ -235,14 +248,60 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         }
     }
+    //处理导入联系人线程的代码 End
 
-    private void setOutputWidgetEnabled(boolean bEnable) {
-        m_btnOutput.setEnabled(bEnable);
-        if(!bEnable){
-            m_tvResult.setText(ContactStrings.NO_TEXT);
+    //导出联系人
+    private void outputContact(){
+        File file = new File(ContactStrings.OUTPUT_PATH);
+        if(file.exists()){
+            createDialog(this, ContactStrings.WARNDIALOG_TITLE,
+                    ContactStrings.OUTPUT_WARNDIALOG_MESSAGE, true,
+                    ContactStrings.DIALOG_TYPE_OUTPUT);
+        }else {
+            doOutputContact();
         }
     }
 
+    //处理导出联系人线程的代码 Begin
+    private void doOutputContact(){
+        setOutputWidgetEnabled(false);
+        m_tvResult.setText(ContactStrings.STATUS_OUTPUTING);
+        if (m_threadOutput != null) {
+            m_threadOutput.interrupt();
+            m_threadOutput = null;
+        }
+        m_threadOutput = new Thread(new OutputRunnable(this));
+        if (m_threadOutput != null) {
+            m_threadOutput.start();
+        }
+    }
+
+    private void endOutputContact() {
+        setOutputWidgetEnabled(true);
+    }
+
+    private Thread m_threadOutput;
+
+    class OutputRunnable implements Runnable {
+        private Context m_context;
+
+        public OutputRunnable(Context context) {
+            m_context = context;
+        }
+
+        @Override
+        public void run() {
+            boolean result = ContactUtilsOutput.outputContacts(m_context);
+            if (result) {
+                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
+            } else {
+                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_FAIL);
+            }
+        }
+    }
+    //处理导出联系人线程的代码 End
+
+    //动态访问权限回调函数
     private static final int NOT_NOTICE = 2;//如果勾选了不再询问
     private AlertDialog m_dla;
     private AlertDialog m_dlgAlert;
@@ -294,73 +353,5 @@ public class MainActivity extends Activity implements OnClickListener {
                 }
             }
         }
-    }
-
-
-    private void outputContact(){
-        //使用兼容库就无需判断系统版本
-        int iHasWriteStoragePermission = -11;
-        int iHasReadContacts = -11;
-        //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
-        //if (iHasWriteStoragePermission == PackageManager.PERMISSION_GRANTED && iHasReadContacts == PackageManager.PERMISSION_GRANTED) {
-        //拥有权限，执行操作
-
-        //权限不足，就进入申请权限死循环
-        while (iHasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || iHasReadContacts != PackageManager.PERMISSION_GRANTED) {
-            //Toast.makeText(this, "权限不足。需要读写联系人权限、读写外部存储权限！", Toast.LENGTH_SHORT).show();
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
-            iHasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            iHasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
-        }
-
-        //拥有权限，执行操作
-        File file = new File(ContactStrings.OUTPUT_PATH);
-        if(file.exists()){
-            createDialog(this, ContactStrings.WARNDIALOG_TITLE,
-                    ContactStrings.OUTPUT_WARNDIALOG_MESSAGE, true,
-                    ContactStrings.DIALOG_TYPE_OUTPUT);
-        }else {
-            doOutputContact();
-        }
-        //}else{
-        //	//没有权限，向用户请求权限
-        //}
-    }
-
-    private void doOutputContact(){
-        setOutputWidgetEnabled(false);
-        m_tvResult.setText(ContactStrings.STATUS_OUTPUTING);
-        if (m_threadOutput != null) {
-            m_threadOutput.interrupt();
-            m_threadOutput = null;
-        }
-        m_threadOutput = new Thread(new OutputRunnable(this));
-        if (m_threadOutput != null) {
-            m_threadOutput.start();
-        }
-    }
-
-    private Thread m_threadOutput;
-
-    class OutputRunnable implements Runnable {
-        private Context m_context;
-
-        public OutputRunnable(Context context) {
-            m_context = context;
-        }
-
-        @Override
-        public void run() {
-            boolean result = ContactUtilsOutput.outputContacts(m_context);
-            if (result) {
-                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
-            } else {
-                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_FAIL);
-            }
-        }
-    }
-
-    private void endOutputContact() {
-        setOutputWidgetEnabled(true);
     }
 }
