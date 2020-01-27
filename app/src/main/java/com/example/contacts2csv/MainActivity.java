@@ -322,7 +322,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean result = ContactUtilsOutput.outputContacts(m_context);
+            boolean result = ContactUtilsOutput.outputContacts(m_context, m_sFilePath);
             if (result) {
                 m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
             } else {

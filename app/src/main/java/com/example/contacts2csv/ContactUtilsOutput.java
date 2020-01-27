@@ -16,13 +16,14 @@ public class ContactUtilsOutput extends ContactUtils {
 	private static int m_iSum = 0;
 	private static List<Person> m_listPerson;
 
-	public static boolean outputContacts(Context context) {
+	public static boolean outputContacts(Context context, String sPath) {
 		init();
 		try {
 			//String result = getFromContactDatabase(context);
 			GetContactInfo getContactInfo = new GetContactInfo(context);
 			String result = getContactInfo.getContactInfo();
-			writeFile(ContactStrings.OUTPUT_PATH, result);
+			//writeFile(ContactStrings.OUTPUT_PATH, result);
+			writeFile(sPath, result);
 			//System.out.println(getContactInfo.mIntSum);
 			m_iSum = getContactInfo.GetContactsSum();
 		} catch (Exception e) {
