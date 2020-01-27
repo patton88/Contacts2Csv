@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -36,6 +37,9 @@ public class MainActivity extends Activity implements OnClickListener {
     private TextView m_tvOs;
     private RadioButton[] m_rbtnArrOs = new RadioButton[2];
     private RadioButton[] m_rbtnArrMode = new RadioButton[2];
+    public static String m_sPathDownloads;    //存储数据的默认路径
+    public String m_sFilePath;              //文件路径
+    public static CommonFun m_Fun;    //通用函数类
 
     //线程消息处理对象
     private Handler m_handler = new Handler() {
@@ -55,7 +59,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ContactStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT, ContactUtilsOutput.getCount())));
+                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, ContactUtilsOutput.getCount())));
                     endOutputContact();
                     break;
             }
@@ -70,8 +74,35 @@ public class MainActivity extends Activity implements OnClickListener {
         init();
     }
 
+    private String getUserPath(){
+        String sPath = "";
+
+        //若Android中存在外部存储，便用Android的外部存储目录，否则便使用Android内部存储目录
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            sPath = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            //sPath = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            //System.out.println("getExternalFilesDir = " + m_sPathDownloads);
+            // /storage/emulated/0/Android/data/com.example.OctopusMessage/files/Download
+            //物理路径：/sdcard/Android/data/com.example.OctopusMessage/files/Download/OctopusMessage/OctopusMessage_Config.xml
+        } else {
+            sPath = getApplicationContext().getFilesDir().getAbsolutePath();
+            //System.out.println("getApplicationContext = " + getApplicationContext().getFilesDir().getAbsolutePath());
+            // /data/user/0/com.example.OctopusMessage/files
+            //物理路径：/data/data/com.example.OctopusMessage/shared_prefs/OctopusMessage_Config.xml
+        }
+
+        //System.out.println("mPathDownloads = " + m_sPathDownloads);
+        //I/System.out: mPathDownloads = /storage/emulated/0/Download
+
+        return sPath;
+    }
+
     /*init widgets*/
     private void init() {
+        m_sPathDownloads = getUserPath();
+        m_Fun = new CommonFun();
+        m_sFilePath = "";
+
         m_etInfo = (EditText) findViewById(R.id.et_filepath);
         m_btnHelp = (Button) findViewById(R.id.btn_help);
         m_btnHelp.setOnClickListener(this);
@@ -250,7 +281,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
     //导出联系人
     private void outputContact(){
-        File file = new File(ContactStrings.OUTPUT_PATH);
+        //File file = new File(ContactStrings.OUTPUT_PATH);
+        File file = m_Fun.GetNewFile(m_sPathDownloads, ContactStrings.OUTPUT_FILENAME, 0);
+        m_sFilePath = file.getAbsolutePath();
         if(file.exists()){
             createDialog(this, ContactStrings.WARNDIALOG_TITLE,
                     ContactStrings.OUTPUT_WARNDIALOG_MESSAGE, true,
