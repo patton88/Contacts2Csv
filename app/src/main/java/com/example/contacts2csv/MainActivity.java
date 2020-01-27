@@ -34,9 +34,10 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button m_btnOutput;
     private TextView m_tvResult;
     private TextView m_tvOs;
-    private RadioButton[] m_rbtnOs = new RadioButton[2];
-    private RadioButton[] m_rbtnMode = new RadioButton[2];
+    private RadioButton[] m_rbtnArrOs = new RadioButton[2];
+    private RadioButton[] m_rbtnArrMode = new RadioButton[2];
 
+    //线程消息处理对象
     private Handler m_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -46,10 +47,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endInsertContact();
                     break;
                 case ContactStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(
-                            ContactStrings.SUCCESS_INSERT,
-                            ContactUtilsInsert.getSuccessCount(),
-                            ContactUtilsInsert.getFailCount()));
+                    m_tvResult.setText(String.format(ContactStrings.SUCCESS_INSERT, ContactUtilsInsert.getSuccessCount(), ContactUtilsInsert.getFailCount()));
                     endInsertContact();
                     break;
                 case ContactStrings.OUTPUT_FAIL:
@@ -57,9 +55,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ContactStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText((String.format(
-                            ContactStrings.SUCCESS_OUTPUT,
-                            ContactUtilsOutput.getCount())));
+                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT, ContactUtilsOutput.getCount())));
                     endOutputContact();
                     break;
             }
@@ -76,26 +72,26 @@ public class MainActivity extends Activity implements OnClickListener {
 
     /*init widgets*/
     private void init() {
-        m_etInfo = (EditText) findViewById(R.id.edit_text);
-        m_btnHelp = (Button) findViewById(R.id.help_button);
+        m_etInfo = (EditText) findViewById(R.id.et_filepath);
+        m_btnHelp = (Button) findViewById(R.id.btn_help);
         m_btnHelp.setOnClickListener(this);
-        m_btnInsert = (Button) findViewById(R.id.insert_button);
+        m_btnInsert = (Button) findViewById(R.id.btn_insert);
         m_btnInsert.setOnClickListener(this);
-        m_btnOutput = (Button) findViewById(R.id.output_button);
+        m_btnOutput = (Button) findViewById(R.id.btn_output);
         m_btnOutput.setOnClickListener(this);
-        m_tvResult = (TextView) findViewById(R.id.result_view);
-        m_tvOs = (TextView)findViewById(R.id.os_text);
-        m_rbtnOs[0] = (RadioButton) findViewById(R.id.radio_button_win);
+        m_tvResult = (TextView) findViewById(R.id.tv_result);
+        m_tvOs = (TextView)findViewById(R.id.tv_os);
+        m_rbtnArrOs[0] = (RadioButton) findViewById(R.id.rbtn_win);
         // set gbk default
-        m_rbtnOs[0].setChecked(true);
-        m_rbtnOs[1] = (RadioButton) findViewById(R.id.radio_button_linux);
-        m_rbtnMode[0] = (RadioButton) findViewById(R.id.radio_insert);
-        m_rbtnMode[0].setOnClickListener(this);
-        m_rbtnMode[1] = (RadioButton) findViewById(R.id.radio_output);
-        m_rbtnMode[1].setOnClickListener(this);
+        m_rbtnArrOs[0].setChecked(true);
+        m_rbtnArrOs[1] = (RadioButton) findViewById(R.id.rbtn_linux);
+        m_rbtnArrMode[0] = (RadioButton) findViewById(R.id.rbtn_insert);
+        m_rbtnArrMode[0].setOnClickListener(this);
+        m_rbtnArrMode[1] = (RadioButton) findViewById(R.id.rbtn_output);
+        m_rbtnArrMode[1].setOnClickListener(this);
 
         //启动时选中导出联系人
-        m_rbtnMode[1].setChecked(true);
+        m_rbtnArrMode[1].setChecked(true);
         setInsertWidgetEnabled(false);
         setOutputWidgetEnabled(true);
 
@@ -113,27 +109,50 @@ public class MainActivity extends Activity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.help_button:
+            case R.id.btn_help:
                 createDialog(this, ContactStrings.HELP_DIALOG_TITLE, ContactStrings.HELP_MESSAGE,
                         false, ContactStrings.DIALOG_TYPE_HELP);
                 break;
-            case R.id.insert_button:
+            case R.id.btn_insert:
                 insertContact();
                 break;
-            case R.id.output_button:
+            case R.id.btn_output:
                 outputContact();
                 break;
-            case R.id.radio_insert:
+            case R.id.rbtn_insert:
                 setInsertWidgetEnabled(true);
                 setOutputWidgetEnabled(false);
                 break;
-            case R.id.radio_output:
+            case R.id.rbtn_output:
                 setInsertWidgetEnabled(false);
                 setOutputWidgetEnabled(true);
                 break;
         }
     }
 
+    //为导出联系人、导出联系人设置控件状态
+    private void setInsertWidgetEnabled(boolean bEnable) {
+        m_rbtnArrOs[0].setEnabled(bEnable);
+        m_rbtnArrOs[1].setEnabled(bEnable);
+        m_btnInsert.setEnabled(bEnable);
+        m_etInfo.setEnabled(bEnable);
+        int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
+        m_rbtnArrOs[0].setVisibility(iVisable);
+        m_rbtnArrOs[1].setVisibility(iVisable);
+        m_tvOs.setVisibility(iVisable);
+        if(!bEnable){
+            m_tvResult.setText(ContactStrings.NO_TEXT);
+        }
+    }
+
+    private void setOutputWidgetEnabled(boolean bEnable) {
+        m_btnOutput.setEnabled(bEnable);
+        if(!bEnable){
+            m_tvResult.setText(ContactStrings.NO_TEXT);
+        }
+    }
+
+    //弹出警告对话框
     public void createDialog(Context context, String title, String message,
                              boolean hasCancel, final int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -166,27 +185,6 @@ public class MainActivity extends Activity implements OnClickListener {
         builder.show();
     }
 
-    private void setInsertWidgetEnabled(boolean bEnable) {
-        m_rbtnOs[0].setEnabled(bEnable);
-        m_rbtnOs[1].setEnabled(bEnable);
-        m_btnInsert.setEnabled(bEnable);
-        m_etInfo.setEnabled(bEnable);
-        int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
-        m_rbtnOs[0].setVisibility(iVisable);
-        m_rbtnOs[1].setVisibility(iVisable);
-        m_tvOs.setVisibility(iVisable);
-        if(!bEnable){
-            m_tvResult.setText(ContactStrings.NO_TEXT);
-        }
-    }
-
-    private void setOutputWidgetEnabled(boolean bEnable) {
-        m_btnOutput.setEnabled(bEnable);
-        if(!bEnable){
-            m_tvResult.setText(ContactStrings.NO_TEXT);
-        }
-    }
-
     //导入联系人
     private void insertContact() {
         String sPath = m_etInfo.getText().toString();
@@ -205,7 +203,7 @@ public class MainActivity extends Activity implements OnClickListener {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        String sCharset = m_rbtnOs[0].isChecked() ? ContactStrings.CHARSET_GBK : ContactStrings.CHARSET_UTF8;
+        String sCharset = m_rbtnArrOs[0].isChecked() ? ContactStrings.CHARSET_GBK : ContactStrings.CHARSET_UTF8;
         m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
         createDialog(this, ContactStrings.WARNDIALOG_TITLE, ContactStrings.INSERT_WARNDIALOG_MESSAGE,
                 true, ContactStrings.DIALOG_TYPE_INSERT);
