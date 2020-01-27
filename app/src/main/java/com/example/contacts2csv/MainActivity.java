@@ -49,20 +49,20 @@ public class MainActivity extends Activity implements OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case ContactStrings.INSERT_FAIL:
-                    m_tvResult.setText(ContactStrings.FAIL_INSERT);
+                case ExtraStrings.INSERT_FAIL:
+                    m_tvResult.setText(ExtraStrings.FAIL_INSERT);
                     endInsertContact();
                     break;
-                case ContactStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ContactStrings.SUCCESS_INSERT, ContactInsert.getSuccessCount(), ContactInsert.getFailCount()));
+                case ExtraStrings.INSERT_SUCCESS:
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, ContactInsert.getSuccessCount(), ContactInsert.getFailCount()));
                     endInsertContact();
                     break;
-                case ContactStrings.OUTPUT_FAIL:
-                    m_tvResult.setText(ContactStrings.FAIL_OUTPUT);
+                case ExtraStrings.OUTPUT_FAIL:
+                    m_tvResult.setText(ExtraStrings.FAIL_OUTPUT);
                     endOutputContact();
                     break;
-                case ContactStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.getSum())));
+                case ExtraStrings.OUTPUT_SUCCESS:
+                    m_tvResult.setText((String.format(ExtraStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.getSum())));
                     endOutputContact();
                     break;
             }
@@ -77,7 +77,7 @@ public class MainActivity extends Activity implements OnClickListener {
         init();
     }
 
-    private String getUserPath(){
+    private String getUserPath() {
         String sPath = "";
 
         //若Android中存在外部存储，便用Android的外部存储目录，否则便使用Android内部存储目录
@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements OnClickListener {
         m_btnOutput = (Button) findViewById(R.id.btn_output);
         m_btnOutput.setOnClickListener(this);
         m_tvResult = (TextView) findViewById(R.id.tv_result);
-        m_tvOs = (TextView)findViewById(R.id.tv_os);
+        m_tvOs = (TextView) findViewById(R.id.tv_os);
         m_rbtnArrOs[0] = (RadioButton) findViewById(R.id.rbtn_win);
         // set gbk default
         m_rbtnArrOs[0].setChecked(true);
@@ -146,8 +146,8 @@ public class MainActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_help:
-                createDialog(this, ContactStrings.HELP_DIALOG_TITLE, ContactStrings.HELP_MESSAGE,
-                        false, ContactStrings.DIALOG_TYPE_HELP);
+                createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
+                        false, ExtraStrings.DIALOG_TYPE_HELP);
                 break;
             case R.id.btn_insert:
                 insertContact();
@@ -176,47 +176,44 @@ public class MainActivity extends Activity implements OnClickListener {
         m_rbtnArrOs[0].setVisibility(iVisable);
         m_rbtnArrOs[1].setVisibility(iVisable);
         m_tvOs.setVisibility(iVisable);
-        if(!bEnable){
-            m_tvResult.setText(ContactStrings.NO_TEXT);
+        if (!bEnable) {
+            m_tvResult.setText(ExtraStrings.NO_TEXT);
         }
     }
 
     private void setOutputWidgetEnabled(boolean bEnable) {
         m_btnOutput.setEnabled(bEnable);
-        if(!bEnable){
-            m_tvResult.setText(ContactStrings.NO_TEXT);
+        if (!bEnable) {
+            m_tvResult.setText(ExtraStrings.NO_TEXT);
         }
     }
 
     //弹出警告对话框
-    public void createDialog(Context context, String title, String message,
-                             boolean hasCancel, final int type) {
+    public void createDialog(Context context, String title, String message, boolean hasCancel, final int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton(ContactStrings.DIALOG_OK,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        switch (type) {
-                            case ContactStrings.DIALOG_TYPE_HELP:
-                                dialog.cancel();
-                                break;
-                            case ContactStrings.DIALOG_TYPE_INSERT:
-                                doInsertContact();
-                                break;
-                            case ContactStrings.DIALOG_TYPE_OUTPUT:
-                                doOutputContact();
-                                break;
-                        }
-                    }
-                });
+        builder.setPositiveButton(ExtraStrings.DIALOG_OK, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                switch (type) {
+                    case ExtraStrings.DIALOG_TYPE_HELP:
+                        dialog.cancel();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_INSERT:
+                        doInsertContact();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_OUTPUT:
+                        doOutputContact();
+                        break;
+                }
+            }
+        });
         if (hasCancel) {
-            builder.setNeutralButton(ContactStrings.DIALOG_CANCEL,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            dialog.cancel();
-                        }
-                    });
+            builder.setNeutralButton(ExtraStrings.DIALOG_CANCEL, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    dialog.cancel();
+                }
+            });
         }
         builder.show();
     }
@@ -224,38 +221,38 @@ public class MainActivity extends Activity implements OnClickListener {
     //导入联系人
     private void insertContact() {
         String sPath = m_etInfo.getText().toString();
-        if (sPath == null || sPath.equals(ContactStrings.NO_TEXT)) {
-            ContactUtils.showToast(this, ContactStrings.FAIL_EDITTEXT_NOT_INPUT);
-            m_tvResult.setText(ContactStrings.FAIL_EDITTEXT_NOT_INPUT);
+        if (sPath == null || sPath.equals(ExtraStrings.NO_TEXT)) {
+            m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
+            m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
-        sPath = ContactStrings.FILE_NAME_PARENT + sPath;
+        sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
         if (!new File(sPath).exists()) {
-            ContactUtils.showToast(this, ContactStrings.FAIL_FIRE_NOT_EXIST);
-            m_tvResult.setText(ContactStrings.FAIL_FIRE_NOT_EXIST);
+            m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
+            m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
         }
         if (m_threadInsert != null) {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        String sCharset = m_rbtnArrOs[0].isChecked() ? ContactStrings.CHARSET_GBK : ContactStrings.CHARSET_UTF8;
+        String sCharset = m_rbtnArrOs[0].isChecked() ? ExtraStrings.CHARSET_GBK : ExtraStrings.CHARSET_UTF8;
         m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
-        createDialog(this, ContactStrings.WARNDIALOG_TITLE, ContactStrings.INSERT_WARNDIALOG_MESSAGE,
-                true, ContactStrings.DIALOG_TYPE_INSERT);
+        createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE,
+                true, ExtraStrings.DIALOG_TYPE_INSERT);
     }
 
     //处理导入联系人线程的代码 Begin
     private void doInsertContact() {
         setInsertWidgetEnabled(false);
-        m_tvResult.setText(ContactStrings.STATUS_INSERTING);
+        m_tvResult.setText(ExtraStrings.STATUS_INSERTING);
         if (m_threadInsert != null) {
             m_threadInsert.start();
         }
     }
 
     private void endInsertContact() {
-        m_etInfo.setText(ContactStrings.NO_TEXT);
+        m_etInfo.setText(ExtraStrings.NO_TEXT);
         setInsertWidgetEnabled(true);
     }
 
@@ -276,32 +273,31 @@ public class MainActivity extends Activity implements OnClickListener {
         public void run() {
             boolean bResult = ContactInsert.insertIntoContact(m_context, m_sPath, m_sCharset);
             if (bResult) {
-                m_handler.sendEmptyMessage(ContactStrings.INSERT_SUCCESS);
+                m_handler.sendEmptyMessage(ExtraStrings.INSERT_SUCCESS);
             } else {
-                m_handler.sendEmptyMessage(ContactStrings.INSERT_FAIL);
+                m_handler.sendEmptyMessage(ExtraStrings.INSERT_FAIL);
             }
         }
     }
     //处理导入联系人线程的代码 End
 
     //导出联系人
-    private void outputContact(){
-        //File file = new File(ContactStrings.OUTPUT_PATH);
-        File file = m_Fun.GetNewFile(m_sPathDownloads, ContactStrings.OUTPUT_FILENAME, 0);
+    private void outputContact() {
+        //File file = new File(ExtraStrings.OUTPUT_PATH);
+        File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
         m_sFilePath = file.getAbsolutePath();
-        if(file.exists()){
-            createDialog(this, ContactStrings.WARNDIALOG_TITLE,
-                    ContactStrings.OUTPUT_WARNDIALOG_MESSAGE, true,
-                    ContactStrings.DIALOG_TYPE_OUTPUT);
-        }else {
+        if (file.exists()) {
+            createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE,
+                    true, ExtraStrings.DIALOG_TYPE_OUTPUT);
+        } else {
             doOutputContact();
         }
     }
 
     //处理导出联系人线程的代码 Begin
-    private void doOutputContact(){
+    private void doOutputContact() {
         setOutputWidgetEnabled(false);
-        m_tvResult.setText(ContactStrings.STATUS_OUTPUTING);
+        m_tvResult.setText(ExtraStrings.STATUS_OUTPUTING);
         if (m_threadOutput != null) {
             m_threadOutput.interrupt();
             m_threadOutput = null;
@@ -329,9 +325,9 @@ public class MainActivity extends Activity implements OnClickListener {
         public void run() {
             boolean result = m_output.outputAllContacts(m_context, m_sFilePath);
             if (result) {
-                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
+                m_handler.sendEmptyMessage(ExtraStrings.OUTPUT_SUCCESS);
             } else {
-                m_handler.sendEmptyMessage(ContactStrings.OUTPUT_FAIL);
+                m_handler.sendEmptyMessage(ExtraStrings.OUTPUT_FAIL);
             }
         }
     }
@@ -341,6 +337,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private static final int NOT_NOTICE = 2;//如果勾选了不再询问
     private AlertDialog m_dla;
     private AlertDialog m_dlgAlert;
+
     @Override
     public void onRequestPermissionsResult(int iRequestCode, String[] sPermissions, int[] iGrantResults) {
         super.onRequestPermissionsResult(iRequestCode, sPermissions, iGrantResults);
@@ -350,7 +347,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 if (iGrantResults[i] == PERMISSION_GRANTED) {//选择了“始终允许”
                     //Toast.makeText(this, "" + "权限" + sPermissions[i] + "申请成功", Toast.LENGTH_SHORT).show();
                 } else {
-                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, sPermissions[i])){//用户选择了禁止不再询问
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, sPermissions[i])) {//用户选择了禁止不再询问
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle("permission")
@@ -369,7 +366,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         m_dla = builder.create();
                         m_dla.setCanceledOnTouchOutside(false);
                         m_dla.show();
-                    }else {//选择禁止
+                    } else {//选择禁止
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle("permission")
                                 .setMessage("点击允许才可以使用我们的app哦")

@@ -41,7 +41,7 @@ import static com.example.contacts2csv.MainActivity.m_MA;
 //(L:176): getClass().getName()=com.xx.xx.controls.activitys.MainActivity
 //(L:177): getClass().getSimpleName()=MainActivity
 
-public class ContactOutput extends ContactUtils {
+public class ContactOutput{
     private JSONObject m_jsonContactData;            //用于存放获取的所有记录中间数据
     private JSONObject m_jsonContactData2;           //用于存放获取的所有记录最终结果
     private ContactHeader m_contactHeader;         //用于存放通讯录所有记录的表头信息
