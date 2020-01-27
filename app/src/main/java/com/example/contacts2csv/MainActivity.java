@@ -41,6 +41,9 @@ public class MainActivity extends Activity implements OnClickListener {
     public String m_sFilePath;              //文件路径
     public static CommonFun m_Fun;    //通用函数类
 
+    public ContactOutput m_output;      //导出联系人
+    public ContactInsert m_insert;      //导入联系人
+
     //线程消息处理对象
     private Handler m_handler = new Handler() {
         @Override
@@ -51,7 +54,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endInsertContact();
                     break;
                 case ContactStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ContactStrings.SUCCESS_INSERT, ContactUtilsInsert.getSuccessCount(), ContactUtilsInsert.getFailCount()));
+                    m_tvResult.setText(String.format(ContactStrings.SUCCESS_INSERT, ContactInsert.getSuccessCount(), ContactInsert.getFailCount()));
                     endInsertContact();
                     break;
                 case ContactStrings.OUTPUT_FAIL:
@@ -59,7 +62,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ContactStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, ContactUtilsOutput.getCount())));
+                    m_tvResult.setText((String.format(ContactStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.m_iSum)));
                     endOutputContact();
                     break;
             }
@@ -102,6 +105,8 @@ public class MainActivity extends Activity implements OnClickListener {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
         m_sFilePath = "";
+        m_output = new ContactOutput();      //导出联系人
+        m_insert = new ContactInsert();      //导入联系人
 
         m_etInfo = (EditText) findViewById(R.id.et_filepath);
         m_btnHelp = (Button) findViewById(R.id.btn_help);
@@ -269,7 +274,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean bResult = ContactUtilsInsert.insertIntoContact(m_context, m_sPath, m_sCharset);
+            boolean bResult = ContactInsert.insertIntoContact(m_context, m_sPath, m_sCharset);
             if (bResult) {
                 m_handler.sendEmptyMessage(ContactStrings.INSERT_SUCCESS);
             } else {
@@ -322,7 +327,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean result = ContactUtilsOutput.outputContacts(m_context, m_sFilePath);
+            boolean result = m_output.outputContacts(m_context, m_sFilePath);
             if (result) {
                 m_handler.sendEmptyMessage(ContactStrings.OUTPUT_SUCCESS);
             } else {

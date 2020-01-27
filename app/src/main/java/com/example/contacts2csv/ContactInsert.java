@@ -18,8 +18,8 @@ import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 
-public class ContactUtilsInsert extends ContactUtils {
-    private static final String m_sTAG = "ContactUtilsInsert";
+public class ContactInsert extends ContactUtils {
+    private static final String m_sTAG = "ContactInsert";
     private static int m_iSuccessCount = 0;
     private static int m_iFailCount = 0;
     private static boolean m_bGbk = false;

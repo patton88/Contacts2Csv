@@ -56,7 +56,7 @@ public class GetContactInfo {
     或者 JSONObject jsonObj = new JSONObject(true);
     */
 
-    public String getContactInfo() {
+    public String getAllContact() {
         // 获得通讯录信息 ，URI是ContactsContract.Contacts.CONTENT_URI
         m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         String sMimetype = "";
