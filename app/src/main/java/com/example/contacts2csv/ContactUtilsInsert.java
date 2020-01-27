@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -158,6 +160,7 @@ public class ContactUtilsInsert extends ContactUtils {
      * insert into database
      */
     private static boolean doInsertToContact(Context context, ContactInfo contactInfo) {
+        // 1.判断是否为空
         Log.d(m_sTAG, "in doInsertToContact contactInfo = null? " + (contactInfo == null));
         try {
             ContentValues contentValues = new ContentValues();

@@ -167,22 +167,21 @@ public class GetContactInfo {
     //class ContactHeader  ->m_jsonHeader  ->jsonG07OrgType     ->jsonG07_00WorkOrgType    ->workCompany   ->__first
     //class ContactHeader  ->m_jsonHeader  ->jsonG00StructName  ->displayName               ->__first
 
-    //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一，并且各信息字段的顺序和位置也不一致
-    //所以，最后再以mContactsHeader中各种数据大小的最终值为标准，再次填充将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
-    //private JSONObject m_jsonContactData2;        //用于存放获取的所有记录
+    //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一，
+    // 并且各信息字段的顺序和位置也不一致。所以，最后再以mContactsHeader中各种数据大小的最终值为标准，
+    // 再次填充将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
+    //private JSONObject m_jsonContactData2;        //用于存放获取的所有记录的最终结果
     private void dumpJsonContactData(JSONObject jsonSource, JSONObject jsonTarget) throws JSONException {
         //JSONObject属性遍历
-        Iterator<String> it1 = jsonSource.keys();
-        int i = jsonSource.length();
-        while (it1.hasNext()) {
-            String key = it1.next();
+        Iterator<String> it = jsonSource.keys();
+        while (it.hasNext()) {
+            String key = it.next();
             jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
             dumpJsonAllFields(key, jsonSource, jsonTarget);
         }
     }
 
     private void dumpJsonAllFields(String key, JSONObject jsonSource, JSONObject jsonTarget) throws JSONException {
-        String keys = "";
         int n = 0;
         //JSONObject属性遍历
         Iterator<String> it1 = mM_contactHeader.m_jsonHeader.keys();
