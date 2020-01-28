@@ -54,7 +54,11 @@ public class ContactOutput{
 
     public ContactOutput() {
         m_contactHeader = new ContactHeader();
-        m_contactHeader.init();
+        try { // 实现 Logcat 输出 m_contactHeader 完整结构
+            System.out.println("m_contactHeader.m_contactHeader : \n" + m_contactHeader.m_jsonHeader.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean outputAllContacts(Context context, String sPath) {
@@ -105,7 +109,6 @@ public class ContactOutput{
             //保证查询不同contactId的记录时时进行处理，相同contactId记录不处理
             if (iOldId != iContactId) {
                 m_contactHeaderCount = new ContactHeader();        //用于存放获取的每条记录每一列的计数器
-                m_contactHeaderCount.init();
 
                 //这里放入的jsonObject是一个对象(引用或指针)，放了之后还可以进行操作
                 contactIdKey = "contact" + iContactId;
@@ -182,6 +185,12 @@ public class ContactOutput{
         //private JSONObject m_jsonContactData2;        //用于存放获取的所有记录
         m_jsonContactData2 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
+
+//        try {  // 实现 Logcat 输出 m_jsonContactData2 完整结构
+//            System.out.println("m_jsonContactData2 : \n" + m_jsonContactData2.toString(4));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
 
         return traverseJSON(m_jsonContactData2);
     }

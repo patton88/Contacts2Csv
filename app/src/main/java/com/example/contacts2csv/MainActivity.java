@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -57,7 +56,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     endInsertContact();
                     break;
                 case ExtraStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, ContactInsert.getSuccessCount(), ContactInsert.getFailCount()));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, m_insert.getSuccessCount(), m_insert.getFailCount()));
                     endInsertContact();
                     break;
                 case ExtraStrings.OUTPUT_FAIL:
@@ -238,11 +237,12 @@ public class MainActivity extends Activity implements OnClickListener {
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
         }
-        if (m_threadInsert != null) {
+        if (m_threadInsert != null) {   //若已经启动线程，先终止清空
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        String sCharset = m_rbtnArrOs[0].isChecked() ? ExtraStrings.CHARSET_GBK : ExtraStrings.CHARSET_UTF8;
+        //String sCharset = m_rbtnArrOs[0].isChecked() ? ExtraStrings.CHARSET_GBK : ExtraStrings.CHARSET_UTF8;
+        String sCharset = ExtraStrings.CHARSET_UTF8;
         m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
         createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE,
                 true, ExtraStrings.DIALOG_TYPE_INSERT);
@@ -277,7 +277,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean bResult = ContactInsert.insertIntoContact(m_context, m_sPath, m_sCharset);
+            boolean bResult = m_insert.insertContacts(m_context, m_sPath, m_sCharset);
             if (bResult) {
                 m_handler.sendEmptyMessage(ExtraStrings.INSERT_SUCCESS);
             } else {
