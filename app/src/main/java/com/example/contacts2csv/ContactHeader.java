@@ -30,14 +30,16 @@ public class ContactHeader {
     //public Map<String, String> mMapCol;            //联系人信息列表头
     //public Vector<Pair<String, String>> mVecCol;   //联系人信息列表头，Map会自动排序，用Vector也不合理
     public JSONObject m_jsonHeader;     //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
-    public LinkedHashMap m_lhmapFields; //联系人信息列表头所有原生字段
+
+    //经输出后查看，混乱无用
+    //public LinkedHashMap m_lhmapFields; //联系人信息列表头所有原生字段
 
     public ContactHeader() {
         // ------------------- 联系人信息列表头 - Begin
         try {
             //联系人信息列表头，Map会自动排序，用Vector也不合理，所以用JSONObject
             m_jsonHeader = new JSONObject(new LinkedHashMap());
-            m_lhmapFields = new LinkedHashMap();
+            //m_lhmapFields = new LinkedHashMap();
 
             //命名惯例：变量名首字母一般小写，函数名、类名、常量名首字母一般大写
             //1.00、jsonG00StructName，获得通讯录中联系人的名字。G00 Group00。1个大项，9个小项
@@ -242,7 +244,8 @@ public class ContactHeader {
                 json.put("__second", "0");   // 用于存放用户值
                 jsonObject.put(sArr[0], json);             // sArr[0] 用于存放 mimetype 类型可读标题
 
-                m_lhmapFields.put(sArr[0], sArr[1]);        //保存联系人信息列表头所有原生字段，供插入联系人使用
+                //经输出后查看，混乱无用
+                //m_lhmapFields.put(sArr[0], sArr[1]);        //保存联系人信息列表头所有原生字段，供插入联系人使用
             }
         } catch (JSONException e) {
             e.printStackTrace();
