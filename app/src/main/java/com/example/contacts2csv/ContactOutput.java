@@ -19,6 +19,7 @@ import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 import android.util.Pair;
 
+import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
 
 //android中获取包名、类名。转载weixin_34405925 最后发布于2018-06-27 11:10:00 阅读数 1005  收藏
@@ -206,10 +207,13 @@ public class ContactOutput {
     private String getMimetype(String key1, String key2) {
         String mimetype = "";
         try {
-            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
+            //mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
+            //I/System.out: mimetype = {"__first":"vnd.android.cursor.item\/name","__second":"0"}
+            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        //System.out.println("mimetype = " + mimetype);
         return mimetype;
     }
 
@@ -420,16 +424,24 @@ public class ContactOutput {
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
 
-        //JSONObject中根据value获取第1个key值。若value值重复时，获取的是第1个key值
-        //JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
-        String key2 = getJsonKey4lay(type, key1);
-
-        String col = get4layColumnName(key1, key2).trim();                      // 获取该类信息的在数据表中的列号(字段号)
-        String data = cursor.getString(cursor.getColumnIndex(col));             // 获取数据表中的数据
-        if (1 == iPhone) {
-            data = funRemove(data);     // 电话号码才处理
+        try {
+            Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
+            it.next();
+            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+            while (it.hasNext()) {
+                String key2 = it.next();                                        // 获得key
+                if (type.equals(key2)) {
+                    String col = get4layColumnName(key1, key2).trim();          // 获取该类信息的在数据表中的列号(字段号)
+                    String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
+                    if (1 == iPhone) {
+                        data = funRemove(data);                                 // 电话号码才处理
+                    }
+                    put2json4lay(idKey, key1, key2, data);                      // 将获取的数据存入 m_jsonContactData
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        put2json4lay(idKey, key1, key2, data);                                  // 将获取的数据存入 m_jsonContactData
     }
 
     // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如StructuredName.CONTENT_ITEM_TYPE
@@ -475,12 +487,16 @@ public class ContactOutput {
 
     //处理4层结构，mJsonG00到mJsonG06、mJsonG08
     private String get4layColumnName(String key1, String key2) {
+        String col = "";
         try {
-            return m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
+            //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
+            //return m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
+            col = String.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first"));
         } catch (JSONException e) {
             e.printStackTrace();
-            return "";
+            //return "";
         }
+        return col;
     }
 
     //处理4层结构，mJsonG00到mJsonG06、mJsonG08
