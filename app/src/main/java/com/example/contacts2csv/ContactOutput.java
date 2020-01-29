@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.util.Pair;
 
@@ -209,7 +210,7 @@ public class ContactOutput {
         try {
             //mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
             //I/System.out: mimetype = {"__first":"vnd.android.cursor.item\/name","__second":"0"}
-            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
+            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first").trim();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -423,7 +424,8 @@ public class ContactOutput {
         String kind = getMimetype(key1, "__mimetype_1").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
-        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+        //String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+        String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
 
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
@@ -437,11 +439,13 @@ public class ContactOutput {
 
                 if (type.equals(type2)) {
                     String col = get4layColumnName(key1, key2).trim();          // 获取该类信息的在数据表中的列号(字段号)
+                    col = ContactsContract.CommonDataKinds.Phone.NUMBER;
                     int iCol = cursor.getColumnIndex(col);
-                    System.out.println("iCol = " + iCol);   //    iCol = -1
+                    System.out.println("iCol = " + iCol);   // 全部都是 iCol = -1
                     String data = "";
                     if(iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
+                        //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
                         data = cursor.getString(iCol); // 获取数据表中的数据
                         if (1 == iPhone) {
                             data = funRemove(data);                                 // 电话号码才处理
