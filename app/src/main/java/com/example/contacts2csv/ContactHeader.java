@@ -64,7 +64,7 @@ public class ContactHeader {
             m_jsonHeader.put("jsonG01Phone", new JSONObject(new LinkedHashMap()));
             String arr2JsonG01Phone[][] = {
                     {"__mimetype_0", Phone.CONTENT_ITEM_TYPE},                  //Phone.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
-                    {"__mimetype_1", Phone.NUMBER},                             //Phone.NUMBER = "data1";
+                    {"__mimetype_1", Phone.TYPE},                               //Phone.TYPE = "data2";
                     {"homeNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
                     {"mobile", String.valueOf(Phone.TYPE_MOBILE)},              //Phone.TYPE_MOBILE = 2;
                     {"workNum", String.valueOf(Phone.TYPE_WORK)},               //Phone.TYPE_WORK = 3;

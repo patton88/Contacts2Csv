@@ -422,6 +422,7 @@ public class ContactOutput {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
         String kind = getMimetype(key1, "__mimetype_1").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
+        //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
 
         try {
@@ -430,11 +431,21 @@ public class ContactOutput {
             it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
             while (it.hasNext()) {
                 String key2 = it.next();                                        // 获得key
-                if (type.equals(key2)) {
+                String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
+                System.out.println("type2 = " + type2);
+                System.out.println("type = " + type);
+
+                if (type.equals(type2)) {
                     String col = get4layColumnName(key1, key2).trim();          // 获取该类信息的在数据表中的列号(字段号)
-                    String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
-                    if (1 == iPhone) {
-                        data = funRemove(data);                                 // 电话号码才处理
+                    int iCol = cursor.getColumnIndex(col);
+                    System.out.println("iCol = " + iCol);   //    iCol = -1
+                    String data = "";
+                    if(iCol > -1) {
+                        //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
+                        data = cursor.getString(iCol); // 获取数据表中的数据
+                        if (1 == iPhone) {
+                            data = funRemove(data);                                 // 电话号码才处理
+                        }
                     }
                     put2json4lay(idKey, key1, key2, data);                      // 将获取的数据存入 m_jsonContactData
                 }
@@ -460,29 +471,6 @@ public class ContactOutput {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    //从4层JSONObject中根据value获取第1个key值。若value值重复时，获取的是第1个key值
-    //JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
-    //原创将心666666于2014-10-01，https://blog.csdn.net/jiangxindu1/article/details/39720481
-    public String getJsonKey4lay(String val, String key1) {
-        String key = "";
-        try {
-            JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
-            Iterator<String> it = json.keys();
-            it.next();
-            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
-            while (it.hasNext()) {
-                key = it.next();
-                if (json.getString(key).equals(val)) {
-                    break;
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return key;
     }
 
     //处理4层结构，mJsonG00到mJsonG06、mJsonG08
