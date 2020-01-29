@@ -260,7 +260,7 @@ public class ContactOutput {
                     String key3 = it3.next();
                     //处理第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
                     if ("__first" == key3) {
-                        // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                        // 跳过前面的元素 "__mimetype_x"
                         if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                             continue;
                         }
@@ -282,7 +282,7 @@ public class ContactOutput {
                             key4 = it4.next();
                             //处理第二类型有5层结构，mJsonG07、mJsonG09
                             if ("__first" == key4) {
-                                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                                // 跳过前面的元素 "__mimetype_x"
                                 if (key3.length() > "__mimetype_".length() && key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                                     continue;
                                 }
@@ -424,38 +424,33 @@ public class ContactOutput {
         String kind = getMimetype(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
-        //String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
-        String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
+        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+        //String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
 
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
                 String key2 = it.next();                                        // 获得key
-                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                // 跳过前面的元素 "__mimetype_x"
                 if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                     //System.out.println("key2.substring(0, \"__mimetype_\".length()) = " + key2.substring(0, "__mimetype_".length()));
                     continue;
                 }
                 String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
-                //System.out.println("type2 = " + type2);
-                //System.out.println("type = " + type);
 
                 if (type.equals(type2)) {
-                    //String col = get4layColumnName(key1, key2).trim();  // 获取该类信息的在数据表中的列号(字段号)
                     String col = getMimetype(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
-                    //col = ContactsContract.CommonDataKinds.Phone.NUMBER;
                     int iCol = cursor.getColumnIndex(col);
-                    //System.out.println("iCol = " + iCol);   // 全部都是 iCol = -1
                     String data = "";
                     if(iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
                         //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
-                        data = cursor.getString(iCol); // 获取数据表中的数据
+                        data = cursor.getString(iCol);          // 获取数据表中的数据
                         if (1 == iPhone) {
-                            data = funRemove(data);                                 // 电话号码才处理
+                            data = funRemove(data);             // 电话号码才处理
                         }
                     }
-                    put2json4lay(idKey, key1, key2, data);                      // 将获取的数据存入 m_jsonContactData
+                    put2json4lay(idKey, key1, key2, data);      // 将获取的数据存入 m_jsonContactData
                 }
             }
         } catch (JSONException e) {
@@ -470,7 +465,7 @@ public class ContactOutput {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
                 String key2 = it.next();                                    // 获得key
-                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                // 跳过前面的元素 "__mimetype_x"
                 if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                     continue;
                 }
@@ -530,7 +525,7 @@ public class ContactOutput {
                 Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).keys();
                 while (it2.hasNext()) {
                     String key3 = it2.next();                                   // 获的key
-                    // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                    // 跳过前面的元素 "__mimetype_x"
                     if (key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                         continue;
                     }
