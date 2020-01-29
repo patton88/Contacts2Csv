@@ -47,11 +47,6 @@ public class ContactHeader {
 
             String arr2JsonG00StructName[][] = {
                     {"__mimetype_0", StructuredName.CONTENT_ITEM_TYPE},             //StructuredName.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
-                    {"__mimetype_1", ""},                                           //用于占位，便于统一处理
-                    {"__mimetype_2", ""},                                           //用于占位，便于统一处理
-                    {"__mimetype_3", ""},                                           //用于占位，便于统一处理
-                    {"__mimetype_4", ""},                                           //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                                           //用于占位，便于统一处理
                     {"displayName", StructuredName.DISPLAY_NAME},	                //StructuredName.DISPLAY_NAME = "data1";
                     {"lastName", StructuredName.GIVEN_NAME},			            //StructuredName.GIVEN_NAME = "data2";
                     {"firstName", StructuredName.FAMILY_NAME},                      //StructuredName.FAMILY_NAME = "data3";
@@ -71,8 +66,6 @@ public class ContactHeader {
                     {"__mimetype_1", Phone.NUMBER},                             //Phone.NUMBER = "data1";
                     {"__mimetype_2", Phone.TYPE},                               //Phone.TYPE = "data2";
                     {"__mimetype_3", Phone.LABEL},                              //Phone.TYPE = "data3";
-                    {"__mimetype_4", ""},                                       //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                                       //用于占位，便于统一处理
                     {"homeNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
                     {"mobile", String.valueOf(Phone.TYPE_MOBILE)},              //Phone.TYPE_MOBILE = 2;
                     {"workNum", String.valueOf(Phone.TYPE_WORK)},               //Phone.TYPE_WORK = 3;
@@ -103,8 +96,6 @@ public class ContactHeader {
                     {"__mimetype_1", Email.DATA},                       //Email.DATA = "data1";
                     {"__mimetype_2", Email.TYPE},                       //Email.TYPE = "data2";
                     {"__mimetype_3", Email.LABEL},                      //Email.LABEL = "data3";
-                    {"__mimetype_4", ""},                               //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                               //用于占位，便于统一处理
                     {"homeEmail"  , String.valueOf(Email.TYPE_HOME)},   //Email.TYPE_HOME = 1;
                     {"workEmail"  , String.valueOf(Email.TYPE_WORK)},   //Email.TYPE_WORK = 2;
                     {"otherEmail" , String.valueOf(Email.TYPE_OTHER)},  //Email.TYPE_OTHER = 3;
@@ -119,8 +110,6 @@ public class ContactHeader {
                     {"__mimetype_1", Event.START_DATE},                     //Event.START_DATE = "data1";
                     {"__mimetype_2", Event.TYPE},                           //Event.TYPE = "data2";
                     {"__mimetype_3", Event.LABEL},                          //Event.LABEL = "data3";
-                    {"__mimetype_4", ""},                                   //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                                   //用于占位，便于统一处理
                     {"anniversary", String.valueOf(Event.TYPE_ANNIVERSARY)},//Event.TYPE_ANNIVERSARY = 1;
                     {"otherday", String.valueOf(Event.TYPE_OTHER)},         //Event.TYPE_OTHER = 2;
                     {"birthday", String.valueOf(Event.TYPE_BIRTHDAY)},      //Event.TYPE_BIRTHDAY = 3;
@@ -140,9 +129,7 @@ public class ContactHeader {
                     {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
                     {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-//                    {"homeMsg", String.valueOf(Im.TYPE_HOME)},                      //Im.TYPE_HOME = 1;
-//                    {"workMsg", String.valueOf(Im.TYPE_WORK)},                      //Im.TYPE_WORK = 2;
-//                    {"otherMsg", String.valueOf(Im.TYPE_OTHER)},                    //Im.TYPE_OTHER = 3;
+                    {"__mimetype_6", String.valueOf(Im.TYPE_HOME)},                 //Im.TYPE_HOME = 1;
                     {"homeCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
                     {"homeAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
                     {"homeMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
@@ -165,9 +152,7 @@ public class ContactHeader {
                     {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
                     {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-//                    {"homeMsg", String.valueOf(Im.TYPE_HOME)},                      //Im.TYPE_HOME = 1;
-//                    {"workMsg", String.valueOf(Im.TYPE_WORK)},                      //Im.TYPE_WORK = 2;
-//                    {"otherMsg", String.valueOf(Im.TYPE_OTHER)},                    //Im.TYPE_OTHER = 3;
+                    {"__mimetype_6", String.valueOf(Im.TYPE_WORK)},                 //Im.TYPE_WORK = 2;
                     {"workCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
                     {"workAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
                     {"workMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
@@ -190,9 +175,7 @@ public class ContactHeader {
                     {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
                     {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-//                    {"homeMsg", String.valueOf(Im.TYPE_HOME)},                      //Im.TYPE_HOME = 1;
-//                    {"workMsg", String.valueOf(Im.TYPE_WORK)},                      //Im.TYPE_WORK = 2;
-//                    {"otherMsg", String.valueOf(Im.TYPE_OTHER)},                    //Im.TYPE_OTHER = 3;
+                    {"__mimetype_6", String.valueOf(Im.TYPE_OTHER)},                //Im.TYPE_OTHER = 3;
                     {"otherCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
                     {"otherAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
                     {"otherMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
@@ -211,10 +194,6 @@ public class ContactHeader {
             String arr2JsonG05Remark[][] = {
                     {"__mimetype_0", Note.CONTENT_ITEM_TYPE},   //Note.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/note";
                     {"__mimetype_1", Note.NOTE},                //Note.NOTE = "data1"
-                    {"__mimetype_2", ""},                       //用于占位，便于统一处理
-                    {"__mimetype_3", ""},                       //用于占位，便于统一处理
-                    {"__mimetype_4", ""},                       //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                       //用于占位，便于统一处理
                     {"remark", Note.NOTE}                       //Note.NOTE = "data1";
             };
             Arr2Json(arr2JsonG05Remark, m_jsonHeader.getJSONObject("jsonG05Remark"));
@@ -226,8 +205,6 @@ public class ContactHeader {
                     {"__mimetype_1", Nickname.NAME},                                //Nickname.NAME = "data1";
                     {"__mimetype_2", Nickname.TYPE},                                //Nickname.TYPE = "data2";
                     {"__mimetype_3", Nickname.LABEL},                               //Nickname.LABEL = "data3";
-                    {"__mimetype_4", ""},                                           //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                                           //用于占位，便于统一处理
                     {"defaultNickName", String.valueOf(Nickname.TYPE_DEFAULT)},     //Nickname.TYPE_DEFAULT = 1;
                     {"otherNickName", String.valueOf(Nickname.TYPE_OTHER_NAME)},    //Nickname.TYPE_OTHER_NAME = 2;
                     {"maindenNickName", String.valueOf(Nickname.TYPE_MAIDEN_NAME)}, //Nickname.TYPE_MAIDEN_NAME = 3;
@@ -261,8 +238,7 @@ public class ContactHeader {
                     {"__mimetype_1", Organization.DATA},                        //Organization.TYPE = "data1";
                     {"__mimetype_2", Organization.TYPE},                        //Organization.TYPE = "data2";
                     {"__mimetype_3", Organization.LABEL},                       //Organization.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(Organization.TYPE_WORK)},   //Organization.TYPE_WORK = 1;
-                    {"__mimetype_5", ""},                                       //用于占位，便于统一处理
+                    {"__mimetype_6", String.valueOf(Organization.TYPE_WORK)},   //Organization.TYPE_WORK = 1;
                     {"workCompany", Organization.COMPANY},                      //Organization.COMPANY = "data1";
                     {"workJobTitle", Organization.TITLE},                       //Organization.TITLE = "data4";
                     {"workDepartment", Organization.DEPARTMENT},                //Organization.DEPARTMENT = "data5";
@@ -280,8 +256,7 @@ public class ContactHeader {
                     {"__mimetype_1", Organization.DATA},                        //Organization.TYPE = "data1";
                     {"__mimetype_2", Organization.TYPE},                        //Organization.TYPE = "data2";
                     {"__mimetype_3", Organization.LABEL},                       //Organization.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(Organization.TYPE_OTHER)},  //Organization.TYPE_OTHER = 2;
-                    {"__mimetype_5", ""},                                       //用于占位，便于统一处理
+                    {"__mimetype_6", String.valueOf(Organization.TYPE_OTHER)},  //Organization.TYPE_OTHER = 2;
                     {"otherCompany", Organization.COMPANY},                     //Organization.COMPANY = "data1";
                     {"otherJobTitle", Organization.TITLE},                      //Organization.TITLE = "data4";
                     {"otherDepartment", Organization.DEPARTMENT},               //Organization.DEPARTMENT = "data5";
@@ -299,8 +274,6 @@ public class ContactHeader {
                     {"__mimetype_1", Website.URL},                          //Website.URL = "data1";
                     {"__mimetype_2", Website.TYPE},                         //Website.URL = "data2";
                     {"__mimetype_3", Website.LABEL},                        //Website.URL = "data3";
-                    {"__mimetype_4", ""},                                   //用于占位，便于统一处理
-                    {"__mimetype_5", ""},                                   //用于占位，便于统一处理
                     {"homepage", String.valueOf(Website.TYPE_HOMEPAGE)},    //Website.TYPE_HOMEPAGE = 1;
                     {"blog", String.valueOf(Website.TYPE_BLOG)},            //Website.TYPE_BLOG = 2;
                     {"profile", String.valueOf(Website.TYPE_PROFILE)},      //Website.TYPE_PROFILE = 3;
@@ -322,8 +295,7 @@ public class ContactHeader {
                     {"__mimetype_1", StructuredPostal.DATA},                        //StructuredPostal.TYPE = "data1";
                     {"__mimetype_2", StructuredPostal.TYPE},                        //StructuredPostal.TYPE = "data2";
                     {"__mimetype_3", StructuredPostal.LABEL},                       //StructuredPostal.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(StructuredPostal.TYPE_HOME)},   //StructuredPostal.TYPE_HOME = 1;
-                    {"__mimetype_5", ""},                                           //用于占位，便于统一处理
+                    {"__mimetype_6", String.valueOf(StructuredPostal.TYPE_HOME)},   //StructuredPostal.TYPE_HOME = 1;
                     {"homeFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},   //StructuredPostal.FORMATTED_ADDRESS = "data1";
                     {"homeStreet", StructuredPostal.STREET},                        //StructuredPostal.STREET = "data4";
                     {"homeBox", StructuredPostal.POBOX},                            //StructuredPostal.POBOX = "data5";
@@ -342,8 +314,7 @@ public class ContactHeader {
                     {"__mimetype_1", StructuredPostal.DATA},                        //StructuredPostal.TYPE = "data1";
                     {"__mimetype_2", StructuredPostal.TYPE},                        //StructuredPostal.TYPE = "data2";
                     {"__mimetype_3", StructuredPostal.LABEL},                       //StructuredPostal.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(StructuredPostal.TYPE_WORK)},   //StructuredPostal.TYPE_WORK = 2;
-                    {"__mimetype_5", ""},                                           //用于占位，便于统一处理
+                    {"__mimetype_6", String.valueOf(StructuredPostal.TYPE_WORK)},   //StructuredPostal.TYPE_WORK = 2;
                     {"workFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},   //StructuredPostal.FORMATTED_ADDRESS = "data1";
                     {"workStreet", StructuredPostal.STREET},                        //StructuredPostal.STREET = "data4";
                     {"workBox", StructuredPostal.POBOX},                            //StructuredPostal.POBOX = "data5";
@@ -362,8 +333,7 @@ public class ContactHeader {
                     {"__mimetype_1", StructuredPostal.DATA},                        //StructuredPostal.TYPE = "data1";
                     {"__mimetype_2", StructuredPostal.TYPE},                        //StructuredPostal.TYPE = "data2";
                     {"__mimetype_3", StructuredPostal.LABEL},                       //StructuredPostal.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(StructuredPostal.TYPE_OTHER)},  //StructuredPostal.TYPE_OTHER = 3;
-                    {"__mimetype_5", ""},                                           //用于占位，便于统一处理
+                    {"__mimetype_6", String.valueOf(StructuredPostal.TYPE_OTHER)},  //StructuredPostal.TYPE_OTHER = 3;
                     {"otherFormattedAddress", StructuredPostal.FORMATTED_ADDRESS},  //StructuredPostal.FORMATTED_ADDRESS = "data1";
                     {"otherStreet", StructuredPostal.STREET},                       //StructuredPostal.STREET = "data4";
                     {"otherBox", StructuredPostal.POBOX},                           //StructuredPostal.POBOX = "data5";
