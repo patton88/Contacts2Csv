@@ -16,16 +16,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.ContactsContract.CommonDataKinds.Email;
-import android.provider.ContactsContract.CommonDataKinds.Event;
-import android.provider.ContactsContract.CommonDataKinds.Im;
-import android.provider.ContactsContract.CommonDataKinds.Nickname;
-import android.provider.ContactsContract.CommonDataKinds.Note;
-import android.provider.ContactsContract.CommonDataKinds.Organization;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.provider.ContactsContract.Data;
 import android.util.Pair;
 
@@ -41,7 +31,7 @@ import static com.example.contacts2csv.MainActivity.m_MA;
 //(L:176): getClass().getName()=com.xx.xx.controls.activitys.MainActivity
 //(L:177): getClass().getSimpleName()=MainActivity
 
-public class ContactOutput{
+public class ContactOutput {
     private JSONObject m_jsonContactData;            //用于存放获取的所有记录中间数据
     private JSONObject m_jsonContactData2;           //用于存放获取的所有记录最终结果
     private ContactHeader m_contactHeader;         //用于存放通讯录所有记录的表头信息
@@ -54,11 +44,11 @@ public class ContactOutput{
 
     public ContactOutput() {
         m_contactHeader = new ContactHeader();
-//        try { // 实现 Logcat 输出 m_contactHeader 完整结构
-//            System.out.println("m_contactHeader.m_contactHeader : \n" + m_contactHeader.m_jsonHeader.toString(4));
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        //        try { // 实现 Logcat 输出 m_contactHeader 完整结构
+        //            System.out.println("m_contactHeader.m_contactHeader : \n" + m_contactHeader.m_jsonHeader.toString(4));
+        //        } catch (JSONException e) {
+        //            e.printStackTrace();
+        //        }
 
         //混乱无用
         //System.out.println("m_contactHeader.m_lhmapFields : \n" + m_contactHeader.m_lhmapFields.toString());
@@ -128,59 +118,72 @@ public class ContactOutput{
             // 取得 MIMETYPE 类型
             sMimetype = cursor.getString(cursor.getColumnIndex(Data.MIMETYPE));
 
-            //m_contactHeader.jsonG00StructName，获得通讯录中联系人的名字
-            if (StructuredName.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG00StructName(contactIdKey, cursor);
-            }
 
-            //m_contactHeader.jsonG01Phone，获取电话信息，共20项
-            if (Phone.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG01Phone(contactIdKey, cursor);
-            }
+            //m_contactHeader.jsonG00StructName，获得通讯录中联系人的名字。StructuredName.CONTENT_ITEM_TYPE
+            if (sMimetype.equals(getMimetype("jsonG00StructName", "__mimetype_0"))) {
+                //dumpJsonG00StructName(contactIdKey, "jsonG00StructName", cursor);
 
-            //m_contactHeader.jsonG02Email，查找Email地址
-            if (Email.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG02Email(contactIdKey, cursor);
+                // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如StructuredName.CONTENT_ITEM_TYPE
+                // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
+                //private void dumpJson4layAll(String idKey, String key1, Cursor cursor) {
+                dumpJson4layAll(contactIdKey, "jsonG00StructName", cursor);
             }
+            //m_contactHeader.jsonG01Phone，获取电话信息，共20项。Phone.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG01Phone", "__mimetype_0"))) {
+                //dumpJsonG01Phone(contactIdKey, cursor);
 
-            //m_contactHeader.jsonG03Event，查找Event地址
-            if (Event.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG03Event(contactIdKey, cursor);
+                // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+                // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
+                //private void dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
+                dumpJson4lay(contactIdKey, "jsonG01Phone", cursor, 1);
             }
-
-            //m_contactHeader.jsonG04Im，即时消息
-            if (Im.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG04Im(contactIdKey, cursor);
+            //m_contactHeader.jsonG02Email，查找Email地址。Email.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG02Email", "__mimetype_0"))) {
+                //dumpJsonG02Email(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG02Email", cursor, 0);
             }
-
-            //m_contactHeader.jsonG05Remark，获取备注信息
-            if (Note.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG05Remark(contactIdKey, cursor);
+            //m_contactHeader.jsonG03Event，查找Event地址。Event.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG03Event", "__mimetype_0"))) {
+                //dumpJsonG03Event(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG03Event", cursor, 0);
             }
-
-            //m_contactHeader.jsonG06NickName，获取昵称信息
-            if (Nickname.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG06NickName(contactIdKey, cursor);
+            //m_contactHeader.jsonG04Im，即时消息。Im.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG04Im", "__mimetype_0"))) {
+                //dumpJsonG04Im(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
             }
-
+            //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG05Remark", "__mimetype_0"))) {
+                //dumpJsonG05Remark(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG05Remark", cursor, 0);
+            }
+            //m_contactHeader.jsonG06NickName，获取昵称信息。Nickname.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG06NickName", "__mimetype_0"))) {
+                //dumpJsonG06NickName(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG06NickName", cursor, 0);
+            }
             //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
             //m_jsonHeader->jsonG00StructName->displayName-first
             //2、第二类型有5层结构，mJsonG07、mJsonG09
             //m_jsonHeader->jsonG07OrgType->jsonG07_00WorkOrgType->workCompany-first
+            //m_contactHeader.jsonG07OrgType，获取组织信息。Organization.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG07OrgType", "__mimetype_0"))) {
+                //dumpJsonG07OrgType(contactIdKey, cursor);
 
-            //m_contactHeader.jsonG07OrgType，获取组织信息
-            if (Organization.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG07OrgType(contactIdKey, cursor);
+                // 取出5层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+                // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
+                //private void dumpJson5lay(String idKey, String key1, Cursor cursor) {
+                dumpJson5lay(contactIdKey, "jsonG07OrgType", cursor);
             }
-
-            //m_contactHeader.jsonG08WebType，获取网站信息
-            if (Website.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG08WebType(contactIdKey, cursor);
+            //m_contactHeader.jsonG08WebType，获取网站信息。Website.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG08WebType", "__mimetype_0"))) {
+                //dumpJsonG08WebType(contactIdKey, cursor);
+                dumpJson4lay(contactIdKey, "jsonG08WebType", cursor, 0);
             }
-
-            //m_contactHeader.jsonG09PostalType，查找通讯地址
-            if (StructuredPostal.CONTENT_ITEM_TYPE.equals(sMimetype)) {
-                dumpJsonG09PostalType(contactIdKey, cursor);
+            //m_contactHeader.jsonG09PostalType，查找通讯地址。StructuredPostal.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype("jsonG09PostalType", "__mimetype_0"))) {
+                //dumpJsonG09PostalType(contactIdKey, cursor);
+                dumpJson5lay(contactIdKey, "jsonG09PostalType", cursor);
             }
         }
         cursor.close();
@@ -191,13 +194,23 @@ public class ContactOutput{
         m_jsonContactData2 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
 
-//        try {  // 实现 Logcat 输出 m_jsonContactData2 完整结构
-//            System.out.println("m_jsonContactData2 : \n" + m_jsonContactData2.toString(4));
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        //        try {  // 实现 Logcat 输出 m_jsonContactData2 完整结构
+        //            System.out.println("m_jsonContactData2 : \n" + m_jsonContactData2.toString(4));
+        //        } catch (JSONException e) {
+        //            e.printStackTrace();
+        //        }
 
         return traverseJSON(m_jsonContactData2);
+    }
+
+    private String getMimetype(String key1, String key2) {
+        String mimetype = "";
+        try {
+            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return mimetype;
     }
 
     //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
@@ -275,9 +288,9 @@ public class ContactOutput{
     //将mJsonObject的内容转储到mJsonResult中
     //private void Dump2Json(String keyField, int n, String key, JSONObject jsonSource, JSONObject jsonTarget) throws JSONException {
     private void Dump2Json(String key, String keyField, int n, JSONObject jsonSource, JSONObject jsonTarget) {
-        for(int i = 0; i <= n; i++){
+        for (int i = 0; i <= n; i++) {
             String keyNew = keyField;
-            if(i > 1){
+            if (i > 1) {
                 keyNew = keyField + i;
             }
             try {
@@ -289,46 +302,6 @@ public class ContactOutput{
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    //处理第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
-    //由于Java是值传递，传递过大JSONObject参数，当手机有上千个联系人时，将导致资源占用过大而崩溃
-    private void put2json(String idKey, String key1, String key2, String strVal) {
-        String keyNew = key2;
-        try {
-            int n = Integer.valueOf(m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second"));
-            n++;
-            m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).put("__second", String.valueOf(n));
-            if(n > 1){
-                keyNew += n;
-            }
-            m_jsonContactData.getJSONObject(idKey).put(keyNew, strVal);
-
-            n = java.lang.Math.max(n, Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second")));
-            m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).put("__second", String.valueOf(n));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-    //由于Java是值传递，传递过大JSONObject参数，当手机有上千个联系人时，将导致资源占用过大而崩溃
-    private void put2json(String idKey, String key1, String key2, String key3, String strVal) {
-        String keyNew = key3;
-        try {
-            int n = Integer.valueOf(m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second"));
-            n++;
-            m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).put("__second", String.valueOf(n));
-            if(n > 1){
-                keyNew += n;
-            }
-            m_jsonContactData.getJSONObject(idKey).put(keyNew, strVal);
-
-            n = java.lang.Math.max(n, Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second")));
-            m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).put("__second", String.valueOf(n));
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
@@ -363,18 +336,18 @@ public class ContactOutput{
     }
 
     /*
-    * mJsonResult:
-    * key0, value0
-    * key1, value1
-    * ...
-    * keyN, valueN
-    *
-    *
-    * pair:
-    * key0,key1,..,keyN
-    * value0,value1,...,valueN
-    *
-    * */
+     * mJsonResult:
+     * key0, value0
+     * key1, value1
+     * ...
+     * keyN, valueN
+     *
+     *
+     * pair:
+     * key0,key1,..,keyN
+     * value0,value1,...,valueN
+     *
+     * */
     //这里参数json，实际上对应一条mJsonResult结构的联系人记录
     //traverseJSON3函数作用：将mJsonResult中的键值对转换为两个字符串构成的Pair
     //pair: key0,key1,..,keyN  , value0,value1,...,valueN
@@ -428,8 +401,72 @@ public class ContactOutput{
         return str;
     }
 
-    //处理第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
-    private String getColumnName(String key1, String key2) {
+    ////////////////////////////////////////////////////////////////////////
+    //转储联系人各个字段数据的函数组 Begin
+
+    // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
+    private void dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
+        // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
+        String kind = getMimetype(key1, "__mimetype_1").trim();
+        // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
+        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+
+        //JSONObject中根据value获取第1个key值。若value值重复时，获取的是第1个key值
+        //JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
+        String key2 = getJsonKey4lay(type, key1);
+
+        String col = get4layColumnName(key1, key2).trim();                      // 获取该类信息的在数据表中的列号(字段号)
+        String data = cursor.getString(cursor.getColumnIndex(col));             // 获取数据表中的数据
+        if (1 == iPhone) {
+            data = funRemove(data);     // 电话号码才处理
+        }
+        put2json4lay(idKey, key1, key2, data);                                  // 将获取的数据存入 m_jsonContactData
+    }
+
+    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如StructuredName.CONTENT_ITEM_TYPE
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
+    private void dumpJson4layAll(String idKey, String key1, Cursor cursor) {
+        try {
+            Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
+            it.next();
+            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+            while (it.hasNext()) {
+                String key2 = it.next();                                    // 获得key
+                String col = get4layColumnName(key1, key2);                 // 获取该类信息的在数据表中的列号(字段号)
+                String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
+                put2json4lay(idKey, key1, key2, data);                      // 将获取的数据存入 m_jsonContactData
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //从4层JSONObject中根据value获取第1个key值。若value值重复时，获取的是第1个key值
+    //JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
+    //原创将心666666于2014-10-01，https://blog.csdn.net/jiangxindu1/article/details/39720481
+    public String getJsonKey4lay(String val, String key1) {
+        String key = "";
+        try {
+            JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
+            Iterator<String> it = json.keys();
+            it.next();
+            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+            while (it.hasNext()) {
+                key = it.next();
+                if (json.getString(key).equals(val)) {
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return key;
+    }
+
+    //处理4层结构，mJsonG00到mJsonG06、mJsonG08
+    private String get4layColumnName(String key1, String key2) {
         try {
             return m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
         } catch (JSONException e) {
@@ -438,8 +475,53 @@ public class ContactOutput{
         }
     }
 
-    //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-    private String getColumnName(String key1, String key2, String key3) {
+    //处理4层结构，mJsonG00到mJsonG06、mJsonG08
+    //由于Java是值传递，传递过大JSONObject参数，当手机有上千个联系人时，将导致资源占用过大而崩溃
+    private void put2json4lay(String idKey, String key1, String key2, String val) {
+        String keyNew = key2;
+        try {
+            int n = Integer.valueOf(m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second"));
+            n++;
+            m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).put("__second", String.valueOf(n));
+            if (n > 1) {
+                keyNew += n;
+            }
+            m_jsonContactData.getJSONObject(idKey).put(keyNew, val);
+
+            //下面两行好像无用
+            n = java.lang.Math.max(n, Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second")));
+            m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).put("__second", String.valueOf(n));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 取出5层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
+    private void dumpJson5lay(String idKey, String key1, Cursor cursor) {
+        //key1 : m_contactHeader.jsonG07OrgType，                    或者m_contactHeader.jsonG09PostalType
+        try {
+            //key2 : jsonG07_00WorkOrgType、jsonG07_01OtherOrgType， 或者jsonG09_00HomePostal、jsonG09_01WorkPostal、jsonG09_02OtherPostal
+            Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
+            while (it.hasNext()) {
+                String key2 = it.next();
+                Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).keys();
+                it2.next();
+                it2.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+                while (it2.hasNext()) {
+                    String key3 = it2.next();                                   // 获的key
+                    String col = get5layColumnName(key1, key2, key3);           // 获取该类信息的在数据表中的列号(字段号)
+                    String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
+                    put2json5lay(idKey, key1, key2, key3, data);                // 将获取的数据存入 m_jsonContactData
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //处理5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
+    private String get5layColumnName(String key1, String key2, String key3) {
         try {
             return m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__first");
         } catch (JSONException e) {
@@ -448,425 +530,21 @@ public class ContactOutput{
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    //转储联系人各个字段数据的函数组 Begin
-
-    //m_contactHeader.jsonG00StructName，获得通讯录中联系人的名字
-    private void dumpJsonG00StructName(String idKey, Cursor cursor) {
-        //if (StructuredName.CONTENT_ITEM_TYPE.equals(mimetype)) {
+    //处理5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
+    //由于Java是值传递，传递过大JSONObject参数，当手机有上千个联系人时，将导致资源占用过大而崩溃
+    private void put2json5lay(String idKey, String key1, String key2, String key3, String strVal) {
+        String keyNew = key3;
         try {
-        Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG00StructName").keys();
-            while (it.hasNext()) {
-                String key2 = it.next();
-                String str = getColumnName("jsonG00StructName", key2);
-                put2json(idKey, "jsonG00StructName", key2, cursor.getString(cursor.getColumnIndex(str)));
-                //int n = Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject("jsonG00StructName").getJSONObject(key).getString("__second"));
-                //System.out.println("jsonG00StructName." + key + ".__second = " + n);
+            int n = Integer.valueOf(m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second"));
+            n++;
+            m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).put("__second", String.valueOf(n));
+            if (n > 1) {
+                keyNew += n;
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+            m_jsonContactData.getJSONObject(idKey).put(keyNew, strVal);
 
-    //m_contactHeader.jsonG01Phone，获取电话信息，共20项
-    private void dumpJsonG01Phone(String idKey, Cursor cursor) {
-        //if (Phone.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出电话类型
-        int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
-
-        // 1、住宅电话
-        if (phoneType == Phone.TYPE_HOME) {
-            String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
-            homeNum = funRemove(homeNum);
-            //System.out.println(homeNum);
-            put2json(idKey, "jsonG01Phone", "homeNum", homeNum);
-            //System.out.println("homeNum" + mJsonObject.getString("homeNum"));
-        }
-
-        // 2、手机
-        if (phoneType == Phone.TYPE_MOBILE) {
-            String mobile = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "mobile")));
-            mobile = funRemove(mobile);
-            put2json(idKey, "jsonG01Phone", "mobile", mobile);
-            //System.out.println("mobile" + mJsonObject.getString("mobile"));
-            //System.out.println("mJsonObject : " + mJsonObject.toString());
-        }
-
-        // 3、单位电话
-        if (phoneType == Phone.TYPE_WORK) {
-            String jobNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "workNum")));
-            jobNum = funRemove(jobNum);
-            put2json(idKey, "jsonG01Phone", "workNum", jobNum);
-            //System.out.println("mJsonObject : " + mJsonObject.toString());
-        }
-
-        // 4、单位传真
-        if (phoneType == Phone.TYPE_FAX_WORK) {
-            String workFax = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "workFax")));
-            put2json(idKey, "jsonG01Phone", "workFax", workFax);
-        }
-
-        // 5、住宅传真
-        if (phoneType == Phone.TYPE_FAX_HOME) {
-            String homeFax = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeFax")));
-            put2json(idKey, "jsonG01Phone", "homeFax", homeFax);
-        }
-
-        // 6、寻呼机
-        if (phoneType == Phone.TYPE_PAGER) {
-            String pager = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "pager")));
-            put2json(idKey, "jsonG01Phone", "pager", pager);
-        }
-
-        // 7、Other电话
-        if (phoneType == Phone.TYPE_OTHER) {
-            String otherNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "otherNum")));
-            otherNum = funRemove(otherNum);
-            //System.out.println(otherNum);
-            put2json(idKey, "jsonG01Phone", "otherNum", otherNum);
-            //System.out.println("otherNum" + mJsonObject.getString("otherNum"));
-        }
-
-        // 8、回拨号码
-        if (phoneType == Phone.TYPE_CALLBACK) {
-            String quickNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "callbackNum")));
-            put2json(idKey, "jsonG01Phone", "callbackNum", quickNum);
-        }
-
-        // 9、车载电话
-        if (phoneType == Phone.TYPE_CAR) {
-            String carNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "carNum")));
-            put2json(idKey, "jsonG01Phone", "carNum", carNum);
-        }
-
-        // 10、公司总机
-        if (phoneType == Phone.TYPE_COMPANY_MAIN) {
-            String jobTel = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "compMainTel")));
-            put2json(idKey, "jsonG01Phone", "compMainTel", jobTel);
-        }
-
-        // 11、ISDN
-        if (phoneType == Phone.TYPE_ISDN) {
-            String isdn = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "isdn")));
-            put2json(idKey, "jsonG01Phone", "isdn", isdn);
-        }
-
-        // 12、总机
-        if (phoneType == Phone.TYPE_MAIN) {
-            String tel = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "mainTel")));
-            put2json(idKey, "jsonG01Phone", "mainTel", tel);
-        }
-
-        // 13、Other传真
-        if (phoneType == Phone.TYPE_OTHER_FAX ) {
-            String homeFax = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "otherFax")));
-            put2json(idKey, "jsonG01Phone", "otherFax", homeFax);
-        }
-
-        // 14、无线装置
-        if (phoneType == Phone.TYPE_RADIO) {
-            String wirelessDev = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "wirelessDev")));
-            put2json(idKey, "jsonG01Phone", "wirelessDev", wirelessDev);
-        }
-
-        // 15、电报
-        if (phoneType == Phone.TYPE_TELEX) {
-            String telegram = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "telegram")));
-            put2json(idKey, "jsonG01Phone", "telegram", telegram);
-        }
-
-        // 16、TTY_TDD
-        if (phoneType == Phone.TYPE_TTY_TDD) {
-            String tty_tdd = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "tty_tdd")));
-            put2json(idKey, "jsonG01Phone", "tty_tdd", tty_tdd);
-        }
-
-        // 17、单位手机
-        if (phoneType == Phone.TYPE_WORK_MOBILE) {
-            String jobMobile = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "workMobile")));
-            jobMobile = funRemove(jobMobile);
-            put2json(idKey, "jsonG01Phone", "workMobile", jobMobile);
-        }
-
-        // 18、单位寻呼机
-        if (phoneType == Phone.TYPE_WORK_PAGER) {
-            String jobPager = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "workPager")));
-            put2json(idKey, "jsonG01Phone", "workPager", jobPager);
-        }
-
-        // 19、助理
-        if (phoneType == Phone.TYPE_ASSISTANT) {
-            String assistantNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "assistantNum")));
-            put2json(idKey, "jsonG01Phone", "assistantNum", assistantNum);
-        }
-
-        // 20、彩信
-        if (phoneType == Phone.TYPE_MMS) {
-            String mms = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "mms")));
-            put2json(idKey, "jsonG01Phone", "mms", mms);
-        }
-    }
-
-    //m_contactHeader.jsonG02Email，查找Email地址
-    private void dumpJsonG02Email(String idKey, Cursor cursor) {
-        //if (Email.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出邮件类型
-        int emailType = cursor.getInt(cursor.getColumnIndex(Email.TYPE));
-
-        if (emailType == Email.TYPE_HOME) {         // 住宅邮件地址，TYPE_HOME = 1;
-            String homeEmail = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG02Email", "homeEmail")));
-            put2json(idKey, "jsonG02Email", "homeEmail", homeEmail);
-        }
-        else if (emailType == Email.TYPE_WORK) {    // 单位邮件地址，TYPE_WORK = 2;
-            String jobEmail = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG02Email", "workEmail")));
-            put2json(idKey, "jsonG02Email", "workEmail", jobEmail);
-        }
-        else if (emailType == Email.TYPE_OTHER) {    // 单位邮件地址，TYPE_OTHER = 3;
-            String jobEmail = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG02Email", "otherEmail")));
-            put2json(idKey, "jsonG02Email", "otherEmail", jobEmail);
-        }
-        else if (emailType == Email.TYPE_MOBILE) {  // 手机邮件地址，TYPE_MOBILE = 4;
-            String mobileEmail = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG02Email", "mobileEmail")));
-            put2json(idKey, "jsonG02Email", "mobileEmail", mobileEmail);
-        }
-    }
-
-    //m_contactHeader.jsonG03Event，查找Event地址
-    private void dumpJsonG03Event(String idKey, Cursor cursor) {
-        //if (Event.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出时间类型
-        int eventType = cursor.getInt(cursor.getColumnIndex(Event.TYPE));
-
-        // 周年纪念日，TYPE_ANNIVERSARY = 1;
-        if (eventType == Event.TYPE_ANNIVERSARY) {
-            String anniversary = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG03Event", "anniversary")));
-            put2json(idKey, "jsonG03Event", "anniversary", anniversary);
-        }
-        // 其他日子，TYPE_OTHER = 2;
-        else if (eventType == Event.TYPE_OTHER) {
-            String otherday = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG03Event", "otherday")));
-            put2json(idKey, "jsonG03Event", "otherday", otherday);
-        }
-        // 生日，TYPE_BIRTHDAY = 3;
-        else if (eventType == Event.TYPE_BIRTHDAY) {
-            String birthday = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG03Event", "birthday")));
-            put2json(idKey, "jsonG03Event", "birthday", birthday);
-        }
-    }
-
-    //m_contactHeader.jsonG04Im，即时消息
-    private void dumpJsonG04Im(String idKey, Cursor cursor) {
-        //if (Im.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出即时消息类型
-        int protocal = cursor.getInt(cursor.getColumnIndex(Im.PROTOCOL));
-
-        if (Im.TYPE_HOME == protocal) {
-            String homeMsg = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "homeMsg")));
-            put2json(idKey, "jsonG04Im", "homeMsg", homeMsg);
-        }
-        else if (Im.TYPE_WORK == protocal) {
-            String workMsg = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "workMsg")));
-            put2json(idKey, "jsonG04Im", "workMsg", workMsg);
-        }
-        else if (Im.TYPE_OTHER == protocal) {
-            String otherMsg = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "otherMsg")));
-            put2json(idKey, "jsonG04Im", "otherMsg", otherMsg);
-        }
-        else if (Im.PROTOCOL_CUSTOM == protocal) {
-            String customIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "customIm")));
-            put2json(idKey, "jsonG04Im", "customIm", customIm);
-        }
-        else if (Im.PROTOCOL_AIM == protocal) {
-            String aimIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "aimIm")));
-            put2json(idKey, "jsonG04Im", "aimIm", aimIm);
-        }
-        else if (Im.PROTOCOL_MSN == protocal) {
-            String msnIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "msnIm")));
-            put2json(idKey, "jsonG04Im", "msnIm", msnIm);
-        }
-        else if (Im.PROTOCOL_YAHOO == protocal) {
-            String yahooIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "yahooIm")));
-            put2json(idKey, "jsonG04Im", "yahooIm", yahooIm);
-        }
-        else if (Im.PROTOCOL_SKYPE == protocal) {
-            String skypeIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "skypeIm")));
-            put2json(idKey, "jsonG04Im", "skypeIm", skypeIm);
-        }
-        else if (Im.PROTOCOL_QQ == protocal) {
-            String qqIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "qqIm")));
-            put2json(idKey, "jsonG04Im", "qqIm", qqIm);
-        }
-        else if (Im.PROTOCOL_GOOGLE_TALK == protocal) {
-            String googleTalkIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "googleTalkIm")));
-            put2json(idKey, "jsonG04Im", "googleTalkIm", googleTalkIm);
-        }
-        else if (Im.PROTOCOL_ICQ == protocal) {
-            String icqIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "icqIm")));
-            put2json(idKey, "jsonG04Im", "icqIm", icqIm);
-        }
-        else if (Im.PROTOCOL_JABBER == protocal) {
-            String jabberIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "jabberIm")));
-            put2json(idKey, "jsonG04Im", "jabberIm", jabberIm);
-        }
-        else if (Im.PROTOCOL_NETMEETING == protocal) {
-            String netmeetingIm = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG04Im", "netmeetingIm")));
-            put2json(idKey, "jsonG04Im", "netmeetingIm", netmeetingIm);
-        }
-    }
-
-    //m_contactHeader.jsonG05Remark，获取备注信息
-    private void dumpJsonG05Remark(String idKey, Cursor cursor) {
-        //if (Note.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        String remark = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG05Remark", "remark")));
-        put2json(idKey, "jsonG05Remark", "remark", remark);
-    }
-
-    //m_contactHeader.jsonG06NickName，获取昵称信息
-    private void dumpJsonG06NickName(String idKey, Cursor cursor) {
-        //if (Nickname.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出昵称类型
-        int nickType = cursor.getInt(cursor.getColumnIndex(Nickname.NAME));
-
-        if (Nickname.TYPE_DEFAULT == nickType) {
-            String defaultNickName = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG06NickName", "defaultNickName")));
-            put2json(idKey, "jsonG06NickName", "defaultNickName", defaultNickName);
-        }
-        else if (Nickname.TYPE_OTHER_NAME == nickType) {
-            String otherNickName = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG06NickName", "otherNickName")));
-            put2json(idKey, "jsonG06NickName", "otherNickName", otherNickName);
-        }
-        else if (Nickname.TYPE_MAIDEN_NAME == nickType) {  // /** @TYPE_MAINDEN_NAME deprecated Use TYPE_MAIDEN_NAME instead. */
-            String maindenNickName = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG06NickName", "maindenNickName")));
-            put2json(idKey, "jsonG06NickName", "maindenNickName", maindenNickName);
-        }
-        else if (Nickname.TYPE_SHORT_NAME == nickType) {
-            String shortNickName = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG06NickName", "shortNickName")));
-            put2json(idKey, "jsonG06NickName", "shortNickName", shortNickName);
-        }
-        else if (Nickname.TYPE_INITIALS == nickType) {
-            String initialsNickName = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG06NickName", "initialsNickName")));
-            put2json(idKey, "jsonG06NickName", "initialsNickName", initialsNickName);
-        }
-    }
-
-
-    //m_contactHeader.jsonG07OrgType，获取组织信息
-    private void dumpJsonG07OrgType(String idKey, Cursor cursor) {
-        //if (Organization.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出组织类型
-        int orgType = cursor.getInt(cursor.getColumnIndex(Organization.TYPE));
-
-        try {
-            //m_contactHeader.jsonG07_00WorkOrgType，单位组织信息，TYPE_WORK = 1;
-            //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-            if (orgType == Organization.TYPE_WORK) {
-                Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG07OrgType").getJSONObject("jsonG07_00WorkOrgType").keys();
-                while (it.hasNext()) {
-                    String key2 = it.next();
-                    String str = getColumnName("jsonG07OrgType", "jsonG07_00WorkOrgType", key2);
-                    put2json(idKey, "jsonG07OrgType", "jsonG07_00WorkOrgType", key2, cursor.getString(cursor.getColumnIndex(str)));
-                }
-            }
-            //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-            //m_contactHeader.jsonG07_01OtherOrgType，其他组织信息，TYPE_OTHER = 2;
-            else if (orgType == Organization.TYPE_OTHER) {
-                Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG07OrgType").getJSONObject("jsonG07_01OtherOrgType").keys();
-                while (it.hasNext()) {
-                    String key2 = it.next();
-                    String str = getColumnName("jsonG07OrgType", "jsonG07_01OtherOrgType", key2);
-                    put2json(idKey, "jsonG07OrgType", "jsonG07_01OtherOrgType", key2, cursor.getString(cursor.getColumnIndex(str)));
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //m_contactHeader.jsonG08WebType，获取网站信息
-    private void dumpJsonG08WebType(String idKey, Cursor cursor) {
-        //if (Website.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出组织类型
-        int webType = cursor.getInt(cursor.getColumnIndex(Website.TYPE));
-
-        // 主页，TYPE_HOMEPAGE = 1;
-        if (webType == Website.TYPE_CUSTOM) {
-            String homepage = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "homepage")));
-            put2json(idKey, "jsonG08WebType", "homepage", homepage);
-        }
-        // 博客，TYPE_BLOG = 2;
-        else if (webType == Website.TYPE_BLOG) {
-            String blog = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "blog")));
-            put2json(idKey, "jsonG08WebType", "blog", blog);
-        }
-        // 个人主页，TYPE_PROFILE = 3;
-        else if (webType == Website.TYPE_HOMEPAGE) {
-            String profile = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "profile")));
-            put2json(idKey, "jsonG08WebType", "profile", profile);
-        }
-        // 家庭主页，TYPE_HOME = 4;
-        else if (webType == Website.TYPE_HOMEPAGE) {
-            String home = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "home")));
-            put2json(idKey, "jsonG08WebType", "home", home);
-        }
-        // 工作主页，TYPE_WORK = 5;
-        else if (webType == Website.TYPE_WORK) {
-            String workPage = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "workPage")));
-            put2json(idKey, "jsonG08WebType", "workPage", workPage);
-        }
-        // ftp主页，TYPE_FTP = 6;
-        else if (webType == Website.TYPE_WORK) {
-            String ftpPage = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "ftpPage")));
-            put2json(idKey, "jsonG08WebType", "ftpPage", ftpPage);
-        }
-        // 其他主页，TYPE_OTHER = 7;
-        else if (webType == Website.TYPE_WORK) {
-            String otherPage = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG08WebType", "otherPage")));
-            put2json(idKey, "jsonG08WebType", "otherPage", otherPage);
-        }
-    }
-
-    //m_contactHeader.jsonG09PostalType，查找通讯地址
-    private void dumpJsonG09PostalType(String idKey, Cursor cursor) {
-        //if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimetype)) {
-        // 取出通讯地址类型
-        int postalType = cursor.getInt(cursor.getColumnIndex(StructuredPostal.TYPE));
-
-        try {
-            //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-            //m_contactHeader.jsonG09_00WorkPostal，单位通讯地址，TYPE_HOME = 1;
-            if (postalType == StructuredPostal.TYPE_WORK) {
-                Iterator<String> it = null;
-                it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG09PostalType").getJSONObject("jsonG09_00WorkPostal").keys();
-                while (it.hasNext()) {
-                    String key2 = it.next();
-                    String str = getColumnName("jsonG09PostalType", "jsonG09_00WorkPostal", key2);
-                    put2json(idKey, "jsonG09PostalType", "jsonG09_00WorkPostal", key2, cursor.getString(cursor.getColumnIndex(str)));
-                }
-            }
-
-            //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-            //m_contactHeader.jsonG09_01HomePostal，住宅通讯地址，TYPE_WORK = 2;
-            if (postalType == StructuredPostal.TYPE_HOME) {
-                //E/ContactOutputTool: Error in outputContacts No value for m_contactHeader.jsonG09_01HomePostal
-                //JSONObject遍历
-                Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG09PostalType").getJSONObject("jsonG09_01HomePostal").keys();
-                while (it.hasNext()) {
-                    String key2 = it.next();
-                    String str = getColumnName("jsonG09PostalType", "jsonG09_01HomePostal", key2);
-                    put2json(idKey, "jsonG09PostalType", "jsonG09_01HomePostal", key2, cursor.getString(cursor.getColumnIndex(str)));
-                }
-            }
-
-            //处理第二类型有5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
-            //m_contactHeader.jsonG09_02OtherPostal，其他通讯地址，TYPE_OTHER = 3;
-            if (postalType == StructuredPostal.TYPE_OTHER) {
-                Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject("jsonG09PostalType").getJSONObject("jsonG09_02OtherPostal").keys();
-                while (it.hasNext()) {
-                    String key2 = it.next();
-                    String str = getColumnName("jsonG09PostalType", "jsonG09_02OtherPostal", key2);
-                    put2json(idKey, "jsonG09PostalType", "jsonG09_02OtherPostal", key2, cursor.getString(cursor.getColumnIndex(str)));
-                }
-            }
+            n = java.lang.Math.max(n, Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second")));
+            m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).put("__second", String.valueOf(n));
         } catch (JSONException e) {
             e.printStackTrace();
         }

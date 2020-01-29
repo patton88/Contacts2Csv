@@ -22,7 +22,7 @@ import android.util.Log;
 import android.util.Pair;
 
 public class ContactInsert {
-    private final String m_sTAG = "ContactInsert";
+    private final String m_sTAG = getClass().getSimpleName();
     private int m_iSuccessCount = 0;
     private int m_iFailCount = 0;
     private boolean m_bGbk = false;
@@ -36,7 +36,7 @@ public class ContactInsert {
                 return false;
             }
             Iterator<String> it = arrList.iterator();
-            it.hasNext();   //跳过表头行
+            it.next();   //跳过表头行
             while (it.hasNext()) {
                 String sContact = it.next();
                 if (doInsertToContact(context, sContact)) {
