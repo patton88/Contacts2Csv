@@ -250,11 +250,15 @@ public class ContactOutput {
                 String key1 = it1.next();       //key1: "jsonG00StructName"、"jsonG01Phone"、...
                 Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
                 while (it2.hasNext()) {
-                    String key2 = it2.next();   //key2: "displayName"、"lastName"、..
+                    String key2 = it2.next();   //key2: "displayName"、"lastName"、...
                     Iterator<String> it3 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).keys();
                     String key3 = it3.next();
                     //处理第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
                     if ("__first" == key3) {
+                        // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+                        if ("__mimetype_0" == key2 || "__mimetype_1" == key2) {
+                            continue;
+                        }
                         n = Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second"));
                         Dump2Json(key, key2, n, jsonSource, jsonTarget);
                     } else {
@@ -273,6 +277,10 @@ public class ContactOutput {
                             key4 = it4.next();
                             //处理第二类型有5层结构，mJsonG07、mJsonG09
                             if ("__first" == key4) {
+                                // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
+                                if ("__mimetype_0" == key3 || "__mimetype_1" == key3) {
+                                    continue;
+                                }
                                 n = Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second"));
                                 Dump2Json(key, key3, n, jsonSource, jsonTarget);
                             }
