@@ -260,8 +260,8 @@ public class ContactOutput {
                     String key3 = it3.next();
                     //处理第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
                     if ("__first" == key3) {
-                        // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
-                        if ("__mimetype_0" == key2 || "__mimetype_1" == key2) {
+                        // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                        if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                             continue;
                         }
                         n = Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second"));
@@ -282,8 +282,8 @@ public class ContactOutput {
                             key4 = it4.next();
                             //处理第二类型有5层结构，mJsonG07、mJsonG09
                             if ("__first" == key4) {
-                                // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
-                                if ("__mimetype_0" == key3 || "__mimetype_1" == key3) {
+                                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                                if (key3.length() > "__mimetype_".length() && key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                                     continue;
                                 }
                                 n = Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__second"));
@@ -429,17 +429,19 @@ public class ContactOutput {
 
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
-            it.next();
-            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
             while (it.hasNext()) {
                 String key2 = it.next();                                        // 获得key
+                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                    continue;
+                }
                 String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
                 System.out.println("type2 = " + type2);
                 System.out.println("type = " + type);
 
                 if (type.equals(type2)) {
                     String col = get4layColumnName(key1, key2).trim();          // 获取该类信息的在数据表中的列号(字段号)
-                    col = ContactsContract.CommonDataKinds.Phone.NUMBER;
+                    //col = ContactsContract.CommonDataKinds.Phone.NUMBER;
                     int iCol = cursor.getColumnIndex(col);
                     System.out.println("iCol = " + iCol);   // 全部都是 iCol = -1
                     String data = "";
@@ -464,10 +466,12 @@ public class ContactOutput {
     private void dumpJson4layAll(String idKey, String key1, Cursor cursor) {
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
-            it.next();
-            it.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
             while (it.hasNext()) {
                 String key2 = it.next();                                    // 获得key
+                // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                    continue;
+                }
                 String col = get4layColumnName(key1, key2);                 // 获取该类信息的在数据表中的列号(字段号)
                 String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
                 put2json4lay(idKey, key1, key2, data);                      // 将获取的数据存入 m_jsonContactData
@@ -522,10 +526,12 @@ public class ContactOutput {
             while (it.hasNext()) {
                 String key2 = it.next();
                 Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).keys();
-                it2.next();
-                it2.next();  // 跳过前面两元素 "__mimetype_0"、 "__mimetype_1"
                 while (it2.hasNext()) {
                     String key3 = it2.next();                                   // 获的key
+                    // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
+                    if (key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                        continue;
+                    }
                     String col = get5layColumnName(key1, key2, key3);           // 获取该类信息的在数据表中的列号(字段号)
                     String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
                     put2json5lay(idKey, key1, key2, key3, data);                // 将获取的数据存入 m_jsonContactData
