@@ -149,10 +149,11 @@ public class ContactOutput {
                 //dumpJsonG03Event(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG03Event", cursor, 0);
             }
-            //m_contactHeader.jsonG04Im，即时消息。Im.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG04Im", "__mimetype_0"))) {
+            //m_contactHeader.jsonG04ImType，即时消息。Im.CONTENT_ITEM_TYPE。改为5层结构
+            else if (sMimetype.equals(getMimetype("jsonG04ImType", "__mimetype_0"))) {
                 //dumpJsonG04Im(contactIdKey, cursor);
-                dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
+                //dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
+                dumpJson5lay(contactIdKey, "jsonG04ImType", cursor);
             }
             //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
             else if (sMimetype.equals(getMimetype("jsonG05Remark", "__mimetype_0"))) {
