@@ -421,7 +421,7 @@ public class ContactOutput {
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
     private void dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
-        String kind = getMimetype(key1, "__mimetype_1").trim();
+        String kind = getMimetype(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         //String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
@@ -433,17 +433,19 @@ public class ContactOutput {
                 String key2 = it.next();                                        // 获得key
                 // 跳过前免的元素 "__mimetype_0"、...、"__mimetype_5"
                 if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                    //System.out.println("key2.substring(0, \"__mimetype_\".length()) = " + key2.substring(0, "__mimetype_".length()));
                     continue;
                 }
                 String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
-                System.out.println("type2 = " + type2);
-                System.out.println("type = " + type);
+                //System.out.println("type2 = " + type2);
+                //System.out.println("type = " + type);
 
                 if (type.equals(type2)) {
-                    String col = get4layColumnName(key1, key2).trim();          // 获取该类信息的在数据表中的列号(字段号)
+                    //String col = get4layColumnName(key1, key2).trim();  // 获取该类信息的在数据表中的列号(字段号)
+                    String col = getMimetype(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
                     //col = ContactsContract.CommonDataKinds.Phone.NUMBER;
                     int iCol = cursor.getColumnIndex(col);
-                    System.out.println("iCol = " + iCol);   // 全部都是 iCol = -1
+                    //System.out.println("iCol = " + iCol);   // 全部都是 iCol = -1
                     String data = "";
                     if(iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
