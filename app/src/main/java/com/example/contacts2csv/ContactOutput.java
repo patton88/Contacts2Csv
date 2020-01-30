@@ -16,11 +16,9 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.util.Pair;
 
-import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
 
 //android中获取包名、类名。转载weixin_34405925 最后发布于2018-06-27 11:10:00 阅读数 1005  收藏
@@ -122,7 +120,7 @@ public class ContactOutput {
 
 
             //m_contactHeader.jsonG00StructName，获得通讯录中联系人的名字。StructuredName.CONTENT_ITEM_TYPE
-            if (sMimetype.equals(getMimetype("jsonG00StructName", "__mimetype_0"))) {
+            if (sMimetype.equals(getMimetype4lay("jsonG00StructName", "__mimetype_0"))) {
                 //dumpJsonG00StructName(contactIdKey, "jsonG00StructName", cursor);
 
                 // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如StructuredName.CONTENT_ITEM_TYPE
@@ -131,7 +129,7 @@ public class ContactOutput {
                 dumpJson4layAll(contactIdKey, "jsonG00StructName", cursor);
             }
             //m_contactHeader.jsonG01Phone，获取电话信息，共20项。Phone.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG01Phone", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG01Phone", "__mimetype_0"))) {
                 //dumpJsonG01Phone(contactIdKey, cursor);
 
                 // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
@@ -140,28 +138,28 @@ public class ContactOutput {
                 dumpJson4lay(contactIdKey, "jsonG01Phone", cursor, 1);
             }
             //m_contactHeader.jsonG02Email，查找Email地址。Email.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG02Email", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG02Email", "__mimetype_0"))) {
                 //dumpJsonG02Email(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG02Email", cursor, 0);
             }
             //m_contactHeader.jsonG03Event，查找Event地址。Event.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG03Event", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG03Event", "__mimetype_0"))) {
                 //dumpJsonG03Event(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG03Event", cursor, 0);
             }
             //m_contactHeader.jsonG04ImType，即时消息。Im.CONTENT_ITEM_TYPE。改为5层结构
-            else if (sMimetype.equals(getMimetype("jsonG04ImType", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG04ImType", "__mimetype_0"))) {
                 //dumpJsonG04Im(contactIdKey, cursor);
                 //dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
                 dumpJson5lay(contactIdKey, "jsonG04ImType", cursor);
             }
             //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG05Remark", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG05Remark", "__mimetype_0"))) {
                 //dumpJsonG05Remark(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG05Remark", cursor, 0);
             }
             //m_contactHeader.jsonG06NickName，获取昵称信息。Nickname.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG06NickName", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG06NickName", "__mimetype_0"))) {
                 //dumpJsonG06NickName(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG06NickName", cursor, 0);
             }
@@ -170,7 +168,7 @@ public class ContactOutput {
             //2、第二类型有5层结构，mJsonG07、mJsonG09
             //m_jsonHeader->jsonG07OrgType->jsonG07_00WorkOrgType->workCompany-first
             //m_contactHeader.jsonG07OrgType，获取组织信息。Organization.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG07OrgType", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG07OrgType", "__mimetype_0"))) {
                 //dumpJsonG07OrgType(contactIdKey, cursor);
 
                 // 取出5层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
@@ -179,12 +177,12 @@ public class ContactOutput {
                 dumpJson5lay(contactIdKey, "jsonG07OrgType", cursor);
             }
             //m_contactHeader.jsonG08WebType，获取网站信息。Website.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG08WebType", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG08WebType", "__mimetype_0"))) {
                 //dumpJsonG08WebType(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG08WebType", cursor, 0);
             }
             //m_contactHeader.jsonG09PostalType，查找通讯地址。StructuredPostal.CONTENT_ITEM_TYPE
-            else if (sMimetype.equals(getMimetype("jsonG09PostalType", "__mimetype_0"))) {
+            else if (sMimetype.equals(getMimetype4lay("jsonG09PostalType", "__mimetype_0"))) {
                 //dumpJsonG09PostalType(contactIdKey, cursor);
                 dumpJson5lay(contactIdKey, "jsonG09PostalType", cursor);
             }
@@ -206,12 +204,25 @@ public class ContactOutput {
         return traverseJSON(m_jsonContactData2);
     }
 
-    private String getMimetype(String key1, String key2) {
+    private String getMimetype4lay(String key1, String key2) {
         String mimetype = "";
         try {
             //mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
             //I/System.out: mimetype = {"__first":"vnd.android.cursor.item\/name","__second":"0"}
             mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first").trim();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //System.out.println("mimetype = " + mimetype);
+        return mimetype;
+    }
+
+    private String getMimetype5lay(String key1, String key2, String key3) {
+        String mimetype = "";
+        try {
+            //mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString(key2);
+            //I/System.out: mimetype = {"__first":"vnd.android.cursor.item\/name","__second":"0"}
+            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__first").trim();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -422,7 +433,7 @@ public class ContactOutput {
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
     private void dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
-        String kind = getMimetype(key1, "__mimetype_2").trim();
+        String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
@@ -440,7 +451,7 @@ public class ContactOutput {
                 String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first");
 
                 if (type.equals(type2)) {
-                    String col = getMimetype(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
+                    String col = getMimetype4lay(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
                     int iCol = cursor.getColumnIndex(col);
                     String data = "";
                     if(iCol > -1) {
@@ -520,7 +531,7 @@ public class ContactOutput {
         //key1 : m_contactHeader.jsonG07OrgType，                    或者m_contactHeader.jsonG09PostalType
 
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
-        String kind = getMimetype(key1, "__mimetype_2").trim();
+        String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
@@ -532,16 +543,30 @@ public class ContactOutput {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
                 String key2 = it.next();
+                // 跳过前面的元素 "__mimetype_x"
+                if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                    continue;
+                }
                 Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).keys();
                 while (it2.hasNext()) {
                     String key3 = it2.next();                                   // 获的key
                     // 跳过前面的元素 "__mimetype_x"
-                    if (key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                    if (key3.length() > "__mimetype_".length() && key3.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                         continue;
                     }
-                    String col = get5layColumnName(key1, key2, key3);           // 获取该类信息的在数据表中的列号(字段号)
-                    String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
-                    put2json5lay(idKey, key1, key2, key3, data);                // 将获取的数据存入 m_jsonContactData
+
+                    String type2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__first");
+                    if (type.equals(type2)) {
+                        String col = getMimetype4lay(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
+                        int iCol = cursor.getColumnIndex(col);
+                        String data = "";
+                        if(iCol > -1) {
+                            //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
+                            //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
+                            data = cursor.getString(iCol);          // 获取数据表中的数据
+                        }
+                        put2json5lay(idKey, key1, key2, key3, data);                // 将获取的数据存入 m_jsonContactData
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -552,6 +577,7 @@ public class ContactOutput {
     //处理5层结构应该多一层getJSONObject操作，mJsonG07、mJsonG09
     private String get5layColumnName(String key1, String key2, String key3) {
         try {
+            //W/System.err: org.json.JSONException: Value vnd.android.cursor.item/im at __first of type java.lang.String cannot be converted to JSONObject
             return m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getJSONObject(key3).getString("__first");
         } catch (JSONException e) {
             e.printStackTrace();

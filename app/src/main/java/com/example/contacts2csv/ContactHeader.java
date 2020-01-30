@@ -119,6 +119,15 @@ public class ContactHeader {
             //1.04、jsonG04ImType，即时消息
             JSONObject jsonG04ImType = new JSONObject(new LinkedHashMap());
             m_jsonHeader.put("jsonG04ImType", jsonG04ImType);
+            String arr2JsonG04ImType[][] = {
+                    {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
+                    {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
+                    {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
+                    {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
+                    {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
+                    {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
+            };
+            Arr2Json(arr2JsonG04ImType, jsonG04ImType);
 
             //1.04.00、JsonG04_00HomeImType，家庭即时消息，Im.TYPE_HOME = 1。1个大项，15个小项
             jsonG04ImType.put("JsonG04_00HomeImType", new JSONObject(new LinkedHashMap()));
