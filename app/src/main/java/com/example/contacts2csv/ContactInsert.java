@@ -9,123 +9,151 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import android.net.Uri;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Contacts.Data;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
-import android.util.Pair;
 
 public class ContactInsert {
     private final String m_sTAG = getClass().getSimpleName();
     private int m_iSuccessCount = 0;
     private int m_iFailCount = 0;
-    private boolean m_bGbk = false;
+    private String m_sHead[];
+    private ArrayList<ContactInfo> m_contactArrayList;
 
-    public boolean insertContacts(Context context, String sPath, String sCharset) {
-        init(sCharset);
+    private void init() {
+        m_iSuccessCount = 0;
+        m_iFailCount = 0;
+    }
+
+    public boolean insertContacts(Context context, String sPath) {
+        init();
         try {
-            ArrayList<String> arrList = readFile(sPath);
-            if (arrList == null) {
-                Log.e(m_sTAG, "Error in insertContacts arrayList == null");
-                return false;
-            }
-            Iterator<String> it = arrList.iterator();
-            it.next();   //跳过表头行
-            while (it.hasNext()) {
-                String sContact = it.next();
-                if (doInsertToContact(context, sContact)) {
+            ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
+            m_contactArrayList = handleReadStrings(arrList);    //获得联系人信息存入m_contactArrayList
+
+            for (ContactInfo contact : m_contactArrayList) {
+                if (doInsertContact(context, contact)) {
                     m_iSuccessCount++;
                 }
             }
+
         } catch (Exception e) {
             Log.e(m_sTAG, "Error in insertContacts result : " + e.getMessage());
         }
         return true;
     }
 
-    /**
-     * insert into database
-     */
-    private boolean doInsertToContact(Context context, String sContact) {
-        String sArr[] = sContact.split(",");
-        // 1.判断是否为空
-        Log.d(m_sTAG, "in doInsertToContact contactInfo = null? " + (sArr == null));
-
-
-        for (int i = 0; i < sArr.length; i ++) {
-
-        }
-
-
-        ContactInfo contactInfo = null;
-        // 1.判断是否为空
-        Log.d(m_sTAG, "in doInsertToContact contactInfo = null? " + (contactInfo == null));
+    // insert into database
+    private boolean doInsertContact(Context context, ContactInfo contactInfo) {
+        Log.d(m_sTAG, "in doInsertIntoContact contactInfo = null? " + (contactInfo == null));
         try {
             ContentValues contentValues = new ContentValues();
             Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, contentValues);
             long rowId = ContentUris.parseId(uri);
 
-            String sName = contactInfo.getDisplayName();
-            String sMobileNum = contactInfo.getMobileNum();
-            String sHomeNum = contactInfo.getHomeNum();
-
-            //insert sName
-            if (sName != null) {
+            //insert name
+            if (contactInfo.displayName != null) {
                 contentValues.clear();
                 contentValues.put(Data.RAW_CONTACT_ID, rowId);
                 contentValues.put(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
-                int iIndex = sName.length() / 2;
-                String sDisplayName = sName;
-                //check sName if english sName
-                String sGivenName = null;
-                String sFamilyName = null;
-                if (checkEnglishName(sDisplayName) == false) {
-                    sGivenName = sName.substring(iIndex);
-                    sFamilyName = sName.substring(0, iIndex);
-                } else {
-                    sGivenName = sFamilyName = sDisplayName;
-                }
-                contentValues.put(StructuredName.DISPLAY_NAME, sDisplayName);
-                contentValues.put(StructuredName.GIVEN_NAME, sGivenName);
-                contentValues.put(StructuredName.FAMILY_NAME, sFamilyName);
+                contentValues.put(StructuredName.DISPLAY_NAME, contactInfo.displayName);
+                contentValues.put(StructuredName.GIVEN_NAME, contactInfo.lastName);
+                contentValues.put(StructuredName.FAMILY_NAME, contactInfo.firstName);
                 context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
             }
 
-            if (sMobileNum != null) {
+            if (contactInfo.mobileNum.size() > 0) {
                 //insert phone
-                contentValues.clear();
-                contentValues.put(Data.RAW_CONTACT_ID, rowId);
-                contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
-                contentValues.put(Phone.NUMBER, sMobileNum);
-                contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+                for (String s : contactInfo.mobileNum) {
+                    contentValues.clear();
+                    contentValues.put(Data.RAW_CONTACT_ID, rowId);
+                    contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
+                    contentValues.put(Phone.NUMBER, s);
+                    contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE);
+                    context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+                }
             }
 
-            if (sHomeNum != null) {
-                //insert houseNum
-                contentValues.clear();
-                contentValues.put(Data.RAW_CONTACT_ID, rowId);
-                contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
-                contentValues.put(Phone.NUMBER, sHomeNum);
-                contentValues.put(Phone.TYPE, Phone.TYPE_HOME);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+            if (contactInfo.homeNum.size() > 0) {
+                //insert phone
+                for (String s : contactInfo.homeNum) {
+                    contentValues.clear();
+                    contentValues.put(Data.RAW_CONTACT_ID, rowId);
+                    contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
+                    contentValues.put(Phone.NUMBER, s);
+                    contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE);
+                    context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+                }
             }
+
+            if (contactInfo.Email.size() > 0) {
+                //insert phone
+                for (String s : contactInfo.Email) {
+                    contentValues.clear();
+                    contentValues.put(Data.RAW_CONTACT_ID, rowId);
+                    contentValues.put(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE);
+                    contentValues.put(Email.DATA, s);
+                    contentValues.put(Email.TYPE, Email.TYPE_HOME);
+                    context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+                }
+            }
+
+            if (contactInfo.Im.size() > 0) {
+                //insert phone
+                for (String s : contactInfo.Im) {
+                    contentValues.clear();
+                    contentValues.put(Data.RAW_CONTACT_ID, rowId);
+                    contentValues.put(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
+                    contentValues.put(Im.DATA, s);
+                    contentValues.put(Im.TYPE, Im.TYPE_HOME);
+                    context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
+                }
+            }
+
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private void init(String charset) {
-        m_iSuccessCount = 0;
-        m_iFailCount = 0;
-        m_bGbk = charset.equals(ExtraStrings.CHARSET_GBK);
+    private ArrayList<ContactInfo> handleReadStrings(ArrayList<String> arrayList) {
+        ArrayList<ContactInfo> contactArrayList = new ArrayList<ContactInfo>();
+        Iterator<String> it = arrayList.iterator();
+        m_sHead = (it.next()).split(",");    //得到表头存入 m_sHead
+
+        while (it.hasNext()) {
+            ContactInfo contactInfo = new ContactInfo();
+            String str = it.next();
+            String[] sArr = str.split(",");
+
+            for (int i = 0; i < m_sHead.length; i++) {
+                if (m_sHead[i].equals("displayName")) {
+                    contactInfo.displayName = sArr[i];
+                } else if (m_sHead[i].equals("lastName")) {
+                    contactInfo.lastName = sArr[i];
+                } else if (m_sHead[i].equals("firstName")) {
+                    contactInfo.firstName = sArr[i];
+                } else if (m_sHead[i].indexOf("mobileEmail") == -1 && m_sHead[i].indexOf("mobile") != -1) {
+                    contactInfo.mobileNum.add(sArr[i]);
+                } else if (m_sHead[i].indexOf("Email") != -1) {
+                    contactInfo.Email.add(sArr[i]);
+                } else if (m_sHead[i].indexOf("Im") != -1) {
+                    contactInfo.Im.add(sArr[i]);
+                }
+            }
+
+            contactArrayList.add(contactInfo);
+        }
+        return contactArrayList;
     }
 
     //sPath 是文件的绝对路径
@@ -159,185 +187,6 @@ public class ContactInsert {
         }
 
         return arrList;
-    }
-
-    /**
-     * read txt file
-     */
-    private ArrayList<ContactInfo> readFile0(String sPath) {
-        //read from file
-        ArrayList<String> sArrList = doReadFile(sPath);
-        if (sArrList == null) {
-            Log.e(m_sTAG, "Error in readFile sArrList == null");
-            return null;
-        }
-        ArrayList<ContactInfo> arrListContactInfo = readArrList(sArrList);
-        return arrListContactInfo;
-    }
-
-    private ArrayList<String> doReadFile(String sPath) {
-        FileInputStream inStream = null;
-        ArrayList<String> arrList = new ArrayList<String>();
-        try {
-            byte[] byteArr = new byte[ExtraStrings.BUFFER_SIZE];
-            inStream = new FileInputStream(sPath);
-            while (inStream.read(byteArr) != -1) {
-                int iLen = 0;
-                int iFirst = iLen;
-                for (int i = 0; i < byteArr.length; i++) {
-                    if (byteArr[i] == ExtraStrings.ENTER_CHAR_LINUX) {
-                        iLen = i;
-                        byte[] nowBytes = new byte[iLen - iFirst];
-                        System.arraycopy(byteArr, iFirst, nowBytes, 0, iLen - iFirst);
-                        if (m_bGbk) {
-                            arrList.add(new String(nowBytes, ExtraStrings.CHARSET_GBK).trim());
-                        } else {
-                            arrList.add(new String(nowBytes, ExtraStrings.CHARSET_UTF8).trim());
-                        }
-                        iFirst = i + 1;
-                    }
-                }
-
-            }
-        } catch (Exception e1) {
-            return null;
-        } finally {
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (IOException e1) {
-                    return null;
-                }
-            }
-        }
-        return arrList;
-    }
-
-    private ArrayList<ContactInfo> readArrList(ArrayList<String> arrList) {
-        ArrayList<ContactInfo> arrListContactInfo = new ArrayList<ContactInfo>();
-        Iterator<String> it = arrList.iterator();
-        while (it.hasNext()) {
-            String sInfo = it.next();
-            String[] sArrInfo = sInfo.split(ExtraStrings.SPACE_REGULAR);
-            String sDisplayName = null;
-            String sMobileNum = null;
-            String sHomeNum = null;
-            switch (sArrInfo.length) {
-                case 0:
-                    //do nothing
-                    continue;
-                case 1:
-                    sDisplayName = sArrInfo[0];
-                    break;
-                case 2:
-                    sDisplayName = sArrInfo[0];
-                    if (sArrInfo[1].length() == ExtraStrings.MOBILE_NUM_LENGTH) {
-                        sMobileNum = sArrInfo[1];
-                    } else {
-                        sHomeNum = sArrInfo[1];
-                    }
-                    break;
-                default:
-                    //length >= 3
-                    sDisplayName = sArrInfo[0];
-                    sMobileNum = sArrInfo[1];
-                    sHomeNum = sArrInfo[2];
-            }
-            //check sDisplayName sMobileNum and sHomeNum
-            if (sDisplayName == null || sDisplayName.matches(ExtraStrings.NUM_REGULAR)) {
-                Log.e(m_sTAG, "Error in readArrList sDisplayName == null");
-                m_iFailCount++;
-                continue;
-            }
-            if (sMobileNum != null && (sMobileNum.length() != ExtraStrings.MOBILE_NUM_LENGTH
-                    || !sMobileNum.matches(ExtraStrings.NUM_REGULAR))) {
-                Log.e(m_sTAG, "Error in readArrList sMobileNum is not all num or sMobileNum == null");
-                m_iFailCount++;
-                continue;
-            }
-            if (sHomeNum != null && !(sHomeNum.matches(ExtraStrings.HOME_REGULAR_01) ||
-                    sHomeNum.matches(ExtraStrings.HOME_REGULAR_02))) {
-                Log.e(m_sTAG, "Error in readArrList sHomeNum is not all num");
-                m_iFailCount++;
-                continue;
-            }
-            arrListContactInfo.add(new ContactInfo(sDisplayName, sMobileNum, sHomeNum));
-        }
-        return arrListContactInfo;
-    }
-
-    /**
-     * insert into database
-     */
-    private boolean doInsertToContact0(Context context, ContactInfo contactInfo) {
-        // 1.判断是否为空
-        Log.d(m_sTAG, "in doInsertToContact contactInfo = null? " + (contactInfo == null));
-        try {
-            ContentValues contentValues = new ContentValues();
-            Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, contentValues);
-            long rowId = ContentUris.parseId(uri);
-
-            String sName = contactInfo.getDisplayName();
-            String sMobileNum = contactInfo.getMobileNum();
-            String sHomeNum = contactInfo.getHomeNum();
-
-            //insert sName
-            if (sName != null) {
-                contentValues.clear();
-                contentValues.put(Data.RAW_CONTACT_ID, rowId);
-                contentValues.put(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
-                int iIndex = sName.length() / 2;
-                String sDisplayName = sName;
-                //check sName if english sName
-                String sGivenName = null;
-                String sFamilyName = null;
-                if (checkEnglishName(sDisplayName) == false) {
-                    sGivenName = sName.substring(iIndex);
-                    sFamilyName = sName.substring(0, iIndex);
-                } else {
-                    sGivenName = sFamilyName = sDisplayName;
-                }
-                contentValues.put(StructuredName.DISPLAY_NAME, sDisplayName);
-                contentValues.put(StructuredName.GIVEN_NAME, sGivenName);
-                contentValues.put(StructuredName.FAMILY_NAME, sFamilyName);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
-            }
-
-            if (sMobileNum != null) {
-                //insert phone
-                contentValues.clear();
-                contentValues.put(Data.RAW_CONTACT_ID, rowId);
-                contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
-                contentValues.put(Phone.NUMBER, sMobileNum);
-                contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
-            }
-
-            if (sHomeNum != null) {
-                //insert houseNum
-                contentValues.clear();
-                contentValues.put(Data.RAW_CONTACT_ID, rowId);
-                contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
-                contentValues.put(Phone.NUMBER, sHomeNum);
-                contentValues.put(Phone.TYPE, Phone.TYPE_HOME);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkEnglishName(String sName) {
-        char[] charsName = sName.toCharArray();
-        for (int i = 0; i < charsName.length; i++) {
-            if ((charsName[i] >= 'a' && charsName[i] <= 'z') ||
-                    (charsName[i] >= 'A' && charsName[i] <= 'Z')) {
-                continue;
-            }
-            return false;
-        }
-        return true;
     }
 
     public int getSuccessCount() {

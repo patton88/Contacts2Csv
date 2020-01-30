@@ -1,27 +1,36 @@
 package com.example.contacts2csv;
 
+import java.util.ArrayList;
+
 public class ContactInfo {
-	private String displayName;
-	private String mobileNum;
-	private String homeNum;
-	
-	public ContactInfo(String displayName,String mobileNum,String homeNum) {
-		this.displayName = displayName;
-		this.mobileNum = mobileNum;
-		this.homeNum = homeNum;
-	}
+    public String lastName;
+    public String firstName;
+    public String displayName;
+    public ArrayList<String> mobileNum;
+    public ArrayList<String> homeNum;
+    public ArrayList<String> Email;
+    public ArrayList<String> Im;
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public ContactInfo(
+            String displayName, String lastName, String firstName,
+            ArrayList<String> mobileNum, ArrayList<String> homeNum,
+            ArrayList<String> Email, ArrayList<String> Im) {
+        this.displayName = displayName;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.mobileNum = mobileNum;
+        this.homeNum = homeNum;
+        this.Email = Email;
+        this.Im = Im;
+    }
 
-	public String getMobileNum() {
-		return mobileNum;
-	}
-
-	public String getHomeNum() {
-		return homeNum;
-	}
-	
-	
+    public ContactInfo() {
+        this.displayName = "";
+        this.lastName = "";
+        this.firstName = "";
+        this.mobileNum = new ArrayList<String>();
+        this.homeNum = new ArrayList<String>();
+        this.Email = new ArrayList<String>();
+        this.Im = new ArrayList<String>();
+    }
 }

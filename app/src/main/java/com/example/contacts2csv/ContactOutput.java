@@ -518,6 +518,15 @@ public class ContactOutput {
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
     private void dumpJson5lay(String idKey, String key1, Cursor cursor) {
         //key1 : m_contactHeader.jsonG07OrgType，                    或者m_contactHeader.jsonG09PostalType
+
+        // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
+        String kind = getMimetype(key1, "__mimetype_2").trim();
+        // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
+        //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
+        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+        //String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
+        System.out.println("kind.type = " + kind + "." + type);
+
         try {
             //key2 : jsonG07_00WorkOrgType、jsonG07_01OtherOrgType， 或者jsonG09_00HomePostal、jsonG09_01WorkPostal、jsonG09_02OtherPostal
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();

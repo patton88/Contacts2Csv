@@ -243,7 +243,7 @@ public class MainActivity extends Activity implements OnClickListener {
         }
         //String sCharset = m_rbtnArrOs[0].isChecked() ? ExtraStrings.CHARSET_GBK : ExtraStrings.CHARSET_UTF8;
         String sCharset = ExtraStrings.CHARSET_UTF8;
-        m_threadInsert = new Thread(new InsertRunnable(this, sPath, sCharset));
+        m_threadInsert = new Thread(new InsertRunnable(this, sPath));
         createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE,
                 true, ExtraStrings.DIALOG_TYPE_INSERT);
     }
@@ -267,17 +267,15 @@ public class MainActivity extends Activity implements OnClickListener {
     class InsertRunnable implements Runnable {
         private Context m_context;
         private String m_sPath;
-        private String m_sCharset;
 
-        public InsertRunnable(Context context, String sPath, String sCharset) {
+        public InsertRunnable(Context context, String sPath) {
             m_sPath = sPath;
             m_context = context;
-            m_sCharset = sCharset;
         }
 
         @Override
         public void run() {
-            boolean bResult = m_insert.insertContacts(m_context, m_sPath, m_sCharset);
+            boolean bResult = m_insert.insertContacts(m_context, m_sPath);
             if (bResult) {
                 m_handler.sendEmptyMessage(ExtraStrings.INSERT_SUCCESS);
             } else {
