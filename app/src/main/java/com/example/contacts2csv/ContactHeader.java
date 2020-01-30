@@ -116,22 +116,9 @@ public class ContactHeader {
             };
             Arr2Json(arr2JsonG03Event, m_jsonHeader.getJSONObject("jsonG03Event"));
 
-            //1.04、jsonG04ImType，即时消息
-            JSONObject jsonG04ImType = new JSONObject(new LinkedHashMap());
-            m_jsonHeader.put("jsonG04ImType", jsonG04ImType);
-            String arr2JsonG04ImType[][] = {
-                    {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
-                    {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
-                    {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
-                    {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
-                    {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
-                    {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-            };
-            Arr2Json(arr2JsonG04ImType, jsonG04ImType);
-
-            //1.04.00、JsonG04_00HomeImType，家庭即时消息，Im.TYPE_HOME = 1。1个大项，15个小项
-            jsonG04ImType.put("JsonG04_00HomeImType", new JSONObject(new LinkedHashMap()));
-            String arr2JsonG04_00HomeImType[][] = {
+            //1.04、jsonG04Im，即时消息
+            m_jsonHeader.put("jsonG04Im", new JSONObject(new LinkedHashMap()));
+            String arr2JsonG04Im[][] = {
                     {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
                     {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
                     {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
@@ -139,64 +126,20 @@ public class ContactHeader {
                     {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
                     {"__mimetype_6", String.valueOf(Im.TYPE_HOME)},                 //Im.TYPE_HOME = 1;
-                    {"homeCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
-                    {"homeAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
-                    {"homeMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
-                    {"homeYahooIm", String.valueOf(Im.PROTOCOL_YAHOO)},             //Im.PROTOCOL_YAHOO = 2;
-                    {"homeSkypeIm", String.valueOf(Im.PROTOCOL_SKYPE)},             //Im.PROTOCOL_SKYPE = 3;
-                    {"homeQqIm", String.valueOf(Im.PROTOCOL_QQ)},                   //Im.PROTOCOL_QQ = 4;
-                    {"homeGoogleTalkIm", String.valueOf(Im.PROTOCOL_GOOGLE_TALK)},  //Im.PROTOCOL_GOOGLE_TALK = 5;
-                    {"homeIcqIm", String.valueOf(Im.PROTOCOL_ICQ)},                 //Im.PROTOCOL_ICQ = 6;
-                    {"homeJabberIm", String.valueOf(Im.PROTOCOL_JABBER)},           //Im.PROTOCOL_JABBER = 7;
-                    {"homeNetmeetingIm", String.valueOf(Im.PROTOCOL_NETMEETING)},   //Im.PROTOCOL_NETMEETING = 8;
+                    {"__mimetype_7", String.valueOf(Im.TYPE_WORK)},                 //Im.TYPE_WORK = 2;
+                    {"__mimetype_8", String.valueOf(Im.TYPE_OTHER)},                //Im.TYPE_WORK = 3;
+                    {"CustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
+                    {"AimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
+                    {"MsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
+                    {"YahooIm", String.valueOf(Im.PROTOCOL_YAHOO)},             //Im.PROTOCOL_YAHOO = 2;
+                    {"SkypeIm", String.valueOf(Im.PROTOCOL_SKYPE)},             //Im.PROTOCOL_SKYPE = 3;
+                    {"QqIm", String.valueOf(Im.PROTOCOL_QQ)},                   //Im.PROTOCOL_QQ = 4;
+                    {"GoogleTalkIm", String.valueOf(Im.PROTOCOL_GOOGLE_TALK)},  //Im.PROTOCOL_GOOGLE_TALK = 5;
+                    {"IcqIm", String.valueOf(Im.PROTOCOL_ICQ)},                 //Im.PROTOCOL_ICQ = 6;
+                    {"JabberIm", String.valueOf(Im.PROTOCOL_JABBER)},           //Im.PROTOCOL_JABBER = 7;
+                    {"NetmeetingIm", String.valueOf(Im.PROTOCOL_NETMEETING)},   //Im.PROTOCOL_NETMEETING = 8;
             };
-            Arr2Json(arr2JsonG04_00HomeImType, jsonG04ImType.getJSONObject("JsonG04_00HomeImType"));
-
-            //1.04.01、JsonG04_01WorkImType，家庭即时消息，Im.TYPE_WORK = 2。1个大项，15个小项
-            jsonG04ImType.put("JsonG04_00WorkImType", new JSONObject(new LinkedHashMap()));
-            String arr2JsonG04_01WorkImType[][] = {
-                    {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
-                    {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
-                    {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
-                    {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
-                    {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
-                    {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-                    {"__mimetype_6", String.valueOf(Im.TYPE_WORK)},                 //Im.TYPE_WORK = 2;
-                    {"workCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
-                    {"workAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
-                    {"workMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
-                    {"workYahooIm", String.valueOf(Im.PROTOCOL_YAHOO)},             //Im.PROTOCOL_YAHOO = 2;
-                    {"workSkypeIm", String.valueOf(Im.PROTOCOL_SKYPE)},             //Im.PROTOCOL_SKYPE = 3;
-                    {"workQqIm", String.valueOf(Im.PROTOCOL_QQ)},                   //Im.PROTOCOL_QQ = 4;
-                    {"workGoogleTalkIm", String.valueOf(Im.PROTOCOL_GOOGLE_TALK)},  //Im.PROTOCOL_GOOGLE_TALK = 5;
-                    {"workIcqIm", String.valueOf(Im.PROTOCOL_ICQ)},                 //Im.PROTOCOL_ICQ = 6;
-                    {"workJabberIm", String.valueOf(Im.PROTOCOL_JABBER)},           //Im.PROTOCOL_JABBER = 7;
-                    {"workNetmeetingIm", String.valueOf(Im.PROTOCOL_NETMEETING)},   //Im.PROTOCOL_NETMEETING = 8;
-            };
-            Arr2Json(arr2JsonG04_01WorkImType, jsonG04ImType.getJSONObject("JsonG04_00WorkImType"));
-
-            //1.04.02、JsonG04_02OtherImType，家庭即时消息，Im.TYPE_OTHER = 3。1个大项，15个小项
-            jsonG04ImType.put("JsonG04_02OtherImType", new JSONObject(new LinkedHashMap()));
-            String arr2JsonG04_02OtherImType[][] = {
-                    {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
-                    {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
-                    {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
-                    {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
-                    {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
-                    {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
-                    {"__mimetype_6", String.valueOf(Im.TYPE_OTHER)},                //Im.TYPE_OTHER = 3;
-                    {"otherCustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
-                    {"otherAimIm", String.valueOf(Im.PROTOCOL_AIM)},                 //Im.PROTOCOL_AIM = 0;
-                    {"otherMsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
-                    {"otherYahooIm", String.valueOf(Im.PROTOCOL_YAHOO)},             //Im.PROTOCOL_YAHOO = 2;
-                    {"otherSkypeIm", String.valueOf(Im.PROTOCOL_SKYPE)},             //Im.PROTOCOL_SKYPE = 3;
-                    {"otherQqIm", String.valueOf(Im.PROTOCOL_QQ)},                   //Im.PROTOCOL_QQ = 4;
-                    {"otherGoogleTalkIm", String.valueOf(Im.PROTOCOL_GOOGLE_TALK)},  //Im.PROTOCOL_GOOGLE_TALK = 5;
-                    {"otherIcqIm", String.valueOf(Im.PROTOCOL_ICQ)},                 //Im.PROTOCOL_ICQ = 6;
-                    {"otherJabberIm", String.valueOf(Im.PROTOCOL_JABBER)},           //Im.PROTOCOL_JABBER = 7;
-                    {"otherNetmeetingIm", String.valueOf(Im.PROTOCOL_NETMEETING)},   //Im.PROTOCOL_NETMEETING = 8;
-            };
-            Arr2Json(arr2JsonG04_02OtherImType, jsonG04ImType.getJSONObject("JsonG04_02OtherImType"));
+            Arr2Json(arr2JsonG04Im, m_jsonHeader.getJSONObject("jsonG04Im"));
 
             //1.05、jsonG05Remark，获取备注信息。1个大项，1个小项
             m_jsonHeader.put("jsonG05Remark", new JSONObject(new LinkedHashMap()));

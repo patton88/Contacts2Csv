@@ -147,11 +147,11 @@ public class ContactOutput {
                 //dumpJsonG03Event(contactIdKey, cursor);
                 dumpJson4lay(contactIdKey, "jsonG03Event", cursor, 0);
             }
-            //m_contactHeader.jsonG04ImType，即时消息。Im.CONTENT_ITEM_TYPE。改为5层结构
-            else if (sMimetype.equals(getMimetype4lay("jsonG04ImType", "__mimetype_0"))) {
+            //m_contactHeader.jsonG04Im，即时消息。Im.CONTENT_ITEM_TYPE
+            else if (sMimetype.equals(getMimetype4lay("jsonG04Im", "__mimetype_0"))) {
                 //dumpJsonG04Im(contactIdKey, cursor);
-                //dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
-                dumpJson5lay(contactIdKey, "jsonG04ImType", cursor);
+                //System.out.println("sMimetype = " + sMimetype);
+                dumpJson4lay(contactIdKey, "jsonG04Im", cursor,0);
             }
             //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
             else if (sMimetype.equals(getMimetype4lay("jsonG05Remark", "__mimetype_0"))) {
@@ -436,6 +436,8 @@ public class ContactOutput {
         String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
+        //"jsonG04Im"
+        System.out.println("kind = " + kind);
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
         //String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
 
