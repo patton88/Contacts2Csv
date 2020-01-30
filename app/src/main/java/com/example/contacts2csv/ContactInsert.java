@@ -20,6 +20,7 @@ import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.RawContacts;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class ContactInsert {
@@ -196,11 +197,17 @@ public class ContactInsert {
                 } else if (m_sHead[j].equals("firstName")) {
                     contactInfo.firstName = sArr[j];
                 } else if ((m_sHead[j].indexOf("mobileEmail") == -1) && (m_sHead[j].indexOf("mobile") != -1)) {
-                    contactInfo.mobileNum.add(sArr[j]);
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.mobileNum.add(sArr[j]);
+                    }
                 } else if (m_sHead[j].indexOf("Email") != -1) {
-                    contactInfo.Email.add(sArr[j]);
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.Email.add(sArr[j]);
+                    }
                 } else if (m_sHead[j].indexOf("Im") != -1) {
-                    contactInfo.Im.add(sArr[j]);
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.Im.add(sArr[j]);
+                    }
                 }
             }
 
