@@ -34,7 +34,7 @@ public class ContactInsertDo {
     */
 
     public String doInsertContact(Context context, String sContact) {
-        String sArr[] = sContact.split(",");
+        String sArr[] = sContact.split(",", -1); //添加后面的参数，保证结尾空字符串不会被丢弃。
         // 1.判断是否为空
         Log.d(m_sTAG, "in doInsertToContact contactInfo = null? " + (sArr == null));
 

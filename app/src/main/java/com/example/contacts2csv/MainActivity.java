@@ -34,6 +34,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button m_btnHelp;
     private Button m_btnInsert;
     private Button m_btnOutput;
+    private Button m_btnDelAll;
     private TextView m_tvResult;
     private TextView m_tvOs;
     private RadioButton[] m_rbtnArrOs = new RadioButton[2];
@@ -45,6 +46,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     public ContactOutput m_output;      //导出联系人
     public ContactInsert m_insert;      //导入联系人
+    public ContactRemove m_remove;      //删除联系人
 
     //线程消息处理对象
     private Handler m_handler = new Handler() {
@@ -110,6 +112,7 @@ public class MainActivity extends Activity implements OnClickListener {
         m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
         m_output = new ContactOutput();      //导出联系人
         m_insert = new ContactInsert();      //导入联系人
+        m_remove = new ContactRemove();      //删除联系人
 
         m_etFilePath = (EditText) findViewById(R.id.et_filepath);
         m_btnHelp = (Button) findViewById(R.id.btn_help);
@@ -118,6 +121,8 @@ public class MainActivity extends Activity implements OnClickListener {
         m_btnInsert.setOnClickListener(this);
         m_btnOutput = (Button) findViewById(R.id.btn_output);
         m_btnOutput.setOnClickListener(this);
+        m_btnDelAll = (Button) findViewById(R.id.btn_del_all);
+        m_btnDelAll.setOnClickListener(this);
         m_tvResult = (TextView) findViewById(R.id.tv_result);
         m_tvOs = (TextView) findViewById(R.id.tv_os);
         m_rbtnArrOs[0] = (RadioButton) findViewById(R.id.rbtn_win);
@@ -157,6 +162,9 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
             case R.id.btn_output:
                 outputContact();
+                break;
+            case R.id.btn_del_all:
+                m_remove.delAllContacts();
                 break;
             case R.id.rbtn_insert:
                 setInsertWidgetEnabled(true);
@@ -225,6 +233,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     //导入联系人
     private void insertContact() {
+        //int n = 1;
+        //System.out.println("insertContact_" + n++);
         String sPath = m_etFilePath.getText().toString();
         if (TextUtils.isEmpty(sPath)) {
             m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
@@ -241,11 +251,10 @@ public class MainActivity extends Activity implements OnClickListener {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        //String sCharset = m_rbtnArrOs[0].isChecked() ? ExtraStrings.CHARSET_GBK : ExtraStrings.CHARSET_UTF8;
-        String sCharset = ExtraStrings.CHARSET_UTF8;
         m_threadInsert = new Thread(new InsertRunnable(this, sPath));
         createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE,
                 true, ExtraStrings.DIALOG_TYPE_INSERT);
+        //System.out.println("insertContact_" + n++);
     }
 
     //处理导入联系人线程的代码 Begin
@@ -254,6 +263,7 @@ public class MainActivity extends Activity implements OnClickListener {
         m_tvResult.setText(ExtraStrings.STATUS_INSERTING);
         if (m_threadInsert != null) {
             m_threadInsert.start();
+            //System.out.println("doInsertContact");
         }
     }
 
@@ -285,7 +295,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
     //处理导入联系人线程的代码 End
 
-    //导出联系人
+    // 导出联系人
     private void outputContact() {
         //File file = new File(ExtraStrings.OUTPUT_PATH);
         File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);

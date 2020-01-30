@@ -157,4 +157,15 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_output"
         app:layout_constraintVertical_bias="0.7" />
 
+    <Button
+        android:id="@+id/btn_del_all"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="96dp"
+        android:layout_marginLeft="96dp"
+        android:layout_marginTop="12dp"
+        android:text="删除所有联系人"
+        app:layout_constraintStart_toEndOf="@+id/btn_insert"
+        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_os" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
