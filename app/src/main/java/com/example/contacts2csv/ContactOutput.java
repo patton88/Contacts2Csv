@@ -18,6 +18,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 import android.util.Pair;
+import android.provider.ContactsContract.CommonDataKinds.Im;
 
 import static com.example.contacts2csv.MainActivity.m_MA;
 
@@ -151,7 +152,7 @@ public class ContactOutput {
             else if (sMimetype.equals(getMimetype4lay("jsonG04Im", "__mimetype_0"))) {
                 //dumpJsonG04Im(contactIdKey, cursor);
                 //System.out.println("sMimetype = " + sMimetype);
-                dumpJson4lay(contactIdKey, "jsonG04Im", cursor,0);
+                dumpJson4layIm(contactIdKey, "jsonG04Im", cursor, 0);
             }
             //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
             else if (sMimetype.equals(getMimetype4lay("jsonG05Remark", "__mimetype_0"))) {
@@ -431,6 +432,49 @@ public class ContactOutput {
 
     // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
+    private void dumpJson4layIm(String idKey, String key1, Cursor cursor, int iPhone) {
+        // 获取即时通讯消息
+        int protocal = cursor.getInt(cursor.getColumnIndex(Im.PROTOCOL));
+        if (Im.TYPE_CUSTOM == protocal) {
+            String workMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //jsonObject.put("workMsg", workMsg);
+            put2json4lay(idKey, key1, getKey(String.valueOf(Im.TYPE_CUSTOM), key1), workMsg); // 将获取的数据存入 m_jsonContactData
+        } else if (Im.PROTOCOL_MSN == protocal) {
+            String workMsn = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //jsonObject.put("workMsg", workMsn);
+            put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_MSN), key1), workMsn); // 将获取的数据存入 m_jsonContactData
+        }
+        if (Im.PROTOCOL_QQ == protocal) {
+            String instantsMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //jsonObject.put("instantsMsg", instantsMsg);
+            put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_QQ), key1), instantsMsg); // 将获取的数据存入 m_jsonContactData
+        }
+    }
+
+    //JSONObject中根据value获取key值，必须value值不重复
+    //原创将心666666于2014-10-01，https://blog.csdn.net/jiangxindu1/article/details/39720481
+    public String getKey(String val, String key1)
+    {
+        String key = "";
+        try {
+            JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
+            Iterator<String> it = json.keys();
+            while (it.hasNext()) {
+                key = it.next();
+                if(json.getString(key).equals(val)){
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return key;
+    }
+
+
+    // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
     private void dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
         String kind = getMimetype4lay(key1, "__mimetype_2").trim();
@@ -456,7 +500,7 @@ public class ContactOutput {
                     String col = getMimetype4lay(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
                     int iCol = cursor.getColumnIndex(col);
                     String data = "";
-                    if(iCol > -1) {
+                    if (iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
                         //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
                         data = cursor.getString(iCol);          // 获取数据表中的数据
@@ -562,7 +606,7 @@ public class ContactOutput {
                         String col = getMimetype4lay(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
                         int iCol = cursor.getColumnIndex(col);
                         String data = "";
-                        if(iCol > -1) {
+                        if (iCol > -1) {
                             //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
                             //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
                             data = cursor.getString(iCol);          // 获取数据表中的数据
