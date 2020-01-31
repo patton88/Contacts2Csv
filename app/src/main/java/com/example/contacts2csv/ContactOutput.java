@@ -575,7 +575,7 @@ public class ContactOutput {
 
     // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
-    private void dumpJson4layIm(String idKey, String key1, Cursor cursor, int iPhone) {
+    private void dumpJson4layIm4(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
         String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
@@ -602,6 +602,38 @@ public class ContactOutput {
             //String instantsMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
             //put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_QQ), key1), im); // 将获取的数据存入 m_jsonContactData
             put2json4lay(idKey, key1, "QqIm", im); // 将获取的数据存入 m_jsonContactData
+        }
+    }
+
+    // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
+    private void dumpJson4layIm(String idKey, String key1, Cursor cursor, int iPhone) {
+        // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
+        String kind = getMimetype4lay(key1, "__mimetype_2").trim();
+        // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
+        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+
+        // 获取即时通讯消息
+        String col = getMimetype4lay(key1, "__mimetype_1").trim();// 获取该类信息的在数据表中的列号(字段号)，Phone.DATA等
+        //int iCol = cursor.getColumnIndex(col);
+        String data = cursor.getString(cursor.getColumnIndex(col));          // 获取数据表中的数据
+
+        //String im = cursor.getString(cursor.getColumnIndex(Im.DATA));
+        //if (type.equals(String.valueOf(Im.TYPE_CUSTOM))) {
+        if (type.equals(getVal2(key1, "CustomTypeIm"))) {
+            //String workMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //put2json4lay(idKey, key1, getKey(String.valueOf(Im.TYPE_CUSTOM), key1), im); // 将获取的数据存入 m_jsonContactData
+            put2json4lay(idKey, key1, "CustomTypeIm", data); // 将获取的数据存入 m_jsonContactData
+            //} else if (type.equals(String.valueOf(Im.PROTOCOL_MSN))) {
+        } else if (type.equals(getVal2(key1, "MsnIm"))) {
+            //String workMsn = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_MSN), key1), im); // 将获取的数据存入 m_jsonContactData
+            put2json4lay(idKey, key1, "MsnIm", data); // 将获取的数据存入 m_jsonContactData
+            //} else if (type.equals(String.valueOf(Im.PROTOCOL_QQ))) {
+        } else if (type.equals(getVal2(key1, "QqIm"))) {
+            //String instantsMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
+            //put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_QQ), key1), im); // 将获取的数据存入 m_jsonContactData
+            put2json4lay(idKey, key1, "QqIm", data); // 将获取的数据存入 m_jsonContactData
         }
     }
 
