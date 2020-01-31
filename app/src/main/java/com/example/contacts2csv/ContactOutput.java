@@ -152,7 +152,8 @@ public class ContactOutput {
             else if (sMimetype.equals(getMimetype4lay("jsonG04Im", "__mimetype_0"))) {
                 //dumpJsonG04Im(contactIdKey, cursor);
                 //System.out.println("sMimetype = " + sMimetype);
-                dumpJson4layIm(contactIdKey, "jsonG04Im", cursor, 0);
+                //dumpJson4layIm(contactIdKey, "jsonG04Im", cursor, 0);
+                dumpJson4lay(contactIdKey, "jsonG04Im", cursor, 0);
             }
             //m_contactHeader.jsonG05Remark，获取备注信息。Note.CONTENT_ITEM_TYPE
             else if (sMimetype.equals(getMimetype4lay("jsonG05Remark", "__mimetype_0"))) {
