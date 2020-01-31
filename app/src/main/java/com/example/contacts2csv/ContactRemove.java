@@ -21,12 +21,12 @@ public class ContactRemove {
             try {
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
                 Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
-                System.out.println("The uri is " + uri.toString());
+                //System.out.println("The uri is " + uri.toString());
                 resolver.delete(uri, null, null);    //删除所有的联系人
                 success++;
             } catch (Exception e) {
                 fail++;
-                System.out.println(e.getStackTrace());
+                //System.out.println(e.getStackTrace());
             }
         }
         Toast.makeText(MainActivity.m_MA, "成功删除 " + success + " 记录，" +

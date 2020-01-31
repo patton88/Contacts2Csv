@@ -66,7 +66,7 @@ public class ContactHeader {
                     {"__mimetype_1", Phone.NUMBER},                             //Phone.NUMBER = "data1";
                     {"__mimetype_2", Phone.TYPE},                               //Phone.TYPE = "data2";
                     {"__mimetype_3", Phone.LABEL},                              //Phone.TYPE = "data3";
-                    {"homeNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
+                    {"telNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
                     {"mobile", String.valueOf(Phone.TYPE_MOBILE)},              //Phone.TYPE_MOBILE = 2;
                     {"workNum", String.valueOf(Phone.TYPE_WORK)},               //Phone.TYPE_WORK = 3;
                     {"workFax", String.valueOf(Phone.TYPE_FAX_WORK)},           //Phone.TYPE_FAX_WORK = 4;
@@ -103,7 +103,7 @@ public class ContactHeader {
             };
             Arr2Json(arr2JsonG02Email, m_jsonHeader.getJSONObject("jsonG02Email"));
 
-            //1.03、jsonG03Event，查找Event地址。1个大项，3个小项
+            //1.03、jsonG03Event，查找Event重要事件、纪念日。1个大项，3个小项
             m_jsonHeader.put("jsonG03Event", new JSONObject(new LinkedHashMap()));
             String arr2JsonG03Event[][] = {
                     {"__mimetype_0", Event.CONTENT_ITEM_TYPE},              //Event.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";

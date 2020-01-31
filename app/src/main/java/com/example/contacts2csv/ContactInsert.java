@@ -6,8 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 import android.net.Uri;
 import android.content.ContentUris;
@@ -93,9 +91,9 @@ public class ContactInsert {
                 }
             }
 
-            if (contactInfo.homeNum.size() > 0) {
+            if (contactInfo.telNum.size() > 0) {
                 //insert phone
-                for (String data : contactInfo.homeNum) {
+                for (String data : contactInfo.telNum) {
                     contentValues.clear();
                     contentValues.put(Data.RAW_CONTACT_ID, rowId);
                     contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);

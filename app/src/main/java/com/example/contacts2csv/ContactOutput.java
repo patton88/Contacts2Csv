@@ -8,20 +8,26 @@ package com.example.contacts2csv;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 
+import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
+import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
 
 //android中获取包名、类名。转载weixin_34405925 最后发布于2018-06-27 11:10:00 阅读数 1005  收藏
 //LogUtil.i("getPackageName()=" + getPackageName()); //Context类
@@ -55,7 +61,7 @@ public class ContactOutput {
         //混乱无用
         //System.out.println("m_contactHeader.m_lhmapFields : \n" + m_contactHeader.m_lhmapFields.toString());
         //2020-01-28 15:03:43.698 8739-8739/com.example.contacts2csv I/System.out: m_contactHeader.m_lhmapFields :
-        //2020-01-28 15:03:43.698 8739-8739/com.example.contacts2csv I/System.out: {displayName=data1, lastName=data2, firstName=data3, prefix=data4, middleName=data5, suffix=data6, phoneticLastName=data7, phoneticFirstName=data9, phoneticMiddleName=data8, homeNum=data1, mobile=data1, workNum=data1, workFax=data1, homeFax=data1, pager=data1, otherNum=data1, callbackNum=data1, carNum=data1, compMainTel=data1, isdn=data1, mainTel=data1, otherFax=data1, wirelessDev=data1, telegram=data1, tty_tdd=data1, workMobile=data1, workPager=data1, assistantNum=data1, mms=data1, homeEmail=data1, workEmail=data1, otherEmail=data1, mobileEmail=data1, anniversary=data1, otherday=data1, birthday=data1, homeMsg=data1, workMsg=data1, otherMsg=data1, customIm=data1, aimIm=data1, msnIm=data1, yahooIm=data1, skypeIm=data1, qqIm=data1, googleTalkIm=data1, icqIm=data1, jabberIm=data1, netmeetingIm=data1, remark=data1, defaultNickName=data1, otherNickName=data1, maindenNickName=data1, shortNickName=data1, initialsNickName=data1, workCompany=data1, workJobTitle=data4, workDepartment=data5, workJobDescription=data5, workSymbol=data5, workPhoneticName=data5, workOfficeLocation=data5, otherCompany=data1, otherJobTitle=data4, otherDepartment=data5, otherJobDescription=data5, otherSymbol=data5, otherPhoneticName=data5, otherOfficeLocation=data5, homepage=data1, blog=data1, profile=data1, home=data1, workPage=data1, ftpPage=data1, otherPage=data1, workFormattedAddress=data1, workStreet=data4, workBox=data5, workArea=data6, workCity=data7, workState=data8, workZip=data9, workCountry=data10, homeFormattedAddress=data1, homeStreet=data4, homeBox=data5, homeArea=data6, homeCity=data7, homeState=data8, homeZip=data9, homeCountry=data10, otherFormattedAddress=data1, otherStreet=data4, otherBox=data5, otherArea=data6, otherCity=data7, otherState=data8, otherZip=data9, otherCountry=data10}
+        //2020-01-28 15:03:43.698 8739-8739/com.example.contacts2csv I/System.out: {displayName=data1, lastName=data2, firstName=data3, prefix=data4, middleName=data5, suffix=data6, phoneticLastName=data7, phoneticFirstName=data9, phoneticMiddleName=data8, telNum=data1, mobile=data1, workNum=data1, workFax=data1, homeFax=data1, pager=data1, otherNum=data1, callbackNum=data1, carNum=data1, compMainTel=data1, isdn=data1, mainTel=data1, otherFax=data1, wirelessDev=data1, telegram=data1, tty_tdd=data1, workMobile=data1, workPager=data1, assistantNum=data1, mms=data1, homeEmail=data1, workEmail=data1, otherEmail=data1, mobileEmail=data1, anniversary=data1, otherday=data1, birthday=data1, homeMsg=data1, workMsg=data1, otherMsg=data1, customIm=data1, aimIm=data1, msnIm=data1, yahooIm=data1, skypeIm=data1, qqIm=data1, googleTalkIm=data1, icqIm=data1, jabberIm=data1, netmeetingIm=data1, remark=data1, defaultNickName=data1, otherNickName=data1, maindenNickName=data1, shortNickName=data1, initialsNickName=data1, workCompany=data1, workJobTitle=data4, workDepartment=data5, workJobDescription=data5, workSymbol=data5, workPhoneticName=data5, workOfficeLocation=data5, otherCompany=data1, otherJobTitle=data4, otherDepartment=data5, otherJobDescription=data5, otherSymbol=data5, otherPhoneticName=data5, otherOfficeLocation=data5, homepage=data1, blog=data1, profile=data1, home=data1, workPage=data1, ftpPage=data1, otherPage=data1, workFormattedAddress=data1, workStreet=data4, workBox=data5, workArea=data6, workCity=data7, workState=data8, workZip=data9, workCountry=data10, homeFormattedAddress=data1, homeStreet=data4, homeBox=data5, homeArea=data6, homeCity=data7, homeState=data8, homeZip=data9, homeCountry=data10, otherFormattedAddress=data1, otherStreet=data4, otherBox=data5, otherArea=data6, otherCity=data7, otherState=data8, otherZip=data9, otherCountry=data10}
     }
 
     public boolean outputAllContacts(Context context, String sPath) {
@@ -64,7 +70,7 @@ public class ContactOutput {
         return true;
     }
 
-    private void writeFile(String sPath, String str) {
+    public void writeFile(String sPath, String str) {
         try {
             File file = new File(sPath);
             FileWriter writer = new FileWriter(file, false);
@@ -87,6 +93,9 @@ public class ContactOutput {
     */
 
     public String getAllContacts() {
+        // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+        String sPath = m_Fun.GetNewFile(m_sPathDownloads, "AllContactsLog_1.txt", 0).getAbsolutePath();
+
         // 获得通讯录信息 ，URI是ContactsContract.Contacts.CONTENT_URI
         m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         String sMimetype = "";
@@ -102,6 +111,8 @@ public class ContactOutput {
         while (cursor.moveToNext()) {
             // 获得通讯录中每个联系人的ID
             iContactId = cursor.getInt(cursor.getColumnIndex(Data.RAW_CONTACT_ID));
+
+            log2file(m_MA.getContentResolver(), String.valueOf(iContactId), sPath);//将联系人的所有字段及其值输出到文件中
 
             //保证查询不同contactId的记录时时进行处理，相同contactId记录不处理
             if (iOldId != iContactId) {
@@ -396,7 +407,7 @@ public class ContactOutput {
             keysNew += key;
 
             //存在下面无名联系人时，这种处理方式会出错，会少一些字段。values的正确处理方式见上面
-            //I/System.out: contact3 = {"displayName":"","lastName":"","firstName":"","prefix":"","middleName":"","suffix":"","phoneticLastName":"","phoneticFirstName":"","phoneticMiddleName":"","homeNum":"13944444444","mobile":"13655555555","mobile2":"","mobile3":"","mobile4":"","workNum":"","workNum2":"","workFax":"","homeFax":"","pager":"","otherNum":"","callbackNum":"","carNum":"","compMainTel":"","isdn":"","mainTel":"","otherFax":"","wirelessDev":"","telegram":"","tty_tdd":"","workMobile":"","workPager":"","assistantNum":"","mms":"","homeEmail":"","workEmail":"","otherEmail":"","mobileEmail":"","anniversary":"","otherday":"","birthday":"","homeMsg":"","workMsg":"","otherMsg":"","customIm":"","aimIm":"","msnIm":"","yahooIm":"","skypeIm":"","qqIm":"","googleTalkIm":"","icqIm":"","jabberIm":"","netmeetingIm":"","remark":"","defaultNickName":"","otherNickName":"","maindenNickName":"","shortNickName":"","initialsNickName":"","workCompany":"","workJobTitle":"","workDepartment":"","workJobDescription":"","workSymbol":"","workPhoneticName":"","workOfficeLocation":"","otherCompany":"","otherJobTitle":"","otherDepartment":"","otherJobDescription":"","otherSymbol":"","otherPhoneticName":"","otherOfficeLocation":"","homepage":"","blog":"","profile":"","home":"","workPage":"","ftpPage":"","otherPage":"","workFormattedAddress":"","workStreet":"","workBox":"","workArea":"","workCity":"","workState":"","workZip":"","workCountry":"","homeFormattedAddress":"","homeStreet":"","homeBox":"","homeArea":"","homeCity":"","homeState":"","homeZip":"","homeCountry":"","otherFormattedAddress":"","otherStreet":"","otherBox":"","otherArea":"","otherCity":"","otherState":"","otherZip":"","otherCountry":""}
+            //I/System.out: contact3 = {"displayName":"","lastName":"","firstName":"","prefix":"","middleName":"","suffix":"","phoneticLastName":"","phoneticFirstName":"","phoneticMiddleName":"","telNum":"13944444444","mobile":"13655555555","mobile2":"","mobile3":"","mobile4":"","workNum":"","workNum2":"","workFax":"","homeFax":"","pager":"","otherNum":"","callbackNum":"","carNum":"","compMainTel":"","isdn":"","mainTel":"","otherFax":"","wirelessDev":"","telegram":"","tty_tdd":"","workMobile":"","workPager":"","assistantNum":"","mms":"","homeEmail":"","workEmail":"","otherEmail":"","mobileEmail":"","anniversary":"","otherday":"","birthday":"","homeMsg":"","workMsg":"","otherMsg":"","customIm":"","aimIm":"","msnIm":"","yahooIm":"","skypeIm":"","qqIm":"","googleTalkIm":"","icqIm":"","jabberIm":"","netmeetingIm":"","remark":"","defaultNickName":"","otherNickName":"","maindenNickName":"","shortNickName":"","initialsNickName":"","workCompany":"","workJobTitle":"","workDepartment":"","workJobDescription":"","workSymbol":"","workPhoneticName":"","workOfficeLocation":"","otherCompany":"","otherJobTitle":"","otherDepartment":"","otherJobDescription":"","otherSymbol":"","otherPhoneticName":"","otherOfficeLocation":"","homepage":"","blog":"","profile":"","home":"","workPage":"","ftpPage":"","otherPage":"","workFormattedAddress":"","workStreet":"","workBox":"","workArea":"","workCity":"","workState":"","workZip":"","workCountry":"","homeFormattedAddress":"","homeStreet":"","homeBox":"","homeArea":"","homeCity":"","homeState":"","homeZip":"","homeCountry":"","otherFormattedAddress":"","otherStreet":"","otherBox":"","otherArea":"","otherCity":"","otherState":"","otherZip":"","otherCountry":""}
             //if ("" != values) {         //第一次时values = ""，跳过
             //    values += ",";
             //}
@@ -434,8 +445,7 @@ public class ContactOutput {
 
     //JSONObject中根据value获取key值，必须value值不重复
     //原创将心666666于2014-10-01，https://blog.csdn.net/jiangxindu1/article/details/39720481
-    public String getKey(String val, String key1)
-    {
+    public String getKey(String val, String key1) {
         String key2 = "";
         try {
             JSONObject json = m_contactHeader.m_jsonHeader.getJSONObject(key1);
@@ -450,7 +460,7 @@ public class ContactOutput {
 
                 //System.out.println("json.getString(key2) = " + json.getString(key2) + "; val = " + val);
                 //I/System.out: json.getString(key2) = {"__first":"-1","__second":"0"}; val = 4
-                if(json.getJSONObject(key2).getString("__first").equals(val)){
+                if (json.getJSONObject(key2).getString("__first").equals(val)) {
                     //System.out.println("json.getJSONObject(key2).getString(\"__first\") = " + json.getJSONObject(key2).getString("__first") + "; val = " + val);
                     //I/System.out: json.getJSONObject(key2).getString("__first") = 4; val = 4
                     break;
@@ -518,11 +528,11 @@ public class ContactOutput {
         if (type.equals(getVal2(key1, "CustomTypeIm"))) {
             String workMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.TYPE_CUSTOM), key1), workMsg); // 将获取的数据存入 m_jsonContactData
-        //} else if (type.equals(String.valueOf(Im.PROTOCOL_MSN))) {
+            //} else if (type.equals(String.valueOf(Im.PROTOCOL_MSN))) {
         } else if (type.equals(getVal2(key1, "MsnIm"))) {
             String workMsn = cursor.getString(cursor.getColumnIndex(Im.DATA));
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_MSN), key1), workMsn); // 将获取的数据存入 m_jsonContactData
-        //} else if (type.equals(String.valueOf(Im.PROTOCOL_QQ))) {
+            //} else if (type.equals(String.valueOf(Im.PROTOCOL_QQ))) {
         } else if (type.equals(getVal2(key1, "QqIm"))) {
             String instantsMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_QQ), key1), instantsMsg); // 将获取的数据存入 m_jsonContactData
@@ -556,19 +566,19 @@ public class ContactOutput {
         //if (type.equals(String.valueOf(Im.TYPE_CUSTOM))) {
         if (type.equals(getVal2(key1, "CustomTypeIm"))) {
             //String workMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
-            System.out.println("getKey(String.valueOf(Im.TYPE_CUSTOM), key1) = " + getKey(String.valueOf(Im.TYPE_CUSTOM), key1));
+            //System.out.println("getKey(String.valueOf(Im.TYPE_CUSTOM), key1) = " + getKey(String.valueOf(Im.TYPE_CUSTOM), key1));
             //I/System.out: getKey(String.valueOf(Im.TYPE_CUSTOM), key1) = NetmeetingIm
             //I/System.out: getKey(String.valueOf(Im.TYPE_CUSTOM), key1) = CustomTypeIm
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.TYPE_CUSTOM), key1), im); // 将获取的数据存入 m_jsonContactData
             //} else if (type.equals(String.valueOf(Im.PROTOCOL_MSN))) {
         } else if (type.equals(getVal2(key1, "MsnIm"))) {
             //String workMsn = cursor.getString(cursor.getColumnIndex(Im.DATA));
-            System.out.println("getKey(String.valueOf(Im.PROTOCOL_MSN), key1) = " + getKey(String.valueOf(Im.PROTOCOL_MSN), key1));
+            //System.out.println("getKey(String.valueOf(Im.PROTOCOL_MSN), key1) = " + getKey(String.valueOf(Im.PROTOCOL_MSN), key1));
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_MSN), key1), im); // 将获取的数据存入 m_jsonContactData
             //} else if (type.equals(String.valueOf(Im.PROTOCOL_QQ))) {
         } else if (type.equals(getVal2(key1, "QqIm"))) {
             //String instantsMsg = cursor.getString(cursor.getColumnIndex(Im.DATA));
-            System.out.println("getKey(String.valueOf(Im.PROTOCOL_QQ), key1) = " + getKey(String.valueOf(Im.PROTOCOL_QQ), key1));
+            //System.out.println("getKey(String.valueOf(Im.PROTOCOL_QQ), key1) = " + getKey(String.valueOf(Im.PROTOCOL_QQ), key1));
             //I/System.out: getKey(String.valueOf(Im.PROTOCOL_QQ), key1) = NetmeetingIm
             //I/System.out: getKey(String.valueOf(Im.PROTOCOL_QQ), key1) = QqIm
             put2json4lay(idKey, key1, getKey(String.valueOf(Im.PROTOCOL_QQ), key1), im); // 将获取的数据存入 m_jsonContactData
@@ -685,7 +695,7 @@ public class ContactOutput {
                     String data = "";
                     if (iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
-                        //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
+                        //String telNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "telNum")));
                         data = cursor.getString(iCol);          // 获取数据表中的数据
                         if (1 == iPhone) {
                             data = funRemove(data);             // 电话号码才处理
@@ -734,7 +744,7 @@ public class ContactOutput {
                     String data = "";
                     if (iCol > -1) {
                         //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
-                        //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
+                        //String telNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "telNum")));
                         data = cursor.getString(iCol);          // 获取数据表中的数据
                         if (1 == iPhone) {
                             data = funRemove(data);             // 电话号码才处理
@@ -814,7 +824,7 @@ public class ContactOutput {
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
         //String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
-        System.out.println("kind.type = " + kind + "." + type);
+        //System.out.println("kind.type = " + kind + "." + type);
 
         try {
             //key2 : jsonG07_00WorkOrgType、jsonG07_01OtherOrgType， 或者jsonG09_00HomePostal、jsonG09_01WorkPostal、jsonG09_02OtherPostal
@@ -840,7 +850,7 @@ public class ContactOutput {
                         String data = "";
                         if (iCol > -1) {
                             //E/CursorWindow: Failed to read row 0, column -1 from a CursorWindow which has 10 rows, 82 columns.
-                            //String homeNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "homeNum")));
+                            //String telNum = cursor.getString(cursor.getColumnIndex(getColumnName("jsonG01Phone", "telNum")));
                             data = cursor.getString(iCol);          // 获取数据表中的数据
                         }
                         put2json5lay(idKey, key1, key2, key3, data);                // 将获取的数据存入 m_jsonContactData
@@ -886,4 +896,122 @@ public class ContactOutput {
     //转储联系人各个字段数据的函数组 End
     ////////////////////////////////////////////////////////////////////////
 
+    //将联系人的所有字段及其值输出到文件中，sPath为文件的绝对路径
+    //调用方式
+    // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+    // 在循环外获得sPath
+    // String sPath = m_Fun.GetNewFile(m_sPathDownloads, "AllContactsLog_1.txt", 0).getAbsolutePath();
+    // 在循环内调用
+    // log2file(m_MA.getContentResolver(), String.valueOf(iContactId), sPath);//将联系人的所有字段及其值输出到文件中
+    private void log2file(final ContentResolver contentResolver, String contactId, String sPath) {
+        Cursor dataCursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
+                null,
+                ContactsContract.Data.CONTACT_ID + "=?",
+                new String[]{String.valueOf(contactId)}, null);
+        if (dataCursor != null) {
+            if (dataCursor.getCount() > 0) {
+                //System.out.println("---------------------- start ------------------------");
+                AppendFile(sPath, "---------------------- start ------------------------");
+                //System.out.println("数量:" + dataCursor.getCount() + " 列数:" + dataCursor.getColumnCount());
+                AppendFile(sPath, "数量:" + dataCursor.getCount() + " 列数:" + dataCursor.getColumnCount());
+                if (dataCursor.moveToFirst()) {
+                    do {
+                        for (int i = 0; i < dataCursor.getColumnCount(); i++) {
+                            final String columnName = dataCursor.getColumnName(i);
+                            final int columnIndex = dataCursor.getColumnIndex(columnName);
+                            final int type = dataCursor.getType(columnIndex);
+                            String data = "", ty = "";
+                            if (type == Cursor.FIELD_TYPE_NULL) {
+                                ty = "NULL";
+                                data = "空值";
+                            } else if (type == Cursor.FIELD_TYPE_BLOB) {
+                                ty = "BLOB";
+                                data = String.valueOf(dataCursor.getBlob(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_FLOAT) {
+                                ty = "FLOAT";
+                                data = String.valueOf(dataCursor.getFloat(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_INTEGER) {
+                                ty = "INTEGER";
+                                data = String.valueOf(dataCursor.getInt(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_STRING) {
+                                ty = "STRING";
+                                data = dataCursor.getString(columnIndex);
+                            }
+                            AppendFile(sPath, "第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
+                            //System.out.println("第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
+                        }
+                        AppendFile(sPath, "\n");
+                    } while (dataCursor.moveToNext());
+                }
+                //System.out.println("------------------------ end ------------------------");
+                AppendFile(sPath, "------------------------ end ------------------------\n");
+            }
+            dataCursor.close();
+        }
+    }
+
+    //java追加写入文件内容，sPath为文件的绝对路径。https://www.cnblogs.com/zhenxiangyue/p/10900319.html
+    public void AppendFile(String sPath, String str) {
+        FileWriter fw = null;
+        try {   //如果文件存在，则追加内容；如果文件不存在，则创建文件
+            File f = new File(sPath);
+            fw = new FileWriter(f, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(str);
+        pw.flush();
+        try {
+            fw.flush();
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //打印联系人的所有字段及其值。会输出太多信息导致溢出，输出不全
+    //调用：logData(m_MA.getContentResolver(), String.valueOf(iContactId));
+    private void logData(final ContentResolver contentResolver, String contactId) {
+        Cursor dataCursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
+                null,
+                ContactsContract.Data.CONTACT_ID + "=?",
+                new String[]{String.valueOf(contactId)}, null);
+        if (dataCursor != null) {
+            if (dataCursor.getCount() > 0) {
+                System.out.println("---------------------- start ------------------------");
+                System.out.println("数量:" + dataCursor.getCount() + " 列数:" + dataCursor.getColumnCount());
+                if (dataCursor.moveToFirst()) {
+                    do {
+                        for (int i = 0; i < dataCursor.getColumnCount(); i++) {
+                            final String columnName = dataCursor.getColumnName(i);
+                            final int columnIndex = dataCursor.getColumnIndex(columnName);
+                            final int type = dataCursor.getType(columnIndex);
+                            String data = "", ty = "";
+                            if (type == Cursor.FIELD_TYPE_NULL) {
+                                ty = "NULL";
+                                data = "空值";
+                            } else if (type == Cursor.FIELD_TYPE_BLOB) {
+                                ty = "BLOB";
+                                data = String.valueOf(dataCursor.getBlob(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_FLOAT) {
+                                ty = "FLOAT";
+                                data = String.valueOf(dataCursor.getFloat(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_INTEGER) {
+                                ty = "INTEGER";
+                                data = String.valueOf(dataCursor.getInt(columnIndex));
+                            } else if (type == Cursor.FIELD_TYPE_STRING) {
+                                ty = "STRING";
+                                data = dataCursor.getString(columnIndex);
+                            }
+                            System.out.println("第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
+                        }
+                    } while (dataCursor.moveToNext());
+                }
+                System.out.println("------------------------ end ------------------------");
+            }
+            dataCursor.close();
+        }
+    }
 }
