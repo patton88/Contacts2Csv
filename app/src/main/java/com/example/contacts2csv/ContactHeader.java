@@ -121,9 +121,9 @@ public class ContactHeader {
             String arr2JsonG04Im[][] = {
                     {"__mimetype_0", Im.CONTENT_ITEM_TYPE},                         //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
                     {"__mimetype_1", Im.DATA},                                      //Im.DATA = "data1";
-                    {"__mimetype_2", Im.TYPE},                                      //Im.TYPE = "data2";
+                    {"__mimetype_2", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
                     {"__mimetype_3", Im.LABEL},                                     //Im.LABEL = "data3";
-                    {"__mimetype_4", Im.PROTOCOL},                                  //Im.PROTOCOL = "data5";
+                    {"__mimetype_4", Im.TYPE},                                      //Im.TYPE = "data2";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                           //Im.PROTOCOL = "data6";
                     {"__mimetype_6", String.valueOf(Im.TYPE_HOME)},                 //Im.TYPE_HOME = 1;
                     {"__mimetype_7", String.valueOf(Im.TYPE_WORK)},                 //Im.TYPE_WORK = 2;
