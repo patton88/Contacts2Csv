@@ -937,8 +937,12 @@ public class ContactOutput {
                                 ty = "STRING";
                                 data = dataCursor.getString(columnIndex);
                             }
-                            AppendFile(sPath, "第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
                             //System.out.println("第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
+                            //AppendFile(sPath, "第" + i + "列->名称:" + columnName + " 索引:" + columnIndex + " 类型:" + ty + " 值:" + data);
+
+                            //java中int转成String位数不足前面补零。String.format自带补零方法，
+                            //String.format("%06d",12);//其中0表示补零而不是补空格，6表示至少6位，d表示参数为整数类型
+                            AppendFile(sPath, "第" + String.format("%02d", i) + "列->名称:" + columnName + " 索引:" + String.format("%02d", columnIndex) + " 类型:" + ty + " 值:" + data);
                         }
                         AppendFile(sPath, "\n");
                     } while (dataCursor.moveToNext());

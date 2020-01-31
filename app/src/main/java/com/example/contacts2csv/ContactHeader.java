@@ -66,7 +66,7 @@ public class ContactHeader {
                     {"__mimetype_1", Phone.NUMBER},                             //Phone.NUMBER = "data1";
                     {"__mimetype_2", Phone.TYPE},                               //Phone.TYPE = "data2";
                     {"__mimetype_3", Phone.LABEL},                              //Phone.TYPE = "data3";
-                    {"telNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
+                    {"homeNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
                     {"mobile", String.valueOf(Phone.TYPE_MOBILE)},              //Phone.TYPE_MOBILE = 2;
                     {"workNum", String.valueOf(Phone.TYPE_WORK)},               //Phone.TYPE_WORK = 3;
                     {"workFax", String.valueOf(Phone.TYPE_FAX_WORK)},           //Phone.TYPE_FAX_WORK = 4;
