@@ -539,7 +539,7 @@ public class ContactOutput {
 
     // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
-    private void dumpJson4layIm(String idKey, String key1, Cursor cursor, int iPhone) {
+    private void dumpJson4layIm3(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
         String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
@@ -575,7 +575,7 @@ public class ContactOutput {
 
     // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
-    private void dumpJson4layIm4(String idKey, String key1, Cursor cursor, int iPhone) {
+    private void dumpJson4layIm(String idKey, String key1, Cursor cursor, int iPhone) {
         // kind为信息种类(大类型)，比如Phone.TYPE、Email.TYPE等
         String kind = getMimetype4lay(key1, "__mimetype_2").trim();
         // type为kind种类信息的子类型，比如Phone.TYPE大类型中的Phone.TYPE_HOME、Phone.TYPE_MOBILE等
