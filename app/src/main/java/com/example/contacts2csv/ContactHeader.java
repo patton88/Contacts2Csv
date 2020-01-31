@@ -125,10 +125,10 @@ public class ContactHeader {
                     {"__mimetype_3", Im.LABEL},                                 //Im.LABEL = "data3";
                     {"__mimetype_4", Im.TYPE},                                  //Im.TYPE = "data2";
                     {"__mimetype_5", Im.CUSTOM_PROTOCOL},                       //Im.PROTOCOL = "data6";
-                    {"__mimetype_6", String.valueOf(Im.TYPE_HOME)},             //Im.TYPE_HOME = 1;
-                    {"__mimetype_7", String.valueOf(Im.TYPE_WORK)},             //Im.TYPE_WORK = 2;
-                    {"__mimetype_8", String.valueOf(Im.TYPE_OTHER)},            //Im.TYPE_WORK = 3;
-                    //{"CustomTypeIm", String.valueOf(Im.TYPE_CUSTOM)},           //Im.TYPE_CUSTOM = 0;
+                    {"__mimetype_6", String.valueOf(Im.TYPE_CUSTOM)},           //Im.TYPE_CUSTOM = 0;
+                    {"__mimetype_7", String.valueOf(Im.TYPE_HOME)},             //Im.TYPE_HOME = 1;
+                    {"__mimetype_8", String.valueOf(Im.TYPE_WORK)},             //Im.TYPE_WORK = 2;
+                    {"__mimetype_9", String.valueOf(Im.TYPE_OTHER)},            //Im.TYPE_WORK = 3;
                     {"CustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},           //Im.PROTOCOL_CUSTOM = -1;
                     {"AimIm(CustomTypeIm)", String.valueOf(Im.PROTOCOL_AIM)},   //Im.PROTOCOL_AIM = 0;
                     {"MsnIm", String.valueOf(Im.PROTOCOL_MSN)},                 //Im.PROTOCOL_MSN = 1;
