@@ -452,6 +452,8 @@ public class ContactOutput {
                     //System.out.println("json.getJSONObject(key2).getString(\"__first\") = " + json.getJSONObject(key2).getString("__first") + "; val = " + val);
                     //I/System.out: json.getJSONObject(key2).getString("__first") = 4; val = 4
                     break;
+                } else {
+                    key2 = "";  // 不匹配必须将key2清空。否则当全部不匹配时，key2将等于最后一个测试值，导致明显的查找错误
                 }
             }
         } catch (JSONException e) {
