@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 
@@ -707,7 +708,13 @@ public class ContactOutput {
         //int phoneType = cursor.getInt(cursor.getColumnIndex(Phone.TYPE));
         //"jsonG04Im"
         //System.out.println("kind = " + kind);
-        String type = cursor.getString(cursor.getColumnIndex(kind)).trim();     // 取当前cursor对应的信息子类型
+        //Attempt to invoke virtual method 'java.lang.String java.lang.String.trim()' on a null object reference
+        String type = "";
+        type = cursor.getString(cursor.getColumnIndex(kind));     // 取当前cursor对应的信息子类型
+        if (TextUtils.isEmpty(type)) {
+            return; //取信息子类型失败，直接返回。避免App崩溃
+        }
+        type = type.trim();
         //String type = String.valueOf(cursor.getInt(cursor.getColumnIndex(kind))); // 取当前cursor对应的信息子类型
 
         try {

@@ -15,16 +15,22 @@ public class ContactRemove {
     public void delAllContacts() {
         ContentResolver resolver = MainActivity.m_MA.getContentResolver();
         Cursor cur = resolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        int success = 0;
+        int fail = 0;
         while (cur.moveToNext()) {
             try {
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
                 Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
                 System.out.println("The uri is " + uri.toString());
                 resolver.delete(uri, null, null);    //删除所有的联系人
+                success++;
             } catch (Exception e) {
+                fail++;
                 System.out.println(e.getStackTrace());
             }
         }
+        Toast.makeText(MainActivity.m_MA, "成功删除 " + success + " 记录，" +
+                fail + " 条记录删除失败", Toast.LENGTH_LONG).show();
     }
 
     public void delAllContacts2(){

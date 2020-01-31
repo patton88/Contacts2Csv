@@ -95,11 +95,11 @@ public class ContactInsert {
 
             if (contactInfo.homeNum.size() > 0) {
                 //insert phone
-                for (String s : contactInfo.homeNum) {
+                for (String data : contactInfo.homeNum) {
                     contentValues.clear();
                     contentValues.put(Data.RAW_CONTACT_ID, rowId);
                     contentValues.put(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
-                    contentValues.put(Phone.NUMBER, s);
+                    contentValues.put(Phone.NUMBER, data);
                     contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE);
                     context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
                 }
@@ -107,24 +107,58 @@ public class ContactInsert {
 
             if (contactInfo.Email.size() > 0) {
                 //insert phone
-                for (String s : contactInfo.Email) {
+                for (String data : contactInfo.Email) {
                     contentValues.clear();
                     contentValues.put(Data.RAW_CONTACT_ID, rowId);
                     contentValues.put(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE);
-                    contentValues.put(Email.DATA, s);
+                    contentValues.put(Email.DATA, data);
                     contentValues.put(Email.TYPE, Email.TYPE_HOME);
                     context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
                 }
             }
 
+            //原文链接：https://blog.csdn.net/hudan2714/article/details/8241334
+            //如果是查询IM数据，则需要关心，以下几个字段：
+            //Data.RAW_CONTACT_ID表示联系人的ID
+            //Data.MIMETYPE：表示mime类型，查im则类型为：Im.CONTENT_ITEM_TYPE
+            //Data.DATA1：表示用户填写的数据，如：是QQ类型，则此为QQ号：123456789
+            //Data.DATA2：表示数据类型，个人感觉是源码中对应的此类型：（目前手机中读取出来的值都为3）
+            //      public static final int TYPE_HOME = 1;
+            //      public static final int TYPE_WORK = 2;
+            //      public static final int TYPE_OTHER = 3;
+            //      data2就是type，是不是都是3啊（用手机测试，也是这个值）。
+            //
+            //Data.DATA5：在源码中是Im.PROTOCOL：它才表示的是真正的类型，如源码中对应的类型：
+            //      public static final int PROTOCOL_CUSTOM = -1;
+            //      public static final int PROTOCOL_AIM = 0;
+            //      public static final int PROTOCOL_MSN = 1;
+            //      public static final int PROTOCOL_YAHOO = 2;
+            //      public static final int PROTOCOL_SKYPE = 3;
+            //      public static final int PROTOCOL_QQ = 4;
+            //      public static final int PROTOCOL_GOOGLE_TALK = 5;
+            //      public static final int PROTOCOL_ICQ = 6;
+            //      public static final int PROTOCOL_JABBER = 7;
+            //      public static final int PROTOCOL_NETMEETING = 8;
+            //
+            //而当PROTOCOL的取值为-1时，则要取出Data.DATA6的值。
+            //Data.DATA6 ：在源码中是Im.CUSTOM_PROTOCOL字段，它表示是用户自定义的值，
+            //也就是只有data5为-1时，这个取取出来才不是null（上图能很好的证明了）
+            //基本上只要了解这几个字段，就能正确的完成Im数据的操作。
+
+            //所以，对im操作，首先要注意：data2的数据类型。若为3、Im.TYPE_OTHER、自定义类型，就要取label值。
+            //                              自定义的名称为Label，存在Data.data3字段中。
+            //                            接着要注意：data5的值，它能判断出来是哪种Im.
+
             if (contactInfo.Im.size() > 0) {
                 //insert phone
-                for (String s : contactInfo.Im) {
+                for (String data : contactInfo.Im) {
                     contentValues.clear();
                     contentValues.put(Data.RAW_CONTACT_ID, rowId);
                     contentValues.put(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
-                    contentValues.put(Im.DATA, s);
-                    contentValues.put(Im.TYPE, Im.TYPE_HOME);
+                    contentValues.put(Im.DATA1, data);          //用户填写的Im数据
+                    contentValues.put(Im.DATA2, Im.TYPE_OTHER); //Im数据类型（目前手机中读取出来的值都为3，Im.TYPE_OTHER，自定义类型）
+                    //contentValues.put(Im.DATA3, Im.PROTOCOL_QQ);//Im真正的类型，对应在源码中的Im.PROTOCOL
+                    contentValues.put(Im.DATA5, Im.PROTOCOL_QQ);//Im真正的类型，对应在源码中的Im.PROTOCOL
                     context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
                 }
             }
