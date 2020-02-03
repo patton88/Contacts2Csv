@@ -311,15 +311,30 @@ public class ContactOutput {
         try {
             Iterator<String> it = jsonSource.getJSONObject(key).keys();
             while (it.hasNext()) {
-                String key3 = it.next();       //key3: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
-                if (key3.indexOf(keyNew) != -1) {
-                    keyNew2 = key3;
-                    break;
+                String key3 = it.next();        //key3: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
+                String keyTemp = key3;
+                // 去头查找法
+                while(keyTemp.length() > keyNew.length()) {
+                    keyTemp = keyTemp.substring(1);   //去掉头一个字符
+                    if (keyTemp.equals(keyNew)) {
+                        keyNew2 = key3;
+                        break;
+                    }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        // 输出字段中没有 home 字段，是因为在 jsonG10Website 的如下结构中查找 "home" 时，
+        // if (key3.indexOf(keyNew) != -1) 首先查找到 "homepage" 便返回 "homepage"，导致没有 home 字段
+        // 改为 if (key3.lastIndexOf(keyNew) != -1) ，从尾部开始查问题一样。必须改变查找方式，改为去头查找法问题解决
+
+        //String arr2jsonG10Website[][] = {
+        //  {"homepage", String.valueOf(Website.TYPE_HOMEPAGE)},    //Website.TYPE_HOMEPAGE = 1;
+        //  ...
+        //  {"home", String.valueOf(Website.TYPE_HOME)},            //Website.TYPE_HOME = 4;
+        //}
 
         return keyNew2;
     }
@@ -447,7 +462,7 @@ public class ContactOutput {
     }
 
     //String substring(int beginIndex, int endIndex)，返回的字串长度为 endIndex-beginIndex。
-    //endIndex可以指向末尾字符之后的数值("emptiness".length())："emptiness".substring(9) returns "" (an empty string)
+    //endIndex(不包括)可以指向末尾字符之后的数值("emptiness".length())："emptiness".substring(9) returns "" (an empty string)
 
     // 根据 subtype 值，取得类型前缀。处理 __mimetype_subtype_ 字段
     private String getPrefix(String subtype, String key1) {
