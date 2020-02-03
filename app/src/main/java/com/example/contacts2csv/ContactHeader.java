@@ -167,9 +167,9 @@ public class ContactHeader {
                     {"__mimetype_data", Organization.COMPANY},                  //Organization.COMPANY = "data1";
                     {"__mimetype_type", Organization.TYPE},                     //Organization.TYPE = "data2";
                     {"__mimetype_label", Organization.LABEL},                   //Organization.LABEL = "data3";
-                    {"__mimetype_4", String.valueOf(Organization.TYPE_CUSTOM)}, //Organization.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
-                    {"__mimetype_5", String.valueOf(Organization.TYPE_WORK)},   //Organization.TYPE_WORK = 1;
-                    {"__mimetype_6", String.valueOf(Organization.TYPE_OTHER)},  //Organization.TYPE_OTHER = 2;
+                    {"__mimetype_subtype_custom", String.valueOf(Organization.TYPE_CUSTOM)},  //Organization.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
+                    {"__mimetype_subtype_work", String.valueOf(Organization.TYPE_WORK)},      //Organization.TYPE_WORK = 2;
+                    {"__mimetype_subtype_other", String.valueOf(Organization.TYPE_OTHER)},    //Organization.TYPE_WORK = 3;
                     {"__mimetype_fun", "fun04"},                                // Set 数据需要分类处理，用 dumpJson4laySet() 处理
                     {"JobTitle", Organization.TITLE},                           //Organization.TITLE = "data4";
                     {"Department", Organization.DEPARTMENT},                    //Organization.DEPARTMENT = "data5";
@@ -179,7 +179,7 @@ public class ContactHeader {
                     {"OfficeLocation", Organization.OFFICE_LOCATION},           //Organization.OFFICE_LOCATION = "data9";
                     {"PhoneticNameStyle", Organization.PHONETIC_NAME_STYLE},    //Organization.PHONETIC_NAME_STYLE = "data10";
             };
-            Arr2Json(arr2jsonG04OrgSet, jsonG04OrgSet.getJSONObject("jsonG04OrgSet"));
+            Arr2Json(arr2jsonG04OrgSet, m_jsonHeader.getJSONObject("jsonG04OrgSet"));
 
             // 对im操作
             // A、首先判断 Im.TYPE(data2) 的类型；
@@ -306,11 +306,11 @@ public class ContactHeader {
                     {"__mimetype_data", StructuredPostal.FORMATTED_ADDRESS},        //StructuredPostal.FORMATTED_ADDRESS = "data1";
                     {"__mimetype_type", StructuredPostal.TYPE},                     //StructuredPostal.TYPE = "data2";
                     {"__mimetype_label", StructuredPostal.LABEL},                   //StructuredPostal.TYPE = "data3";
-                    {"__mimetype_4", String.valueOf(StructuredPostal.TYPE_CUSTOM)}, //StructuredPostal.TYPE_CUSTOM = 0;
-                    {"__mimetype_5", String.valueOf(StructuredPostal.TYPE_HOME)},   //StructuredPostal.TYPE_WORK = 1;
-                    {"__mimetype_6", String.valueOf(StructuredPostal.TYPE_WORK)},   //StructuredPostal.TYPE_HOME = 2;
-                    {"__mimetype_7", String.valueOf(StructuredPostal.TYPE_OTHER)},  //StructuredPostal.TYPE_OTHER = 3;
-                    {"__mimetype_fun", "fun00"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_subtype_custom", String.valueOf(StructuredPostal.TYPE_CUSTOM)},  //StructuredPostal.TYPE_CUSTOM = 0;
+                    {"__mimetype_subtype_home", String.valueOf(StructuredPostal.TYPE_HOME)},      //StructuredPostal.TYPE_HOME = 1;
+                    {"__mimetype_subtype_work", String.valueOf(StructuredPostal.TYPE_WORK)},      //StructuredPostal.TYPE_WORK = 2;
+                    {"__mimetype_subtype_other", String.valueOf(StructuredPostal.TYPE_OTHER)},    //StructuredPostal.TYPE_WORK = 3;
+                    {"__mimetype_fun", "fun04"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
                     {"Street", StructuredPostal.STREET},                            //StructuredPostal.STREET = "data4";
                     {"Box", StructuredPostal.POBOX},                                //StructuredPostal.POBOX = "data5";
                     {"Area", StructuredPostal.NEIGHBORHOOD},                        //StructuredPostal.NEIGHBORHOOD = "data6";
@@ -319,7 +319,7 @@ public class ContactHeader {
                     {"Zip", StructuredPostal.POSTCODE},                             //StructuredPostal.POSTCODE = "data9";
                     {"Country", StructuredPostal.COUNTRY},                          //StructuredPostal.COUNTRY = "data10";
             };
-            Arr2Json(arr2jsonG08PostalSet, jsonG08PostalSet.getJSONObject("jsonG08PostalSet"));
+            Arr2Json(arr2jsonG08PostalSet, m_jsonHeader.getJSONObject("jsonG08PostalSet"));
 
             //09、jsonG09GroupMember，分组信息。
             m_jsonHeader.put("jsonG09GroupMember", new JSONObject(new LinkedHashMap()));
@@ -419,7 +419,7 @@ public class ContactHeader {
                 //为避免与联系人信息标识重名，前面添加双下划线
                 json.put("__first", sArr[1]);       // sArr[1] 用于存放 mimetype 类型编码
                 json.put("__second", "0");  // 用于存放用户值
-                //json.put("__third", "");                // 用于存放字段名前缀
+                //json.put("__third", "");    // 用于存放字段名前缀
                 jsonObject.put(sArr[0], json);            // sArr[0] 用于存放 mimetype 类型可读标题
 
                 //经输出后查看，混乱无用
