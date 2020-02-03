@@ -755,13 +755,13 @@ public class ContactOutput {
         }
         String filename = "";
         try {
-            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1.png";
+            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1";
             filename = filename.replace(" ", "_");  // 文件名中不能有空格
         } catch (JSONException e) {
-            filename = "anonymity_1.png";
+            filename = "anonymity_1";
             e.printStackTrace();
         }
-        saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename);
+        saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename, "png", 100);
         //return photoBmp;
     }
 
@@ -787,7 +787,8 @@ public class ContactOutput {
 
     //Android笔记（15）将bitmap存为文件。2017-07-19
     //原文链接：https://blog.csdn.net/yangye608/article/details/75332958
-    private File saveBmpFile(Bitmap bmp, String path, String filename){
+    // filename 不带后缀；photoType : jpg、png；iQuality：压缩质量 50 - 100
+    private File saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality){
         File dirFile = new File(path);
         if(!dirFile.exists()){
             dirFile.mkdir();
@@ -796,7 +797,7 @@ public class ContactOutput {
         // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
         // String sPath = m_Fun.GetNewFile(m_sPathDownloads, "AllContactsLog_1.txt", 0).getAbsolutePath();
         //File file = new File(path, filename);
-        File file = m_Fun.GetNewFile(path, filename, 0);    // 获得不重名的新文件名称：Photo_x.bmp
+        File file = m_Fun.GetNewFile(path, filename + "." + photoType, 0);    // 获得不重名的新文件名称：Photo_x.bmp
         System.out.println("filePath = " + file.getAbsolutePath());
         //I/System.out: filePath = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang Wu_2.png
         try {
@@ -805,12 +806,23 @@ public class ContactOutput {
 //            bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
 //            byte[] photoPng = os.toByteArray();
 
-            // 将Bitmap压缩成PNG编码，质量为100%存储
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            //bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            //若 bmp 为空，会报错
             //java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.graphics.Bitmap.compress
             // (android.graphics.Bitmap$CompressFormat, int, java.io.OutputStream)' on a null object reference
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
+
+            // 将Bitmap压缩成PNG编码，质量为100%存储
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            switch (photoType) {
+                case "jpg":
+                    //bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos); // 输出这种 JPEG, 80 文件后大约 2.5K
+                    bmp.compress(Bitmap.CompressFormat.JPEG, iQuality, bos); // 输出 JPEG, 100 文件后大约 7K
+                    break;
+                case "png":
+                    bmp.compress(Bitmap.CompressFormat.PNG, iQuality, bos);  // 输出这种 png, 100 文件后大约 16K
+                    break;
+                default:
+                    break;
+            }
             bos.flush();
             bos.close();
         } catch (FileNotFoundException e) {
