@@ -5,7 +5,11 @@ package com.example.contacts2csv;
 // 解决办法-OK，用文本编辑器打开文件，将文件另存为UTF-8格式
 // 有警告，没关系：uses unchecked or unsafe operations. Recompile with -Xlint:unchecked for details.
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,7 +30,9 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 
+import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
+import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
 
 //android中获取包名、类名。转载weixin_34405925 最后发布于2018-06-27 11:10:00 阅读数 1005  收藏
 //LogUtil.i("getPackageName()=" + getPackageName()); //Context类
@@ -177,7 +183,8 @@ public class ContactOutput {
                                 case "fun02":   //无需处理 xxx.TYPE_CUSTOM，用 fun02_dumpJson4layAll() 处理
                                     fun02_dumpJson4layAll(sContactId, key1, cursor);
                                     break;
-                                case "fun03":   // "jsonG03Photo"，单独用 dumpPhoto() 处理
+                                case "fun03":   // "jsonG03Photo"，单独用 fun03_dumpPhoto() 处理
+                                    fun03_dumpPhoto(sContactId, key1, cursor);
                                     break;
                                 default:
                                     break;
@@ -282,7 +289,7 @@ public class ContactOutput {
                 // keyNew 为："QqIm"、"QqIm2"、"QqIm3"、...
                 // 想在 jsonTarget 中应查找的 key 为："otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
 
-                // 用 findKey 函数处理。遍历 jsonSource 的 key ，若找到 key 包含 keyNew 字串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
+                // 遍历 jsonSource 的 key ，若找到 key 的末尾包含 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
                 keyNew = findKey(jsonSource, key, keyNew);
 
                 if (jsonSource.getJSONObject(key).has(keyNew)) {
@@ -298,7 +305,7 @@ public class ContactOutput {
 
     // key 为：contact592、contact593、...
     // keyNew 为："QqIm"、"QqIm2"、"QqIm3"、...
-    // 遍历 jsonSource 的 key ，若找到 key 包含 keyNew 字串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
+    // 遍历 jsonSource 的 key ，若找到 key 的末尾包含 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
     private String findKey(JSONObject jsonSource, String key, String keyNew) {
         String keyNew2 = keyNew;
 
@@ -309,7 +316,7 @@ public class ContactOutput {
 
                 // 去头查找法。优化算法
                 if (key3.length() > keyNew.length()) {
-                    String keyTemp = key3.substring(key3.length() - keyNew.length());   // 取 key3 尾部字符串
+                    String keyTemp = key3.substring(key3.length() - keyNew.length());   // 取 key3 末尾子串
                     if (keyTemp.equals(keyNew)) {
                         keyNew2 = key3;
                         break;
@@ -722,6 +729,42 @@ public class ContactOutput {
         }
     }
 
+    //03、jsonG03Photo，头像。
+    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如 jsonG00StructName
+    // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
+    private void fun03_dumpPhoto(String idKey, String key1, Cursor cursor) {
+        String typePhoto = getMimetype4lay(key1, "photo").trim();  // typePhoto 为：Photo.PHOTO
+
+        Bitmap photoBmp = null;
+//        Cursor dataCursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, new String[]{Photo.PHOTO},
+//                ContactsContract.Data.CONTACT_ID + "=?" + " AND " +
+//                        ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'",
+//                new String[]{String.valueOf(contactId)}, null);
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
+                //cursor.moveToFirst();
+                //byte[] bytes = cursor.getBlob(cursor.getColumnIndex(Photo.PHOTO));
+                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(typePhoto));
+                System.out.println("bytes.length = " + bytes.length);
+                if (bytes != null) {
+                    photoBmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    System.out.println("photoBmp.toString() = " + photoBmp.toString());
+                }
+            }
+            //cursor.close();
+        }
+        String filename = "";
+        try {
+            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1.jpg";
+            filename = filename.replace(" ", "_");  // 文件名中不能有空格
+        } catch (JSONException e) {
+            filename = "anonymity_1.jpg";
+            e.printStackTrace();
+        }
+        saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename);
+        //return photoBmp;
+    }
+
     // 获取联系人头像。原文链接：https://blog.csdn.net/angcyo/article/details/52177832
     public static Bitmap getPhoto(final ContentResolver contentResolver, String contactId) {
         Bitmap photo = null;
@@ -740,5 +783,41 @@ public class ContactOutput {
             dataCursor.close();
         }
         return photo;
+    }
+
+    //Android笔记（15）将bitmap存为文件。2017-07-19
+    //原文链接：https://blog.csdn.net/yangye608/article/details/75332958
+    private File saveBmpFile(Bitmap bmp, String path, String filename){
+        File dirFile = new File(path);
+        if(!dirFile.exists()){
+            dirFile.mkdir();
+        }
+
+        // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+        // String sPath = m_Fun.GetNewFile(m_sPathDownloads, "AllContactsLog_1.txt", 0).getAbsolutePath();
+        //File file = new File(path, filename);
+        File file = m_Fun.GetNewFile(path, filename, 0);    // 获得不重名的新文件名称：Photo_x.bmp
+        System.out.println("filePath = " + file.getAbsolutePath());
+        //I/System.out: filePath = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang Wu_2.png
+        try {
+            // 将Bitmap压缩成PNG编码，质量为100%存储
+//            ByteArrayOutputStream os = new ByteArrayOutputStream();
+//            bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+//            byte[] photoPng = os.toByteArray();
+
+            // 将Bitmap压缩成PNG编码，质量为100%存储
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            //java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.graphics.Bitmap.compress
+            // (android.graphics.Bitmap$CompressFormat, int, java.io.OutputStream)' on a null object reference
+            //bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 }
