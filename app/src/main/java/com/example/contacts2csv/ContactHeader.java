@@ -47,7 +47,7 @@ public class ContactHeader {
             Email.CONTENT_ITEM_TYPE,            //jsonG02Email            //jsonG02Email          //邮箱
             Photo.CONTENT_ITEM_TYPE,            //jsonG03Photo            //                      //头像
             Organization.CONTENT_ITEM_TYPE,     //jsonG04OrgSet           //jsonG07OrgType        //公司
-            Im.CONTENT_ITEM_TYPE,               //jsonG05Im               //jsonG04Im             //即时通信
+            Im.CONTENT_ITEM_TYPE,               //jsonG05ImSet            //jsonG04Im             //即时通信
             Nickname.CONTENT_ITEM_TYPE,         //jsonG06NickName         //jsonG06NickName       //昵称
             Note.CONTENT_ITEM_TYPE,             //jsonG07Note             //jsonG05Remark         //备注
             StructuredPostal.CONTENT_ITEM_TYPE, //jsonG08PostalSet        //jsonG09PostalType     //地址
@@ -108,7 +108,7 @@ public class ContactHeader {
                     {"__mimetype_data", Phone.NUMBER},                          //Phone.NUMBER = "data1";
                     {"__mimetype_type", Phone.TYPE},                            //Phone.TYPE = "data2";
                     {"__mimetype_label", Phone.LABEL},                          //Phone.TYPE = "data3";
-                    {"__mimetype_fun", "fun01"},                                // "jsonG01Phone"，需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun01"},                                // "jsonG01Phone"，需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customNum", String.valueOf(Phone.TYPE_CUSTOM)},           //Phone.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"homeNum", String.valueOf(Phone.TYPE_HOME)},               //Phone.TYPE_HOME = 1;
                     {"mobile", String.valueOf(Phone.TYPE_MOBILE)},              //Phone.TYPE_MOBILE = 2;
@@ -140,7 +140,7 @@ public class ContactHeader {
                     {"__mimetype_data", Email.ADDRESS},                 //Email.DATA = "data1";
                     {"__mimetype_type", Email.TYPE},                    //Email.TYPE = "data2";
                     {"__mimetype_label", Email.LABEL},                  //Email.LABEL = "data3";
-                    {"__mimetype_fun", "fun00"},                        // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                        // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customEmail", String.valueOf(Email.TYPE_CUSTOM)}, //Email.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"homeEmail", String.valueOf(Email.TYPE_HOME)},     //Email.TYPE_HOME = 1;
                     {"workEmail", String.valueOf(Email.TYPE_WORK)},     //Email.TYPE_WORK = 2;
@@ -159,7 +159,7 @@ public class ContactHeader {
             };
             Arr2Json(arr2jsonG03Photo, m_jsonHeader.getJSONObject("jsonG03Photo"));
 
-            //04、jsonG04OrgSet，获取组织信息。Set 数据需要分类处理，用 dumpJson4laySet() 处理。jsonG04OrgSet、jsonG08PostalSet
+            //04、jsonG04OrgSet，获取组织信息。Set 数据需要分类处理，包括 jsonG04OrgSet、jsonG05ImSet、jsonG08PostalSet
             JSONObject jsonG04OrgSet = new JSONObject(new LinkedHashMap());
             m_jsonHeader.put("jsonG04OrgSet", jsonG04OrgSet);
             String arr2jsonG04OrgSet[][] = {
@@ -170,7 +170,7 @@ public class ContactHeader {
                     {"__mimetype_subtype_custom", String.valueOf(Organization.TYPE_CUSTOM)},  //Organization.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"__mimetype_subtype_work", String.valueOf(Organization.TYPE_WORK)},      //Organization.TYPE_WORK = 2;
                     {"__mimetype_subtype_other", String.valueOf(Organization.TYPE_OTHER)},    //Organization.TYPE_WORK = 3;
-                    {"__mimetype_fun", "fun04"},                                // Set 数据需要分类处理，用 dumpJson4laySet() 处理
+                    {"__mimetype_fun", "fun04"},                                // Set 数据需要分类处理，用 fun04_dumpJson4laySet() 处理
                     {"JobTitle", Organization.TITLE},                           //Organization.TITLE = "data4";
                     {"Department", Organization.DEPARTMENT},                    //Organization.DEPARTMENT = "data5";
                     {"JobDescription", Organization.JOB_DESCRIPTION},           //Organization.JOB_DESCRIPTION = "data6";
@@ -185,9 +185,9 @@ public class ContactHeader {
             // A、首先判断 Im.TYPE(data2) 的类型；
             // B、若 data2 中取出的是自定义类型 Im.TYPE_CUSTOM(0)，就要取 Im.LABEL(data3) 中的值；此时在 CUSTOM_PROTOCOL(data6) 中有一份和data3一样的数据
             // C、接着取 Im.PROTOCOL(data5) 的值，判断是哪种Im。
-            //05、jsonG05Im，即时消息。
-            m_jsonHeader.put("jsonG05Im", new JSONObject(new LinkedHashMap()));
-            String arr2jsonG05Im[][] = {
+            //05、jsonG05ImSet，即时消息。Set 数据需要分类处理，包括 jsonG04OrgSet、jsonG05ImSet、jsonG08PostalSet
+            m_jsonHeader.put("jsonG05ImSet", new JSONObject(new LinkedHashMap()));
+            String arr2jsonG05ImSet[][] = {
                     {"__mimetype_item", Im.CONTENT_ITEM_TYPE},                      //Im.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
                     {"__mimetype_data", Im.DATA},                                   //Im.DATA = "data1";
                     {"__mimetype_type", Im.TYPE},                                   //Im.TYPE = "data2";
@@ -198,7 +198,7 @@ public class ContactHeader {
                     {"__mimetype_subtype_home", String.valueOf(Im.TYPE_HOME)},      //Im.TYPE_HOME = 1;
                     {"__mimetype_subtype_work", String.valueOf(Im.TYPE_WORK)},      //Im.TYPE_WORK = 2;
                     {"__mimetype_subtype_other", String.valueOf(Im.TYPE_OTHER)},    //Im.TYPE_WORK = 3;
-                    {"__mimetype_fun", "fun05"},                                    // "jsonG05Im"，用 dumpJson4layIm2() 处理
+                    {"__mimetype_fun", "fun00"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"CustomIm", String.valueOf(Im.PROTOCOL_CUSTOM)},               //Im.PROTOCOL_CUSTOM = -1;
                     {"AimIm(CustomTypeIm)", String.valueOf(Im.PROTOCOL_AIM)},       //Im.PROTOCOL_AIM = 0;
                     {"MsnIm", String.valueOf(Im.PROTOCOL_MSN)},                     //Im.PROTOCOL_MSN = 1;
@@ -210,67 +210,7 @@ public class ContactHeader {
                     {"JabberIm", String.valueOf(Im.PROTOCOL_JABBER)},               //Im.PROTOCOL_JABBER = 7;
                     {"NetmeetingIm", String.valueOf(Im.PROTOCOL_NETMEETING)},       //Im.PROTOCOL_NETMEETING = 8;
             };
-            Arr2Json(arr2jsonG05Im, m_jsonHeader.getJSONObject("jsonG05Im"));
-            //待处理
-            /**
-             * <tr>
-             * <td>String</td>
-             * <td>{@link #DATA}</td>
-             * <td>{@link #DATA1}</td>
-             * <td></td>
-             * </tr>
-             * <tr>
-             * <td>int</td>
-             * <td>{@link #TYPE}</td>
-             * <td>{@link #DATA2}</td>
-             * <td>Allowed values are:
-             * <p>
-             * <ul>
-             * <li>{@link #TYPE_CUSTOM}. Put the actual type in {@link #LABEL}.</li>
-             * <li>{@link #TYPE_HOME}</li>
-             * <li>{@link #TYPE_WORK}</li>
-             * <li>{@link #TYPE_OTHER}</li>
-             * </ul>
-             * </p>
-             * </td>
-             * </tr>
-             * <tr>
-             * <td>String</td>
-             * <td>{@link #LABEL}</td>
-             * <td>{@link #DATA3}</td>
-             * <td></td>
-             * </tr>
-             * <tr>
-             * <td>String</td>
-             * <td>{@link #PROTOCOL}</td>
-             * <td>{@link #DATA5}</td>
-             * <td>
-             * <p>
-             * Allowed values:
-             * <ul>
-             * <li>{@link #PROTOCOL_CUSTOM}. Also provide the actual protocol name
-             * as {@link #CUSTOM_PROTOCOL}.</li>
-             * <li>{@link #PROTOCOL_AIM}</li>
-             * <li>{@link #PROTOCOL_MSN}</li>
-             * <li>{@link #PROTOCOL_YAHOO}</li>
-             * <li>{@link #PROTOCOL_SKYPE}</li>
-             * <li>{@link #PROTOCOL_QQ}</li>
-             * <li>{@link #PROTOCOL_GOOGLE_TALK}</li>
-             * <li>{@link #PROTOCOL_ICQ}</li>
-             * <li>{@link #PROTOCOL_JABBER}</li>
-             * <li>{@link #PROTOCOL_NETMEETING}</li>
-             * </ul>
-             * </p>
-             * </td>
-             * </tr>
-             * <tr>
-             * <td>String</td>
-             * <td>{@link #CUSTOM_PROTOCOL}</td>
-             * <td>{@link #DATA6}</td>
-             * <td></td>
-             * </tr>
-             * </table>
-             */
+            Arr2Json(arr2jsonG05ImSet, m_jsonHeader.getJSONObject("jsonG05ImSet"));
 
             //06、jsonG06NickName，获取昵称信息。
             m_jsonHeader.put("jsonG06NickName", new JSONObject(new LinkedHashMap()));
@@ -279,7 +219,7 @@ public class ContactHeader {
                     {"__mimetype_data", Nickname.NAME},                             //Nickname.NAME = "data1";
                     {"__mimetype_type", Nickname.TYPE},                             //Nickname.TYPE = "data2";
                     {"__mimetype_label", Nickname.LABEL},                           //Nickname.LABEL = "data3";
-                    {"__mimetype_fun", "fun00"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customNickName", String.valueOf(Nickname.TYPE_CUSTOM)},       //Nickname.TYPE_CUSTOM = 0;
                     {"defaultNickName", String.valueOf(Nickname.TYPE_DEFAULT)},     //Nickname.TYPE_DEFAULT = 1;
                     {"otherNickName", String.valueOf(Nickname.TYPE_OTHER_NAME)},    //Nickname.TYPE_OTHER_NAME = 2;
@@ -291,17 +231,17 @@ public class ContactHeader {
 
             //07、jsonG07Note，获取备注信息。
             m_jsonHeader.put("jsonG07Note", new JSONObject(new LinkedHashMap()));
-            String arr2jsonG07Note[][] = {                      //无 xxx.TYPE_CUSTOM(实际类型在 LABEL 中)，用 dumpJson4layAll() 处理
-                    {"__mimetype_item", Note.CONTENT_ITEM_TYPE},   //Note.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/note";
-                    {"__mimetype_fun", "fun02"},                //无需处理 xxx.TYPE_CUSTOM，用 dumpJson4layAll() 处理
-                    {"note", Note.NOTE}                         //Note.NOTE = "data1";
+            String arr2jsonG07Note[][] = {                          //无 xxx.TYPE_CUSTOM(实际类型在 LABEL 中)，用 dumpJson4layAll() 处理
+                    {"__mimetype_item", Note.CONTENT_ITEM_TYPE},    //Note.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/note";
+                    {"__mimetype_fun", "fun02"},                    //无需处理 xxx.TYPE_CUSTOM，用 dumpJson4layAll() 处理
+                    {"note", Note.NOTE}                             //Note.NOTE = "data1";
             };
             Arr2Json(arr2jsonG07Note, m_jsonHeader.getJSONObject("jsonG07Note"));
 
-            //08、jsonG08PostalSet，查找通讯地址。Set 数据需要分类处理，用 dumpJson4laySet() 处理
+            //08、jsonG08PostalSet，查找通讯地址。Set 数据需要分类处理，包括 jsonG04OrgSet、jsonG05ImSet、jsonG08PostalSet
             JSONObject jsonG08PostalSet = new JSONObject(new LinkedHashMap());
             m_jsonHeader.put("jsonG08PostalSet", jsonG08PostalSet);
-            String arr2jsonG08PostalSet[][] = {                                     //有 xxx.TYPE_CUSTOM(实际类型在 LABEL 中)，用 dumpJson4lay() 处理
+            String arr2jsonG08PostalSet[][] = {                                     //有 xxx.TYPE_CUSTOM(实际类型在 LABEL 中)，用 fun00_dumpJson4lay() 处理
                     {"__mimetype_item", StructuredPostal.CONTENT_ITEM_TYPE},        //StructuredPostal.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address_v2";
                     {"__mimetype_data", StructuredPostal.FORMATTED_ADDRESS},        //StructuredPostal.FORMATTED_ADDRESS = "data1";
                     {"__mimetype_type", StructuredPostal.TYPE},                     //StructuredPostal.TYPE = "data2";
@@ -310,7 +250,7 @@ public class ContactHeader {
                     {"__mimetype_subtype_home", String.valueOf(StructuredPostal.TYPE_HOME)},      //StructuredPostal.TYPE_HOME = 1;
                     {"__mimetype_subtype_work", String.valueOf(StructuredPostal.TYPE_WORK)},      //StructuredPostal.TYPE_WORK = 2;
                     {"__mimetype_subtype_other", String.valueOf(StructuredPostal.TYPE_OTHER)},    //StructuredPostal.TYPE_WORK = 3;
-                    {"__mimetype_fun", "fun04"},                                    // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun04"},                                    // Set 数据需要分类处理，用 fun04_dumpJson4laySet() 处理
                     {"Street", StructuredPostal.STREET},                            //StructuredPostal.STREET = "data4";
                     {"Box", StructuredPostal.POBOX},                                //StructuredPostal.POBOX = "data5";
                     {"Area", StructuredPostal.NEIGHBORHOOD},                        //StructuredPostal.NEIGHBORHOOD = "data6";
@@ -339,7 +279,7 @@ public class ContactHeader {
                     {"__mimetype_type", Website.TYPE},                      //Website.URL = "data2";
                     {"__mimetype_label", Website.LABEL},                    //Website.URL = "data3";
                     {"__mimetype_4", Website.DATA},                         //Website.DATA = "data1";
-                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customWebsite", String.valueOf(Website.TYPE_CUSTOM)}, //Website.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"homepage", String.valueOf(Website.TYPE_HOMEPAGE)},    //Website.TYPE_HOMEPAGE = 1;
                     {"blog", String.valueOf(Website.TYPE_BLOG)},            //Website.TYPE_BLOG = 2;
@@ -358,7 +298,7 @@ public class ContactHeader {
                     {"__mimetype_data", Event.START_DATE},                  //Event.START_DATE = "data1";
                     {"__mimetype_type", Event.TYPE},                        //Event.TYPE = "data2";
                     {"__mimetype_label", Event.LABEL},                      //Event.LABEL = "data3";
-                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customEvent", String.valueOf(Event.TYPE_CUSTOM)},     //Event.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"anniversary", String.valueOf(Event.TYPE_ANNIVERSARY)},//Event.TYPE_ANNIVERSARY = 1;
                     {"otherday", String.valueOf(Event.TYPE_OTHER)},         //Event.TYPE_OTHER = 2;
@@ -373,7 +313,7 @@ public class ContactHeader {
                     {"__mimetype_data", Relation.NAME},                                     //Relation.NAME = "data1";
                     {"__mimetype_type", Relation.TYPE},                                     //Relation.TYPE = "data2";
                     {"__mimetype_label", Relation.LABEL},                                   //Relation.LABEL = "data3";
-                    {"__mimetype_fun", "fun00"},                                            // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                                            // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customRelation", String.valueOf(Relation.TYPE_CUSTOM)},               //Relation.TYPE_CUSTOM = 0;    //Put the actual type in LABEL
                     {"assistant", String.valueOf(Relation.TYPE_ASSISTANT)},                 //Relation.TYPE_ASSISTANT = 1;
                     {"brother", String.valueOf(Relation.TYPE_BROTHER)},                     //Relation.TYPE_BROTHER = 2;
@@ -399,7 +339,7 @@ public class ContactHeader {
                     {"__mimetype_data", SipAddress.SIP_ADDRESS},            //SipAddress.DATA = "data1";
                     {"__mimetype_type", SipAddress.TYPE},                   //SipAddress.TYPE = "data2";
                     {"__mimetype_label", SipAddress.LABEL},                 //SipAddress.LABEL = "data3";
-                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 dumpJson4lay() 处理
+                    {"__mimetype_fun", "fun00"},                            // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                     {"customSip", String.valueOf(SipAddress.TYPE_CUSTOM)},  //SipAddress.TYPE_CUSTOM = 0
                     {"homeSip", String.valueOf(SipAddress.TYPE_HOME)},      //SipAddress.TYPE_HOME = 1;
                     {"workSip", String.valueOf(SipAddress.TYPE_WORK)},      //SipAddress.TYPE_WORK = 2;
@@ -419,7 +359,7 @@ public class ContactHeader {
                 //为避免与联系人信息标识重名，前面添加双下划线
                 json.put("__first", sArr[1]);       // sArr[1] 用于存放 mimetype 类型编码
                 json.put("__second", "0");  // 用于存放用户值
-                //json.put("__third", "");    // 用于存放字段名前缀
+                //json.put("__third", "");                // 用于存放字段名前缀
                 jsonObject.put(sArr[0], json);            // sArr[0] 用于存放 mimetype 类型可读标题
 
                 //经输出后查看，混乱无用

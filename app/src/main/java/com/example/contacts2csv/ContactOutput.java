@@ -167,7 +167,8 @@ public class ContactOutput {
                         String mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject("__mimetype_item").getString("__first").trim();
                         if (sMimetype.equals(mimetype)) {   // 根据 sMimetype 类型确定 key1
                             switch (getMimetype4lay(key1, "__mimetype_fun")) {
-                                case "fun00":  // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
+                                case "fun00":   // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
+                                case "fun04":   // Set 数据需要分类处理，包括 jsonG04OrgSet、jsonG05ImSet、jsonG08PostalSet
                                     fun00_dumpJson4lay(sContactId, key1, cursor, 0);
                                     break;
                                 case "fun01":   // "jsonG01Phone"，需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
@@ -177,13 +178,6 @@ public class ContactOutput {
                                     fun02_dumpJson4layAll(sContactId, key1, cursor);
                                     break;
                                 case "fun03":   // "jsonG03Photo"，单独用 dumpPhoto() 处理
-                                    break;
-                                case "fun04":   // Set 数据需用 dumpJson4laySet() 分类处理。包括 jsonG04OrgSet、jsonG08PostalSet
-                                    fun00_dumpJson4lay(sContactId, key1, cursor, 0);
-                                    break;
-                                case "fun05":   // "jsonG05Im"，用 fun05_dumpJson4layIm2() 处理
-                                    //fun05_dumpJson4layIm2(sContactId, key1, cursor, 0);
-                                    fun00_dumpJson4lay(sContactId, key1, cursor, 0);
                                     break;
                                 default:
                                     break;
@@ -499,7 +493,7 @@ public class ContactOutput {
         int iSubtype = cursor.getInt(cursor.getColumnIndex(type));      // subtype 为子类型，比如 xxx.TYPE_HOME、xxx.TYPE_WORK、...
         String prefix = getPrefix(String.valueOf(iSubtype), key1);      // 根据 subtype 值，取得类型前缀。处理 __mimetype_subtype_ 字段
 
-        // 处理 jsonG05Im
+        // 处理 jsonG05ImSet
         String protocal = getMimetype4lay(key1, "__mimetype_protocal").trim();
         if (!TextUtils.isEmpty(protocal)){  //若存在 "__mimetype_protocal" 字段，便取出 xxx.PROTOCOL(data5) 的值，作为子类型
             iSubtype = cursor.getInt(cursor.getColumnIndex(protocal));
