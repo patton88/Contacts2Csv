@@ -312,15 +312,22 @@ public class ContactOutput {
             Iterator<String> it = jsonSource.getJSONObject(key).keys();
             while (it.hasNext()) {
                 String key3 = it.next();        //key3: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
-                String keyTemp = key3;
-                // 去头查找法
-                while(keyTemp.length() > keyNew.length()) {
-                    keyTemp = keyTemp.substring(1);   //去掉头一个字符
+
+                // 去头查找法。优化算法
+                if (key3.length() > keyNew.length()) {
+                    String keyTemp = key3.substring(key3.length() - keyNew.length());   // 取 key3 尾部字符串
                     if (keyTemp.equals(keyNew)) {
                         keyNew2 = key3;
                         break;
                     }
                 }
+//                while(keyTemp.length() > keyNew.length()) { //效率较低
+//                    keyTemp = keyTemp.substring(1);   //去掉头一个字符
+//                    if (keyTemp.equals(keyNew)) {
+//                        keyNew2 = key3;
+//                        break;
+//                    }
+//                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
