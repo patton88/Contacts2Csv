@@ -755,10 +755,10 @@ public class ContactOutput {
         }
         String filename = "";
         try {
-            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1.jpg";
+            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1.png";
             filename = filename.replace(" ", "_");  // 文件名中不能有空格
         } catch (JSONException e) {
-            filename = "anonymity_1.jpg";
+            filename = "anonymity_1.png";
             e.printStackTrace();
         }
         saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename);
@@ -807,10 +807,10 @@ public class ContactOutput {
 
             // 将Bitmap压缩成PNG编码，质量为100%存储
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            //bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos);
             //java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.graphics.Bitmap.compress
             // (android.graphics.Bitmap$CompressFormat, int, java.io.OutputStream)' on a null object reference
-            //bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
             bos.flush();
             bos.close();
         } catch (FileNotFoundException e) {
