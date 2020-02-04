@@ -148,15 +148,11 @@ public class MainActivity extends Activity implements OnClickListener {
         m_etQuality = findViewById(R.id.et_quality);
         m_etQuality.setOnClickListener(this);
         //默认不选中
-        m_chkPhoto.setChecked(false);
-        setPhotoWidgetEnabled(false);
+        doCheck(m_chkPhoto, false);
+        //m_chkPhoto.setChecked(false);
+        //setPhotoWidgetEnabled(false);
         m_etQuality.setText("100"); // 默认100
         m_etQuality.setFilters(new InputFilter[]{new InputFilterMinMax(1,100)});    //设置监听
-
-        //启动时选中导出联系人
-        m_rbtnArrMode[1].setChecked(true);
-        //setInsertWidgetEnabled(false);
-        //setOutputWidgetEnabled(true);
 
         //处理动态权限申请。权限不足，就进入申请权限死循环
         int iHasWriteStoragePermission = -11;
@@ -167,10 +163,29 @@ public class MainActivity extends Activity implements OnClickListener {
             iHasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
             iHasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
         }
+
+        //启动时选中导出联系人
+        doCheck(m_rbtnArrMode[1], true);
+        //m_rbtnArrMode[1].setChecked(true);
+        //setInsertWidgetEnabled(false);
+        //setOutputWidgetEnabled(true);
+    }
+
+    // 实现 CheckBox 选择事件的对应操作
+    private void doCheck(Button chk, boolean check) {
+        if (RadioButton.class.isInstance(chk)){
+            ((RadioButton)chk).setChecked(check);
+        } else if (CheckBox.class.isInstance(chk)){
+            ((CheckBox)chk).setChecked(check);
+        }
+        View v = new View(this);
+        v.setId(chk.getId());
+        onClick(v);
     }
 
     @Override
     public void onClick(View v) {
+        File file;
         switch (v.getId()) {
             case R.id.btn_help:
                 createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
@@ -188,12 +203,14 @@ public class MainActivity extends Activity implements OnClickListener {
             case R.id.rbtn_insert:
 //                setInsertWidgetEnabled(true);
 //                setOutputWidgetEnabled(false);
-                File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
+                file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
             case R.id.rbtn_output:
 //                setInsertWidgetEnabled(false);
 //                setOutputWidgetEnabled(true);
+                file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
+                m_etFilePath.setText(file.getAbsolutePath());
                 break;
             case R.id.chk_photo:
                 setPhotoWidgetEnabled(m_chkPhoto.isChecked());
