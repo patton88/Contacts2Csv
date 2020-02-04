@@ -17,4 +17,9 @@
     <string name="tv_quality">图像质量（1到100）：</string>
     <string name="et_quality">1到100</string>
 
+    <string name="tv_deal_namesake">联系人同名处理方式：</string>
+    <string name="rbtn_merge">合并</string>
+    <string name="rbtn_only_old">只保留旧的</string>
+    <string name="rbtn_only_new">只保留新的</string>
+
 </resources>

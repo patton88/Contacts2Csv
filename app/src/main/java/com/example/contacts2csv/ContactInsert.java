@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import android.net.Uri;
 import android.content.ContentUris;
@@ -21,7 +22,10 @@ import android.provider.ContactsContract.RawContacts;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 public class ContactInsert {
+    private JSONObject m_jsonContactData;            //用于存放获取的所有记录数据
     private final String m_sTAG = getClass().getSimpleName();
     private int m_iSuccessCount = 0;
     private int m_iFailCount = 0;
@@ -29,6 +33,7 @@ public class ContactInsert {
     private ArrayList<ContactInfo> m_contactArrayList;
 
     private void init() {
+        m_jsonContactData = new JSONObject(new LinkedHashMap());
         m_iSuccessCount = 0;
         m_iFailCount = 0;
     }
@@ -167,6 +172,48 @@ public class ContactInsert {
         }
         //System.out.println("doInsertContact_" + n++);
         return true;
+    }
+
+    private void aryList2json(ArrayList<String> arrayList) {
+        for (int i = 0; i < arrayList.size(); i++) {
+            String str = arrayList.get(i);
+            String[] sArr = str.split(",", -1); //添加后面的参数，保证结尾空字符串不会被丢弃。
+
+            if (0 == i) {
+                m_sHead = sArr;    //得到表头存入 m_sHead
+                continue;
+            }
+
+
+
+
+            ContactInfo contactInfo = new ContactInfo();
+            for (int j = 0; j < m_sHead.length; j++) {
+                if (m_sHead[j].equals("displayName")) {
+                    contactInfo.displayName = sArr[j];
+                } else if (m_sHead[j].equals("lastName")) {
+                    contactInfo.lastName = sArr[j];
+                } else if (m_sHead[j].equals("firstName")) {
+                    contactInfo.firstName = sArr[j];
+                } else if ((m_sHead[j].indexOf("mobileEmail") == -1) && (m_sHead[j].indexOf("mobile") != -1)) {
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.mobileNum.add(sArr[j]);
+                    }
+                } else if (m_sHead[j].indexOf("Email") != -1) {
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.Email.add(sArr[j]);
+                    }
+                } else if (m_sHead[j].indexOf("Im") != -1) {
+                    if (!TextUtils.isEmpty(sArr[j])) {
+                        contactInfo.Im.add(sArr[j]);
+                    }
+                }
+            }
+
+            //contactArrayList.add(contactInfo);
+            //System.out.println("handleReadStrings_" + n++);
+        }
+        //System.out.println("handleReadStrings_" + n++);
     }
 
     //java String split 使用注意点和问题
