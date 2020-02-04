@@ -6,54 +6,29 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btn_help"
+    <TextView
+        android:id="@+id/tv_deal_mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/help"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/tv_help"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_help"
-        app:layout_constraintVertical_bias="0.02" />
-
-    <TextView
-        android:id="@+id/tv_mode"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="@string/choose_mode"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_help"
-        app:layout_constraintVertical_bias="0.03" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <RadioGroup
         android:id="@+id/rbtn_group_fun"
-        android:layout_width="84dp"
-        android:layout_height="61dp"
+        android:orientation="horizontal"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_mode">
+        app:layout_constraintTop_toBottomOf="@+id/tv_deal_mode">
 
         <RadioButton
             android:id="@+id/rbtn_insert"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:text="@string/insert" />
 
@@ -87,64 +62,104 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_filepath"
         app:layout_constraintVertical_bias="0.015" />
 
-    <TextView
-        android:id="@+id/tv_os"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/choose_os"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_filepath"
-        app:layout_constraintVertical_bias="0.1" />
-
-    <RadioGroup
-        android:id="@+id/rbtn_group_os"
+    <CheckBox
+        android:id="@+id/chk_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
+        android:text="@string/deal_photo"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_os">
+        app:layout_constraintTop_toBottomOf="@+id/et_filepath" />
+
+    <RadioGroup
+        android:id="@+id/rbtn_group_photo_type"
+        android:orientation="horizontal"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chk_photo">
 
         <RadioButton
-            android:id="@+id/rbtn_win"
-            android:layout_width="wrap_content"
+            android:id="@+id/rbtn_png"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="@string/radio_win" />
+            android:text="@string/radio_png" />
 
         <RadioButton
-            android:id="@+id/rbtn_linux"
+            android:id="@+id/rbtn_jpg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/radio_linux" />
+            android:text="@string/radio_jpg" />
     </RadioGroup>
+
+    <TextView
+        android:id="@+id/tv_quality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/tv_quality"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
+
+    <EditText
+        android:id="@+id/et_quality"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:ems="10"
+        android:hint="@string/et_quality"
+        android:inputType="numberDecimal"
+        app:layout_constraintStart_toEndOf="@+id/tv_quality"
+        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
 
     <Button
         android:id="@+id/btn_insert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="46dp"
         android:text="@string/insert_contact"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_os"
-        app:layout_constraintVertical_bias="0.05" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_quality" />
+
+    <Button
+        android:id="@+id/btn_del_all"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="46dp"
+        android:text="删除所有联系人"
+        app:layout_constraintStart_toEndOf="@+id/btn_insert"
+        app:layout_constraintTop_toBottomOf="@+id/tv_quality" />
 
     <Button
         android:id="@+id/btn_output"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="16dp"
         android:text="@string/output_contact"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_insert"
-        app:layout_constraintVertical_bias="0.05" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
+
+    <Button
+        android:id="@+id/btn_help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/help"
+        app:layout_constraintStart_toEndOf="@+id/btn_output"
+        app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
     <TextView
         android:id="@+id/tv_result"
@@ -156,16 +171,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_output"
         app:layout_constraintVertical_bias="0.7" />
-
-    <Button
-        android:id="@+id/btn_del_all"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="96dp"
-        android:layout_marginLeft="96dp"
-        android:layout_marginTop="12dp"
-        android:text="删除所有联系人"
-        app:layout_constraintStart_toEndOf="@+id/btn_insert"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_os" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

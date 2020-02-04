@@ -788,6 +788,7 @@ public class ContactOutput {
     //Android笔记（15）将bitmap存为文件。2017-07-19
     //原文链接：https://blog.csdn.net/yangye608/article/details/75332958
     // filename 不带后缀；photoType : jpg、png；iQuality：压缩质量 50 - 100
+    // 默认字符变量、特殊类型变量可以不带前缀，比如：String path、BufferedOutputStream bos
     private File saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality){
         File dirFile = new File(path);
         if(!dirFile.exists()){

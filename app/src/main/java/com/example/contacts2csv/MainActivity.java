@@ -15,10 +15,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -35,9 +38,13 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button m_btnInsert;
     private Button m_btnOutput;
     private Button m_btnDelAll;
+    private CheckBox m_chkPhoto;
     private TextView m_tvResult;
     private TextView m_tvOs;
-    private RadioButton[] m_rbtnArrOs = new RadioButton[2];
+    private TextView m_tvQuality;
+    private EditText m_etQuality;
+
+    private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
     private RadioButton[] m_rbtnArrMode = new RadioButton[2];
     public static String m_sPathDownloads;    //存储数据的默认路径
     public String m_sFilePath;              //文件路径
@@ -124,20 +131,32 @@ public class MainActivity extends Activity implements OnClickListener {
         m_btnDelAll = (Button) findViewById(R.id.btn_del_all);
         m_btnDelAll.setOnClickListener(this);
         m_tvResult = (TextView) findViewById(R.id.tv_result);
-        m_tvOs = (TextView) findViewById(R.id.tv_os);
-        m_rbtnArrOs[0] = (RadioButton) findViewById(R.id.rbtn_win);
-        // set gbk default
-        m_rbtnArrOs[0].setChecked(true);
-        m_rbtnArrOs[1] = (RadioButton) findViewById(R.id.rbtn_linux);
+        m_tvOs = (TextView) findViewById(R.id.chk_photo);
+        m_rbtnArrPhoto[0] = (RadioButton) findViewById(R.id.rbtn_png);
+        // set png default
+        m_rbtnArrPhoto[0].setChecked(true);
+        m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
         m_rbtnArrMode[0] = (RadioButton) findViewById(R.id.rbtn_insert);
         m_rbtnArrMode[0].setOnClickListener(this);
         m_rbtnArrMode[1] = (RadioButton) findViewById(R.id.rbtn_output);
         m_rbtnArrMode[1].setOnClickListener(this);
 
+        m_chkPhoto = findViewById(R.id.chk_photo);
+        m_chkPhoto.setOnClickListener(this);
+        m_tvQuality = findViewById(R.id.tv_quality);
+        m_tvQuality.setOnClickListener(this);
+        m_etQuality = findViewById(R.id.et_quality);
+        m_etQuality.setOnClickListener(this);
+        //默认不选中
+        m_chkPhoto.setChecked(false);
+        setPhotoWidgetEnabled(false);
+        m_etQuality.setText("100"); // 默认100
+        m_etQuality.setFilters(new InputFilter[]{new InputFilterMinMax(1,100)});    //设置监听
+
         //启动时选中导出联系人
         m_rbtnArrMode[1].setChecked(true);
-        setInsertWidgetEnabled(false);
-        setOutputWidgetEnabled(true);
+        //setInsertWidgetEnabled(false);
+        //setOutputWidgetEnabled(true);
 
         //处理动态权限申请。权限不足，就进入申请权限死循环
         int iHasWriteStoragePermission = -11;
@@ -167,27 +186,89 @@ public class MainActivity extends Activity implements OnClickListener {
                 m_remove.delAllContacts();
                 break;
             case R.id.rbtn_insert:
-                setInsertWidgetEnabled(true);
-                setOutputWidgetEnabled(false);
+//                setInsertWidgetEnabled(true);
+//                setOutputWidgetEnabled(false);
                 File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
             case R.id.rbtn_output:
-                setInsertWidgetEnabled(false);
-                setOutputWidgetEnabled(true);
+//                setInsertWidgetEnabled(false);
+//                setOutputWidgetEnabled(true);
+                break;
+            case R.id.chk_photo:
+                setPhotoWidgetEnabled(m_chkPhoto.isChecked());
                 break;
         }
     }
 
+    public class InputFilterMinMax implements InputFilter {
+        private float min, max;
+
+        public InputFilterMinMax(float min, float max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public InputFilterMinMax(String min, String max) {
+            this.min = Float.valueOf(min);
+            this.max = Float.valueOf(max);
+        }
+
+        //Android Edittext 限制输入的最大值和最小值以及小数点值位数。原创莎莉mm 2019-06-27
+        //原文链接：https://blog.csdn.net/qq_35936174/article/details/93885088
+
+        //1、首先设置Edittext的输入类型
+        //两种方法：（XML布局）
+        //android:inputType="numberDecimal"
+        //或者
+        //edit.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_CLASS_NUMBER);
+        //2、重写 InputFilter
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            try {
+                //限制小数点位数
+                if (source.equals(".") && dest.toString().length() == 0) {
+                    return "0.";
+                }
+                if (dest.toString().contains(".")) {
+                    int index = dest.toString().indexOf(".");
+                    int mlength = dest.toString().substring(index).length();
+                    if (mlength == 3) {
+                        return "";
+                    }
+                }
+                //限制大小
+                float input = Float.valueOf(dest.toString() + source.toString());
+                if (isInRange(min, max, input))
+                    return null;
+            } catch (Exception nfe) { }
+            return "";
+        }
+        //3 添加监听：
+        // edit.setFilters(new InputFilter[]{new InputFilterMinMax(0,100)});
+
+        private boolean isInRange(float a, float b, float c) {
+            return b > a ? c >= a && c <= b : c >= b && c <= a;
+        }
+    }
+
+    //为处理联系人 Photo 设置控件状态
+    private void setPhotoWidgetEnabled(boolean bEnable) {
+        m_rbtnArrPhoto[0].setEnabled(bEnable);
+        m_rbtnArrPhoto[1].setEnabled(bEnable);
+        m_tvQuality.setEnabled(bEnable);
+        m_etQuality.setEnabled(bEnable);
+    }
+
     //为导出联系人、导出联系人设置控件状态
     private void setInsertWidgetEnabled(boolean bEnable) {
-        m_rbtnArrOs[0].setEnabled(bEnable);
-        m_rbtnArrOs[1].setEnabled(bEnable);
+        m_rbtnArrPhoto[0].setEnabled(bEnable);
+        m_rbtnArrPhoto[1].setEnabled(bEnable);
         m_btnInsert.setEnabled(bEnable);
         m_etFilePath.setEnabled(bEnable);
         int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
-        m_rbtnArrOs[0].setVisibility(iVisable);
-        m_rbtnArrOs[1].setVisibility(iVisable);
+        m_rbtnArrPhoto[0].setVisibility(iVisable);
+        m_rbtnArrPhoto[1].setVisibility(iVisable);
         m_tvOs.setVisibility(iVisable);
         if (!bEnable) {
             m_tvResult.setText(ExtraStrings.NO_TEXT);
