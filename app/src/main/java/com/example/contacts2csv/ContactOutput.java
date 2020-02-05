@@ -271,11 +271,11 @@ public class ContactOutput {
     }
 
     //将mJsonObject的内容转储到mJsonResult中
-    //private void Dump2Json(String key2, int n, String key, JSONObject jsonSource, JSONObject jsonTarget) throws JSONException {
-    // key 为：contact592、contact593、...
+    //private void Dump2Json(String key2, int n, String key1, JSONObject jsonSource, JSONObject jsonTarget) throws JSONException {
+    // key1 为：contact592、contact593、...
     // key2 为："homeNum"、"mobile"、...
     // keyNew 为："homeNum1"、"homeNum2"、...、"mobile1"、"mobile2"、...
-    private void Dump2Json(String key, String key2, int n, JSONObject jsonSource, JSONObject jsonTarget) {
+    private void Dump2Json(String key1, String key2, int n, JSONObject jsonSource, JSONObject jsonTarget) {
         for (int i = 0; i <= n; i++) {
             String keyNew = key2;
             if (i > 1) {
@@ -285,17 +285,17 @@ public class ContactOutput {
                 //不能显示 "QqIm" 问题的原因。因为前面已经添加前缀变为 "otherQqIm"、"otherQqIm2"、...，而 m_contactHeader 中的原始字段名仍然是 "QqIm"，
                 //  所以遍历 m_contactHeader 中的字段，无法存储已经改名的 "otherQqImx" 字段的值
 
-                //所以，判断 if (jsonSource.getJSONObject(key).has(keyNew)) 时，必须进行特殊处理。
+                //所以，判断 if (jsonSource.getJSONObject(key1).has(keyNew)) 时，必须进行特殊处理。
                 // keyNew 为："QqIm"、"QqIm2"、"QqIm3"、...
-                // 想在 jsonTarget 中应查找的 key 为："otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
+                // 想在 jsonTarget 中应查找的 key1 为："otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
 
-                // 遍历 jsonSource 的 key ，若找到 key 的末尾包含 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
-                keyNew = findKey(jsonSource, key, keyNew);
+                // 遍历 jsonSource 的 key3s ，若找到 key3 的末尾含有 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
+                keyNew = findKey(jsonSource, key1, keyNew);
 
-                if (jsonSource.getJSONObject(key).has(keyNew)) {
-                    jsonTarget.getJSONObject(key).put(keyNew, jsonSource.getJSONObject(key).getString(keyNew));
+                if (jsonSource.getJSONObject(key1).has(keyNew)) {
+                    jsonTarget.getJSONObject(key1).put(keyNew, jsonSource.getJSONObject(key1).getString(keyNew));
                 } else {
-                    jsonTarget.getJSONObject(key).put(keyNew, "");
+                    jsonTarget.getJSONObject(key1).put(keyNew, "");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -303,14 +303,14 @@ public class ContactOutput {
         }
     }
 
-    // key 为：contact592、contact593、...
+    // key1 为：contact592、contact593、...
     // keyNew 为："QqIm"、"QqIm2"、"QqIm3"、...
-    // 遍历 jsonSource 的 key ，若找到 key 的末尾包含 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
-    private String findKey(JSONObject jsonSource, String key, String keyNew) {
+    // 遍历 jsonSource 的 key3s ，若找到 key3 的末尾含有 keyNew 子串，则返回找到的 keyNew2 = key; 否则返回 keyNew2 = keyNew
+    private String findKey(JSONObject jsonSource, String key1, String keyNew) {
         String keyNew2 = keyNew;
 
         try {
-            Iterator<String> it = jsonSource.getJSONObject(key).keys();
+            Iterator<String> it = jsonSource.getJSONObject(key1).keys();
             while (it.hasNext()) {
                 String key3 = it.next();        //key3: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
 

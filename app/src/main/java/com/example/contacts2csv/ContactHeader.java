@@ -40,8 +40,8 @@ public class ContactHeader {
     //联系人所有字段的MIMETYPE解释
     //import android.provider.ContactsContract.CommonDataKinds.xxx;
     //来自MIMETYPE字段官方文档：https://developer.android.google.cn/reference/android/provider/ContactsContract.Data.html
-    String[] MIMETYPES = new String[]{
-            //数据字段                          //存储json变量            //旧存储json变量        //数据内容
+    String[] MIMETYPES_temp = new String[]{
+            //mimetype数据字段                  //存储json变量            //旧存储json变量        //数据内容
             StructuredName.CONTENT_ITEM_TYPE,   //jsonG00StructName       //jsonG00StructName     //联系人名称 (G：Group)
             Phone.CONTENT_ITEM_TYPE,            //jsonG01Phone            //jsonG01Phone          //联系人电话
             Email.CONTENT_ITEM_TYPE,            //jsonG02Email            //jsonG02Email          //邮箱
@@ -55,7 +55,7 @@ public class ContactHeader {
             Website.CONTENT_ITEM_TYPE,          //jsonG10WebSet           //jsonG08WebType        //网站
             Event.CONTENT_ITEM_TYPE,            //jsonG11Event            //jsonG03Event          //重要日期
             Relation.CONTENT_ITEM_TYPE,         //jsonG12Relation         //                      //家庭关系
-            SipAddress.CONTENT_ITEM_TYPE        //jsonG13SipAddress       //                      //网络电话
+            SipAddress.CONTENT_ITEM_TYPE,       //jsonG13SipAddress       //                      //网络电话
     };
 
     public ContactHeader() {
@@ -82,6 +82,12 @@ public class ContactHeader {
                     {"phoneticFirstName", StructuredName.PHONETIC_FAMILY_NAME},     //StructuredName.PHONETIC_MIDDLE_NAME = "data9";
             };
             Arr2Json(arr2JsonG00StructName, m_jsonHeader.getJSONObject("jsonG00StructName"));
+            //以下测试表明，初始化数组时，最后多一个英文逗号，不会增加一个空元素
+            //System.out.println("jsonG00StructName.length() = " + m_jsonHeader.getJSONObject("jsonG00StructName").length());
+            //I/System.out: jsonG00StructName.length() = 11
+            //还有 AS3.5 AVD 未启动时，点击 AS3.5 的 Run'app' 按钮启动 app 时，AVD 明明已经正常启动，而 app 往往始一直卡死等待，app 界面迟迟不出现
+            // 这可能是因为 AVD 启动时，后台自动加载上次关机时正在运行的旧版 app (不显示界面)，导致 AVD 重启时新版 app 无法正常启动。
+            // 解决办法是点击 AVD 中的任务键，关闭已经在后台运行的旧版 app (不显示界面)，新版 app 便会正常运行
 
             //Android 获取联系人的号码的Phone.TYPE_CUSTOM类型处理
             //......

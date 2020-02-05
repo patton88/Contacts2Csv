@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         false, ExtraStrings.DIALOG_TYPE_HELP);
                 break;
             case R.id.btn_insert:
+                m_remove.delAllContacts();
                 insertContact();
                 break;
             case R.id.btn_output:
