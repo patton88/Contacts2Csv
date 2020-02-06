@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import android.database.Cursor;
 import android.net.Uri;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -20,7 +19,6 @@ import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.RawContacts;
 import android.text.TextUtils;
-import android.util.Log;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -30,19 +28,14 @@ import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
-import android.widget.Toast;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.example.contacts2csv.MainActivity.m_Fun;
-import static com.example.contacts2csv.MainActivity.m_MA;
 
 public class ContactInsert {
     private JSONObject m_jsonInsertContact;        //用于存放获取的所有记录数据
@@ -124,10 +117,8 @@ public class ContactInsert {
                     case Phone.CONTENT_ITEM_TYPE:            //jsonG01Phone
                     case Email.CONTENT_ITEM_TYPE:            //jsonG02Email
                     case Organization.CONTENT_ITEM_TYPE:     //jsonG04OrgSet
-                        addMimeItem02(mime, jsonItem, jsonMime, context, contactId);
-                        break;
                     case Im.CONTENT_ITEM_TYPE:               //jsonG05ImSet
-                        addMimeItem03(mime, jsonItem, jsonMime, context, contactId);
+                        addMimeItem02(mime, jsonItem, jsonMime, context, contactId);
                         break;
                     case Nickname.CONTENT_ITEM_TYPE:         //jsonG06NickName
                     case Note.CONTENT_ITEM_TYPE:             //jsonG07Note
@@ -144,12 +135,6 @@ public class ContactInsert {
                     default:
                         break;
                 }
-                //System.out.println("contactId_" + (n++) + " = " + contactId);
-                //I/System.out: contactId_0 = 605
-                //I/System.out: contactId_1 = 605
-                //I/System.out: contactId_8 = 605
-                //I/System.out: contactId_5 = 607
-                //I/System.out: contactId_12 = 607
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -158,93 +143,10 @@ public class ContactInsert {
         return true;
     }
 
-    private long addMimeItem03(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, long contactId) {
-        ContentValues cv = new ContentValues();
-
-        Iterator<String> it1 = jsonItem.keys();
-        while (it1.hasNext()) {
-            String key1 = it1.next();       //key1: "__mimetype_x"、"displayName"、"lastName"、...
-            //arr[0] = "QqIm"; arr[1] = "other"
-            String [] arr = findKey03(jsonMime, key1);  // 返回数组 {keyNew2, keyHead}
-            try {
-                if(TextUtils.isEmpty(jsonItem.getString(key1)) || !jsonMime.has(arr[0])) {
-                    //break;    //若没有该 key 便终止循环，后面的联系人数据便无法导入
-                    continue;
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            String mime = "";
-            String val = "";
-            String mimeData = "";
-            String valData = "";
-
-            //必须每次清空，否则可能会有重复数据
-            cv.clear();
-            cv.put(Data.RAW_CONTACT_ID, contactId);
-            cv.put(Data.MIMETYPE, mimeItem);
-
-            //if (contactInfo.Im.size() > 0) {
-            //    //insert phone
-            //    for (String data : contactInfo.Im) {
-            //        contentValues.clear();
-            //        contentValues.put(Data.RAW_CONTACT_ID, rowId);
-            //        contentValues.put(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
-            //        contentValues.put(Im.TYPE, Im.TYPE_OTHER);        //Im数据类型（目前手机中读取出来的值都为3，Im.TYPE_OTHER，自定义类型）
-
-            //        //contentValues.put(Im.LABEL, Im.PROTOCOL_QQ);    //Im真正的类型，对应在源码中的Im.PROTOCOL
-            //        contentValues.put(Im.PROTOCOL, Im.PROTOCOL_QQ);   //Im真正的类型，对应在源码中的Im.PROTOCOL
-
-            //        contentValues.put(Im.DATA, data);                 //用户填写的Im数据
-            //        context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, contentValues);
-            //    }
-            //}
-
-            //{"__mimetype_type", Im.TYPE},                                   //Im.TYPE = "data2";
-            //{"__mimetype_protocal", Im.PROTOCOL},                           //Im.PROTOCOL = "data5";
-            //{"__mimetype_subtype_other", String.valueOf(Im.TYPE_OTHER)},    //Im.TYPE_WORK = 3;
-            //{"QqIm", String.valueOf(Im.PROTOCOL_QQ)},                       //Im.PROTOCOL_QQ = 4;
-
-            //arr[0] = "QqIm"; arr[1] = "other"
-            String __mimetype_subtype_ = "__mimetype_subtype_" + arr[1]; //"__mimetype_subtype_custom"、"__mimetype_subtype_home"、...
-            try {
-                if(jsonMime.has("__mimetype_type") || jsonMime.has("__mimetype_data")) {
-                    //contentValues.put(Im.TYPE, Im.TYPE_OTHER);        //Im数据类型（目前手机中读取出来的值都为3，Im.TYPE_OTHER，自定义类型）
-                    mime = jsonMime.getJSONObject("__mimetype_type").getString("__first");
-                    val = jsonMime.getJSONObject(__mimetype_subtype_).getString("__first");
-                    if (!TextUtils.isEmpty(val)) {  // 非空便加入
-                        cv.put(mime, val);
-                    }
-
-                    //contentValues.put(Im.PROTOCOL, Im.PROTOCOL_QQ);   //Im真正的类型，对应在源码中的Im.PROTOCOL
-                    mime = jsonMime.getJSONObject("__mimetype_protocal").getString("__first");
-                    val = jsonMime.getJSONObject(arr[0]).getString("__first");
-                    if (!TextUtils.isEmpty(val)) {  // 非空便加入
-                        cv.put(mime, val);
-                    }
-
-                    //contentValues.put(Im.DATA, data);                 //用户填写的Im数据
-                    mime = jsonMime.getJSONObject("__mimetype_data").getString("__first");
-                    val = jsonItem.getString(key1);
-                    if (!TextUtils.isEmpty(val)) {  // 非空便加入
-                        cv.put(mime, val);
-                        context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return contactId;
-    }
-
     // keyNew: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
     // 返回数组 {keyNew2, keyHead}
     // 遍历 jsonMime 的 keys ，若找到 keyNew 的末尾含有 key 子串，则返回找到的 key、keyHead 组成的数组; 否则返回 keyNew2、keyHead 组成的数组
-    private String [] findKey03(JSONObject jsonMime, String keyNew) {
+    private String [] findKey02(JSONObject jsonMime, String keyNew) {
         String keyNew2 = keyNew.replaceAll("\\d+$",""); // java 正则去掉字符串后面的数字
         String keyHead = "";
         String keyTail = "";
@@ -270,46 +172,78 @@ public class ContactInsert {
         Iterator<String> it1 = jsonItem.keys();
         while (it1.hasNext()) {
             String key1 = it1.next();       //key1: "__mimetype_x"、"displayName"、"lastName"、...
-            String mime = "";
-            String val = "";
-            String mimeData = "";
-            String valData = "";
-
-            //必须每次清空，否则可能会有重复数据
-            cv.clear();
-            cv.put(Data.RAW_CONTACT_ID, contactId);
-            cv.put(Data.MIMETYPE, mimeItem);
-
-            if(!jsonMime.has(findKey(jsonMime, key1))) {
-                //break;    //若没有该 key 便终止循环，后面的联系人数据便无法导入
+            String [] arr = findKey02(jsonMime, key1);  // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"
+            try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
+                if(TextUtils.isEmpty(jsonItem.getString(key1)) || !jsonMime.has(arr[0])) {
+                    continue;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
                 continue;
             }
 
-            try {
-                if(jsonMime.has("__mimetype_type") || jsonMime.has("__mimetype_data")) {
-                    mime = jsonMime.getJSONObject("__mimetype_type").getString("__first");
-                    val = jsonMime.getJSONObject(findKey(jsonMime, key1)).getString("__first");
+            String mime = "";
+            String val = "";
 
-                    mimeData = jsonMime.getJSONObject("__mimetype_data").getString("__first");
-                    valData = jsonItem.getString(key1);
-                } else {
-                    mime = jsonMime.getJSONObject(findKey(jsonMime, key1)).getString("__first");
+            //必须每次清空，否则可能会有重复数据
+            cv.clear();                                     //   对jsonItem中每条有内容的用户数据处理步骤
+            cv.put(Data.RAW_CONTACT_ID, contactId);         //1、contactID
+            cv.put(Data.MIMETYPE, mimeItem);                //2、MIMETYPE
+
+            try {
+                // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
+                if(jsonMime.has("__mimetype_type") || jsonMime.has("__mimetype_data")) {
+                    //contentValues.put(Im.PROTOCOL, Im.PROTOCOL_QQ);               //3、是否包含 "__mimetype_protocal"，处理 jsonG05ImSet
+                    // 处理 jsonG05ImSet
+                    String protocal = getMimetype(jsonMime, "__mimetype_protocal");
+                    if (!TextUtils.isEmpty(protocal)) {  //若存在 "__mimetype_protocal" 字段，便取出 xxx.PROTOCOL(data5) 的值，作为子类型
+                        val = getMimetype(jsonMime, arr[0]);
+                        if (!TextUtils.isEmpty(val)) {  // 非空便加入
+                            cv.put(protocal, val);
+                        }
+                        //contentValues.put(Im.TYPE, Im.TYPE_OTHER);                //4、处理数据TYPE。Im数据类型（目前手机中读取出来的值都为3，Im.TYPE_OTHER，自定义类型）
+                        mime = getMimetype(jsonMime, "__mimetype_type");
+                        val = getMimetype(jsonMime, "__mimetype_subtype_" + arr[1]);//"__mimetype_subtype_custom"、"__mimetype_subtype_home"、...
+                        if (!TextUtils.isEmpty(val)) {  // 非空便加入
+                            cv.put(mime, val);
+                        }
+                    } else {    //contentValues.put(Phone.TYPE, Phone.TYPE_MOBILE); //4、处理数据TYPE
+                        mime = getMimetype(jsonMime, "__mimetype_type");
+                        val = getMimetype(jsonMime, arr[0]);    //Phone.TYPE_CUSTOM、Phone.TYPE_HOME、...
+                        //System.out.println("mime = " + mime + ", val = " + val);
+                        if (!TextUtils.isEmpty(val)) {  // 非空便加入
+                            cv.put(mime, val);
+                        }
+                    }
+
+                    //contentValues.put(Im.DATA, data);                             //5、处理用户数据
+                    mime = getMimetype(jsonMime, "__mimetype_data");
                     val = jsonItem.getString(key1);
+                    if (!TextUtils.isEmpty(val)) {  // 非空便加入
+                        cv.put(mime, val);
+                        context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);
+                    }
+                } else {    //无需处理 xxx.TYPE_CUSTOM，用 fun02_dumpJson4layAll() 处理
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            if (!TextUtils.isEmpty(valData)) {  // 非空便加入
-                cv.put(mimeData, valData);
-            }
-            if (!TextUtils.isEmpty(val)) {  // 非空便加入
-                cv.put(mime, val);
-                context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);
-            }
         }
 
         return contactId;
+    }
+
+    private String getMimetype(JSONObject json, String key) {
+        String mimetype = "";
+        try {
+            if (json.has(key)) {
+                mimetype = json.getJSONObject(key).getString("__first").trim();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return mimetype;
     }
 
     private void logContentValues(ContentValues cv) {
@@ -319,7 +253,6 @@ public class ContactInsert {
         }
         System.out.println("}");
     }
-
 
     private long addMimeItem00(String mime, JSONObject jsonItem, JSONObject jsonMime, Context context) {
         long contactId = -1;
