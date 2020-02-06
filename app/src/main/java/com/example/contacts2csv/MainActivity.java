@@ -166,7 +166,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         //启动时选中导出联系人
-        doCheck(m_rbtnArrMode[1], true);
+        //doCheck(m_rbtnArrMode[1], true);
+        doCheck(m_rbtnArrMode[0], true);
+
         //m_rbtnArrMode[1].setChecked(true);
         //setInsertWidgetEnabled(false);
         //setOutputWidgetEnabled(true);
@@ -352,8 +354,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_threadInsert = null;
         }
         m_threadInsert = new Thread(new InsertRunnable(this, sPath));
-        createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE,
-                true, ExtraStrings.DIALOG_TYPE_INSERT);
+        //createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE, true, ExtraStrings.DIALOG_TYPE_INSERT);
+        doInsertContact();  //测试用
         //System.out.println("insertContact_" + n++);
     }
 

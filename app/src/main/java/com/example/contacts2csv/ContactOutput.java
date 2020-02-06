@@ -13,8 +13,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,11 +27,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.Groups;
 
 import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
@@ -72,6 +81,8 @@ public class ContactOutput {
     public boolean outputAllContacts(Context context, String sPath) {
         String sContacts = getAllContacts();
         writeFile(sPath, sContacts);
+
+        getAllGroupInfo(m_MA);
         return true;
     }
 
@@ -147,11 +158,11 @@ public class ContactOutput {
         m_jsonContactData2 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
 
-//        try {  // 实现 Logcat 输出 m_jsonContactData2 完整结构
-//            System.out.println("m_jsonContactData2 : \n" + m_jsonContactData2.toString(4));
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        //        try {  // 实现 Logcat 输出 m_jsonContactData2 完整结构
+        //            System.out.println("m_jsonContactData2 : \n" + m_jsonContactData2.toString(4));
+        //        } catch (JSONException e) {
+        //            e.printStackTrace();
+        //        }
 
         return traverseJSON(m_jsonContactData2);
     }
@@ -202,7 +213,9 @@ public class ContactOutput {
     private String getMimetype4lay(String key1, String key2) {
         String mimetype = "";
         try {   //W/System.err: org.json.JSONException: No value for __mimetype_protocal
-            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first").trim();
+            if (m_contactHeader.m_jsonHeader.getJSONObject(key1).has(key2)) {
+                mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__first").trim();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -322,13 +335,13 @@ public class ContactOutput {
                         break;
                     }
                 }
-//                while(keyTemp.length() > keyNew.length()) { //效率较低
-//                    keyTemp = keyTemp.substring(1);   //去掉头一个字符
-//                    if (keyTemp.equals(keyNew)) {
-//                        keyNew2 = key3;
-//                        break;
-//                    }
-//                }
+                //                while(keyTemp.length() > keyNew.length()) { //效率较低
+                //                    keyTemp = keyTemp.substring(1);   //去掉头一个字符
+                //                    if (keyTemp.equals(keyNew)) {
+                //                        keyNew2 = key3;
+                //                        break;
+                //                    }
+                //                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -433,14 +446,16 @@ public class ContactOutput {
     }
 
     private String funRemove(String str) {
-        str = str.replaceAll("^(0+)", "");  //java正则去掉字符串前导0
-        str = str.replace(" ", "");
-        str = str.replace("-", "");
-        str = str.replace("+86", "");
-        str = str.replace("+", "");
-        str = str.replace("\\", "");
-        str = str.replace("(", "");
-        str = str.replace(")", "");
+        if (!TextUtils.isEmpty(str)) {
+            str = str.replaceAll("^(0+)", "");  //java正则去掉字符串前导0
+            str = str.replace(" ", "");
+            str = str.replace("-", "");
+            str = str.replace("+86", "");
+            str = str.replace("+", "");
+            str = str.replace("\\", "");
+            str = str.replace("(", "");
+            str = str.replace(")", "");
+        }
         return str;
     }
 
@@ -476,7 +491,7 @@ public class ContactOutput {
     private String getPrefix(String subtype, String key1) {
         String prefix = getKey(subtype, key1); //JSONObject中根据value获取key值，必须value值不重复
         //System.out.println("key1 = " + key1 + "；subtype = " + subtype + "；prefix = " + prefix);
-        if (prefix.indexOf("__mimetype_subtype_") != -1){
+        if (prefix.indexOf("__mimetype_subtype_") != -1) {
             prefix = prefix.substring(prefix.lastIndexOf("_") + 1); // 截取 prefix 最后一个 "_" 后面的字串，"custom"、"home"、"work"、"other"
         } else {
             prefix = "";
@@ -502,7 +517,7 @@ public class ContactOutput {
 
         // 处理 jsonG05ImSet
         String protocal = getMimetype4lay(key1, "__mimetype_protocal").trim();
-        if (!TextUtils.isEmpty(protocal)){  //若存在 "__mimetype_protocal" 字段，便取出 xxx.PROTOCOL(data5) 的值，作为子类型
+        if (!TextUtils.isEmpty(protocal)) {  //若存在 "__mimetype_protocal" 字段，便取出 xxx.PROTOCOL(data5) 的值，作为子类型
             iSubtype = cursor.getInt(cursor.getColumnIndex(protocal));
         }
 
@@ -736,10 +751,10 @@ public class ContactOutput {
         String typePhoto = getMimetype4lay(key1, "photo").trim();  // typePhoto 为：Photo.PHOTO
 
         Bitmap photoBmp = null;
-//        Cursor dataCursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, new String[]{Photo.PHOTO},
-//                ContactsContract.Data.CONTACT_ID + "=?" + " AND " +
-//                        ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'",
-//                new String[]{String.valueOf(contactId)}, null);
+        //        Cursor dataCursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, new String[]{Photo.PHOTO},
+        //                ContactsContract.Data.CONTACT_ID + "=?" + " AND " +
+        //                        ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'",
+        //                new String[]{String.valueOf(contactId)}, null);
         if (cursor != null) {
             if (cursor.getCount() > 0) {
                 //cursor.moveToFirst();
@@ -789,9 +804,9 @@ public class ContactOutput {
     //原文链接：https://blog.csdn.net/yangye608/article/details/75332958
     // filename 不带后缀；photoType : jpg、png；iQuality：压缩质量 50 - 100
     // 默认字符变量、特殊类型变量可以不带前缀，比如：String path、BufferedOutputStream bos
-    private File saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality){
+    private File saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality) {
         File dirFile = new File(path);
-        if(!dirFile.exists()){
+        if (!dirFile.exists()) {
             dirFile.mkdir();
         }
 
@@ -803,9 +818,9 @@ public class ContactOutput {
         //I/System.out: filePath = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang Wu_2.png
         try {
             // 将Bitmap压缩成PNG编码，质量为100%存储
-//            ByteArrayOutputStream os = new ByteArrayOutputStream();
-//            bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
-//            byte[] photoPng = os.toByteArray();
+            //            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            //            bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+            //            byte[] photoPng = os.toByteArray();
 
             //若 bmp 为空，会报错
             //java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.graphics.Bitmap.compress
@@ -833,4 +848,305 @@ public class ContactOutput {
         }
         return file;
     }
+
+    // 处理组信息 Begin
+
+    //其实联系人分组实现原理是：
+    //  根据 Data.MIMETYPE 为 GroupMembership 类型，data1 中的组 id 来进行分组。
+    // 设置 ContactsContract.Data.CONTENT_URI 中的 ContactsContract.Data.MIMETYPE 为
+    // ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE 类型，data1 字段为某一分组的组ID，
+    // 该值可查询 ContactsContract.Groups.CONTENT_URI(该表保存了各分组的组_id，组名称 title 等分组信息)得到。
+    //例如查询具有某一分组的所有联系人的ContactsContract.RawContacts._ID，代码如下
+    public static final String[] RAW_PROJECTION = new String[]{
+            ContactsContract.Data.RAW_CONTACT_ID,
+    };
+    public static final String RAW_CONTACTS_WHERE =
+            ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID + "=?" + " and " +
+                    ContactsContract.Data.MIMETYPE + "=" + "'" +
+                    ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE + "'";
+    //具有同一组id的原始联系人的id
+    //Cursor mMemberRawIds =rc.query(URI, RAW_PROJECTION, RAW_CONTACTS_WHERE, new String[]{""+groupId}, "data1 asc");
+
+    public class GroupEntity {
+        private int groupId;
+        private String groupName;
+
+        public int getGroupId() {
+            return groupId;
+        }
+
+        public void setGroupId(int groupId) {
+            this.groupId = groupId;
+        }
+
+        public String getGroupName() {
+            return groupName;
+        }
+
+        public void setGroupName(String groupName) {
+            this.groupName = groupName;
+        }
+    }
+
+    //Android通讯录之分组联系人，Ziv最后发布于2017-10-15
+    //https://blog.csdn.net/qq_30180559/article/details/78242861
+    // 获取所有的 联系人分组信息
+    public List<GroupEntity> getAllGroupInfo(Context context) {
+        List<GroupEntity> groupList = new ArrayList<GroupEntity>();
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(Groups.CONTENT_URI, null, null, null, null);
+            while (cursor.moveToNext()) {
+                GroupEntity ge = new GroupEntity();
+                int groupId = cursor.getInt(cursor.getColumnIndex(Groups._ID));             // 组id
+                String groupName = cursor.getString(cursor.getColumnIndex(Groups.TITLE));   // 组名
+                ge.setGroupId(groupId);
+                ge.setGroupName(groupName);
+                Log.i("MainActivity", "group id:" + groupId + ">>groupName:" + groupName);
+                groupList.add(ge);
+                ge = null;
+            }
+            return groupList;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public class ContactEntity {
+        private int contactId;
+        private String contactName;
+        private String telNumber;
+
+        public int getContactId() {
+            return contactId;
+        }
+
+        public void setContactId(int contactId) {
+            this.contactId = contactId;
+        }
+
+        public String getContactName() {
+            return contactName;
+        }
+
+        public void setContactName(String contactName) {
+            this.contactName = contactName;
+        }
+
+        public String getTelNumber() {
+            return telNumber;
+        }
+
+        public void setTelNumber(String telNumber) {
+            this.telNumber = telNumber;
+        }
+    }
+
+    /**
+     * 获取某个分组下的 所有联系人信息
+     * 思路：通过组的id 去查询 RAW_CONTACT_ID, 通过RAW_CONTACT_ID去查询联系人要查询得到 data表的Data.RAW_CONTACT_ID字段
+     */
+    public List<ContactEntity> getAllContactsByGroupId(int groupId, Context context) {
+        String[] RAW_PROJECTION = new String[]{ContactsContract.Data.RAW_CONTACT_ID,};
+        String RAW_CONTACTS_WHERE = ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID + "=?" + " and " +
+                ContactsContract.Data.MIMETYPE + "=" + "'" + ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE + "'";
+
+        // 通过分组的id 查询得到RAW_CONTACT_ID
+        Cursor cursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, RAW_PROJECTION,
+                RAW_CONTACTS_WHERE, new String[]{groupId + ""}, "data1 asc");
+
+        List<ContactEntity> contactList = new ArrayList<ContactEntity>();
+
+        while (cursor.moveToNext()) {
+            // RAW_CONTACT_ID
+            int col = cursor.getColumnIndex("raw_contact_id");
+            int raw_contact_id = cursor.getInt(col);
+
+            // Log.i("getAllContactsByGroupId", "raw_contact_id:" + raw_contact_id);
+
+            ContactEntity ce = new ContactEntity();
+            ce.setContactId(raw_contact_id);
+
+            Uri dataUri = Uri.parse("content://com.android.contacts/data");
+            Cursor dataCursor = context.getContentResolver().query(dataUri, null,
+                    "raw_contact_id=?", new String[]{raw_contact_id + ""}, null);
+
+            while (dataCursor.moveToNext()) {
+                String data1 = dataCursor.getString(dataCursor.getColumnIndex("data1"));
+                String mime = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
+
+                if ("vnd.android.cursor.item/phone_v2".equals(mime)) {
+                    ce.setTelNumber(data1);
+                } else if ("vnd.android.cursor.item/name".equals(mime)) {
+                    ce.setContactName(data1);
+                }
+            }
+
+            dataCursor.close();
+            contactList.add(ce);
+            ce = null;
+        }
+        cursor.close();
+        return contactList;
+    }
+
+
+    ////方法是 通过分组的id 查询 该组的所有联系人
+    ////思路是 通过分组的id 查询出data表里的raw_contact_id
+    //// 通过raw_contact_id去查询联系人的姓名电话号码
+    ////self 是上下文  id是联系人分组的id
+    //
+    //Cursor cursor = self
+    //	.getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+    //	 new String[] { ContactsContract.Data.RAW_CONTACT_ID },
+    //	ContactsContract.Data.MIMETYPE
+    //	+ " =' "
+    //	+ ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE
+    //	+ " ' " + " and " +ContactsContract.CommonDataKinds.GroupMembership._ID
+    //	+ " = ? "
+    //
+    //	, new String[] { String.valueOf(id) }, null);
+    ////打印出来为false 我搞了半天还是没有搞懂
+    //Log.e(TAG, "查询该组的联系人cursor********************：" + cursor.moveToFirst());
+
+    //我想做个android通讯录的demo。
+    //功能主要用：操作系统的通讯录联系人。这个比较简单，通过URL可以获取到，我可以实现。
+    //但是：我想获取联系人分组，就没有思路做了。android模拟器里，没有分组这个选项，只有收藏，但是真机里有分组这个功能的。
+    //那么要怎么样去，获取手机通讯录里设置的分组呢？大家说说思路吧！
+    //功能主要包括：可以在demo里获取手机通讯录里的分组，修改分组名字，可以添加分组，删除分组，添加组成员，移除组成员！
+    //谢谢大家了！我在百度 google里搜了很多资料，还是一头雾水。后来自己去研究了android通讯录数据库，大家帮忙指点下哦
+    //0 2012-07-14 16:23:42
+
+    private String COLUMN_NAME = "1";
+    private String COLUMN_NUMBER = "2";
+
+    // 查询分组的联系人方法 outid是分组的id。https://bbs.csdn.net/topics/390134732
+    public ArrayList<HashMap<String, String>> getContactsByGroupId(int outid, Context context) {
+        Log.e(m_sTAG, "开始查询该组的联系人********************id:" + outid);
+        ArrayList<HashMap<String, String>> mymaplist = new ArrayList<HashMap<String, String>>();
+        // 思路 我们通过组的id 去查询 RAW_CONTACT_ID, 通过RAW_CONTACT_ID去查询联系人
+        // 要查询得到 data表的Data.RAW_CONTACT_ID字段
+        String[] RAW_PROJECTION = new String[]{ContactsContract.Data.RAW_CONTACT_ID,};
+
+        String RAW_CONTACTS_WHERE = GroupMembership.GROUP_ROW_ID + "=?" + " and "
+                + ContactsContract.Data.MIMETYPE + "=" + "'" + GroupMembership.CONTENT_ITEM_TYPE + "'";
+        // 通过分组的id outid；查询得到RAW_CONTACT_ID
+        Cursor cursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, RAW_PROJECTION,
+                RAW_CONTACTS_WHERE, new String[]{"" + outid}, "data1 asc");
+
+        while (cursor.moveToNext()) {
+            HashMap<String, String> map = new HashMap<String, String>();
+            // RAW_CONTACT_ID
+            int contactId = cursor.getInt(cursor.getColumnIndex("raw_contact_id"));
+            Log.e(m_sTAG, "查询该组的联系人的raw_contact_id****************：" + contactId);
+            String[] RAW_PROJECTION02 = new String[]{StructuredName.DISPLAY_NAME,};
+            String RAW_CONTACTS_WHERE02 = StructuredName.CONTACT_ID + "=?" + " and "
+                    + ContactsContract.Data.MIMETYPE + "=" + "'" + StructuredName.CONTENT_ITEM_TYPE + "'";
+            // 通过raw_contact_id的值获取用户的名字
+            Cursor cursor01 = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, RAW_PROJECTION02,
+                    RAW_CONTACTS_WHERE02, new String[]{"" + contactId}, "data1 asc");
+            String contacts_name = null;
+            while (cursor01.moveToNext()) {
+                contacts_name = cursor01.getString(cursor01.getColumnIndex("data1"));
+                Log.e(m_sTAG, "联系人姓名:" + contacts_name);
+            }
+            map.put(COLUMN_NAME, contacts_name);
+
+            String[] RAW_PROJECTION03 = new String[]{Phone.NUMBER,};
+
+            String RAW_CONTACTS_WHERE03 =
+                    Phone.CONTACT_ID + "=?" + " and " + ContactsContract.Data.MIMETYPE + "=" + "'" + Phone.CONTENT_ITEM_TYPE + "'";
+            // 有多个号码时
+            // String num_str = cursor
+            // .getString(cursor
+            // .getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+            // int num = Integer.valueOf(num_str);
+            // if (num > 0) {
+
+            // 通过raw_contact_id 获取电话号码
+            Cursor cursor02 = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, RAW_PROJECTION03,
+                    RAW_CONTACTS_WHERE03, new String[]{"" + contactId}, "data1 asc");
+            String phonenum = null;
+            while (cursor02.moveToNext()) {
+                phonenum = cursor02.getString(cursor02.getColumnIndex("data1"));
+                // map.put("phonekey", phonenum);
+                Log.e(m_sTAG, "联系人电话号码:" + phonenum);
+            }
+            map.put(COLUMN_NUMBER, phonenum);
+            // }
+            mymaplist.add(map);
+        }
+        Log.e(m_sTAG, "结束查询改组的联系人，返回联系人的集合********************" + mymaplist.size());
+        return mymaplist;
+    }
+
+
+    //2012-07-19 11:20:47只看TA 引用 举报 #3    得分 0	随雨诺
+    //先顶下，lz有个问题啊，你这分组的outid是哪里来的？自己跑到数据库区看的？
+    //还有：代码比较乱，希望大家给优化！谢谢！
+    // 查询没有分组的联系人
+    public ArrayList<HashMap<String, String>> getContactsByNoGroup(Context context) {
+        Log.e(m_sTAG, "开始查询没有分组的联系人********************");
+        ArrayList<HashMap<String, String>> mymaplist = new ArrayList<HashMap<String, String>>();
+        // 思路 我们通过组的id 去查询 RAW_CONTACT_ID, 通过RAW_CONTACT_ID去查询联系人
+        // 查询未分组联系人的过滤条件
+        String RAW_CONTACTS_IN_NO_GROUP_SELECTION = "1=1) and " + Data.RAW_CONTACT_ID + " not in( select "
+                + Data.RAW_CONTACT_ID + " from view_data_restricted where " + Data.MIMETYPE + "='"
+                + GroupMembership.CONTENT_ITEM_TYPE + "') group by (" + Data.RAW_CONTACT_ID;
+
+        Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI,
+                null, RAW_CONTACTS_IN_NO_GROUP_SELECTION, null, null);
+
+        Log.e(m_sTAG, "查询该组的联系人cursorgetCount********************：" + cursor.getCount());
+        while (cursor.moveToNext()) {
+            HashMap<String, String> map = new HashMap<String, String>();
+            // RAW_CONTACT_ID
+            int contactId = cursor.getInt(cursor.getColumnIndex("raw_contact_id"));
+            Log.e(m_sTAG, "查询该组的联系人cursor***联系人的id****************：" + contactId);
+            String[] RAW_PROJECTION02 = new String[]{StructuredName.DISPLAY_NAME,};
+
+            String RAW_CONTACTS_WHERE02 = StructuredName.CONTACT_ID + "=?" + " and "
+                    + ContactsContract.Data.MIMETYPE + "=" + "'" + StructuredName.CONTENT_ITEM_TYPE + "'";
+
+            Cursor cursor01 = context.getContentResolver().query(
+                    ContactsContract.Data.CONTENT_URI, RAW_PROJECTION02,
+                    RAW_CONTACTS_WHERE02, new String[]{"" + contactId}, "data1 asc");
+            String contacts_name = null;
+            while (cursor01.moveToNext()) {
+                contacts_name = cursor01.getString(cursor01.getColumnIndex("data1"));
+                Log.e(m_sTAG, "联系人姓名:" + contacts_name);
+            }
+            map.put(COLUMN_NAME, contacts_name);
+            // 有多个号码时
+
+            String[] RAW_PROJECTION03 = new String[]{Phone.NUMBER,};
+
+            String RAW_CONTACTS_WHERE03 = Phone.CONTACT_ID + "=?" + " and "
+                    + ContactsContract.Data.MIMETYPE + "=" + "'" + Phone.CONTENT_ITEM_TYPE + "'";
+
+            // String num_str = cursor
+            // .getString(cursor
+            // .getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+            // int num = Integer.valueOf(num_str);
+            // if (num > 0) {
+            Cursor cursor02 = context.getContentResolver().query(
+                    ContactsContract.Data.CONTENT_URI, RAW_PROJECTION03,
+                    RAW_CONTACTS_WHERE03, new String[]{"" + contactId}, "data1 asc");
+            String phonenum = null;
+            while (cursor02.moveToNext()) {
+                phonenum = cursor02.getString(cursor02.getColumnIndex("data1"));
+                map.put("phonekey", phonenum);
+                Log.e(m_sTAG, "联系人电话号码:" + phonenum);
+            }
+            map.put(COLUMN_NUMBER, phonenum);
+            // }
+            mymaplist.add(map);
+        }
+        Log.e(m_sTAG, "结束查询没有分组的联系人，返回结合********************" + mymaplist.size());
+        return mymaplist;
+    }
+
+    // 处理组信息 End
 }

@@ -6,6 +6,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -292,5 +295,14 @@ public class CommonFun {
 
     public void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    // Logcat 输出 JSONObject 完整结构
+    public void logJson(JSONObject json) {
+        try {
+            System.out.println("JSONObject : \n" + json.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
