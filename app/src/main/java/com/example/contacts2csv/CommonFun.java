@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
 
 /**
@@ -181,6 +182,55 @@ public class CommonFun {
         String nameNew = namePure + "_" + String.valueOf(n) + "." + getFileSuffix(filePath + "/" + fileName);
         //System.out.println("nameNew = " + nameNew);
         return nameNew;
+    }
+
+    // filePath 为目录绝对路径，：filenamePure 不含后缀的文件名称
+    // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt(_x).txt 名称
+    public String GetNewPhotoFileName(String filePath, String filenamePure, int iFlag) {
+        //filenamePure = filenamePure.substring(0, filenamePure.length() - 2);      //去除文件名后面的2个字符：_x
+        if (filenamePure.indexOf("_") > 0) {      // 若 filenamePure 末尾包含 "_ddd" 数字子串，便去除
+            if (m_Fun.isNum(filenamePure.substring(filenamePure.lastIndexOf("_") + 1))) {
+                filenamePure = filenamePure.substring(0, filenamePure.lastIndexOf("_"));
+            }
+        }
+
+        File fileDir = new File(filePath);
+        String[] filesNames = fileDir.list();   //获取 filePath 目录下的所有文件名称
+        int n = 0;
+        String suffix = "";
+        for (String name : filesNames){         //NamePhoneNicks_x.png
+            suffix = getFileSuffix(name);
+            //System.out.println("suffix = " + suffix);
+
+            if (!(suffix.equals("bmp") || suffix.equals("png") || suffix.equals("jpg"))) {
+                continue;   // 若文件后缀非 "bmp"、"png"、"jpg"，则跳过后续处理，继续循环
+            }
+
+            String sp = getFileNamePure(name);
+            if (sp.equals(filenamePure)) {
+                n = -1;
+                break;
+            } else if (sp.length() >= (filenamePure.length() + 2) && (sp.substring(0, filenamePure.length())).equals(filenamePure)){
+                String s = sp.substring(filenamePure.length() + 1, sp.length());
+                if (isNum(s)) {
+                    n = Math.max(n, Integer.valueOf(s));
+                }
+            }
+        }
+
+        String filenameNew = "";
+        // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+        if (iFlag < 0 || iFlag > 1 || (1 == iFlag && 0 == n)) {
+            return  "";    //iFlag非法，或者没有找到最新回执信息文件 Receipt(_x).txt 名称
+        } else if (0 == iFlag) {
+            n = (0 == n) ? 1 : (n + 1);
+        } else if (1 == iFlag && -1 == n) {
+            filenameNew = filenamePure + suffix;
+        } else {
+            filenameNew = filenamePure + "_" + String.valueOf(n) + "." + suffix;
+        }
+        //System.out.println("filenameNew = " + filenameNew);
+        return filenameNew;
     }
 
     //android 重命名文件 原创cw2004100021124 发布于2017-10-17 16:38:46 阅读数 6526  收藏

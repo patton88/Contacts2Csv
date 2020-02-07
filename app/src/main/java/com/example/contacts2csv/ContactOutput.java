@@ -771,7 +771,7 @@ public class ContactOutput {
         String filename = "";
         try {
             filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1";
-            filename = filename.replace(" ", "_");  // 文件名中不能有空格
+            filename = filename.replace(" ", "_");  // 文件名空格全部替换为"_"
         } catch (JSONException e) {
             filename = "anonymity_1";
             e.printStackTrace();
