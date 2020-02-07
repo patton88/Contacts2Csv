@@ -118,7 +118,7 @@ public class ContactInsert {
                         fun01_addMimeItem(mime, jsonItem, jsonMime, context, contactId);    // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
                         break;
                     case Photo.CONTENT_ITEM_TYPE:            //jsonG03Photo
-                        fun03_addMimePhoto(mime, jsonItem, jsonMime, context, contactId);
+                        fun03_addMimePhoto(mime, jsonItem, jsonMime, context, contactId);   // 专门处理 jsonG03Photo，用 fun03_addMimePhoto() 处理
                         break;
                     default:
                         break;
@@ -133,122 +133,9 @@ public class ContactInsert {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 处理导入头像 Begin
-    //安卓获取当前系统SDK版本，原创斌Builder 最后发布于2019-03-16
-    //原文链接：https://blog.csdn.net/qq_17314535/article/details/88601869
-    //int sdkVersion = android.os.Build.VERSION.SDK_INT;	// 根据返回整数判断安卓版本
-
-    //通过代码设置Android联系人的头像。转载strliu 最后发布于2012-07-24 16:32:18 阅读数 2726  收藏
-    //https://blog.csdn.net/strliu/article/details/7780941
-    //private final static boolean OldSDK = (System.getSDKVersionNumber() < 5) ? true : false;
-    private final static boolean OldSDK = (android.os.Build.VERSION.SDK_INT < 5) ? true : false;
-
-    public static void setPersonPhotoBytes(Context context, byte[] b, long persionID, boolean Sync) {
-        if (OldSDK) {
-            Uri myPerson = ContentUris.withAppendedId(Contacts.People.CONTENT_URI, persionID);
-            Contacts.People.setPhotoData(context.getContentResolver(), myPerson, b);
-            if (!Sync) {
-                ContentValues values = new ContentValues();
-                values.put("_sync_dirty", 0);
-                context.getContentResolver().update(myPerson, values, null, null);
-            }
-        } else
-            setContactPhoto5(context.getContentResolver(), b, persionID, Sync);
-    }
-
-    private static void setContactPhoto5(ContentResolver c, byte[] bytes, long personId, boolean Sync) {
-        ContentValues values = new ContentValues();
-        Uri u = Uri.parse("content://com.android.contacts/data");
-        int photoRow = -1;
-        String where = "raw_contact_id = " + personId + " AND mimetype ='vnd.android.cursor.item/photo'";
-        Cursor cursor = c.query(u, null, where, null, null);
-        int idIdx = cursor.getColumnIndexOrThrow("_id");
-        if (cursor.moveToFirst()) {
-            photoRow = cursor.getInt(idIdx);
-        }
-        cursor.close();
-        values.put("raw_contact_id", personId);
-        values.put("is_super_primary", 1);
-        values.put("data15", bytes);
-        values.put("mimetype", "vnd.android.cursor.item/photo");
-        if (photoRow >= 0) {
-            c.update(u, values, " _id= " + photoRow, null);
-        } else {
-            c.insert(u, values);
-        }
-        if (!Sync) {
-            u = Uri.withAppendedPath(Uri.parse("content://com.android.contacts/raw_contacts"), String.valueOf(personId));
-            values = new ContentValues();
-            values.put("dirty", 0);
-            c.update(u, values, null, null);
-        }
-    }
-    // 专门处理 jsonG03Photo，用 fun03_addMimePhoto() 处理
-    private long fun03_addMimePhoto2(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, long contactId) {
-        //Uri contactUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, contactId);  //构建Uri
-        //Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DATA15);    //带路径
-
-        System.out.println("Mytest");
-        try {
-            System.out.println(jsonItem.getString("displayName"));
-            if (!jsonItem.getString("displayName").equals("Wang Wu")) {
-                return -1;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Bitmap sourceBitmap = null;
-        try {
-            FileInputStream fs = new FileInputStream("/storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png");
-            sourceBitmap = BitmapFactory.decodeStream(fs);
-            System.out.println("sourceBitmap Success");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        //修改联系人的头像。注意：经过测试发现，导入头像 byte[] 长度不能超过 1M，否则失败
-        //Bitmap sourceBitmap = BitmapFactory.decodeResource(m_MA.getResources(), R.drawable.img2);
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        // 将Bitmap压缩成PNG编码，质量为100%存储
-        sourceBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-        byte[] avatar = os.toByteArray();
-        ContentValues values = new ContentValues();
-        values.put(Data.RAW_CONTACT_ID, contactId);
-        values.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
-        values.put(Photo.PHOTO, avatar);
-        //android.database.sqlite.SQLiteException: unknown error (code 0 SQLITE_OK): Unable to convert BLOB to string
-        //context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values, null, null);   //已有头像才用更新
-        context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values); //没有头像只能用insert
-
-        //values.clear();// 添加头像
-        //values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, id);
-        //values.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
-        //ByteArrayOutputStream array = new ByteArrayOutputStream();
-        //card.getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, array);
-        //values.put(Photo.PHOTO, array.toByteArray());
-        //resolver.insert(android.provider.ContactsContract.Data.CONTENT_URI, values);
-
-        return contactId;
-    }
 
     // 专门处理 jsonG03Photo，用 fun03_addMimePhoto() 处理
     private long fun03_addMimePhoto(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, long contactId) {
-        //Uri contactUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, contactId);  //构建Uri
-        //Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DATA15);    //带路径
-
-//        //修改联系人的头像。注意：经过测试发现，导入头像 byte[] 长度不能超过 1M，否则失败
-//        //Bitmap sourceBitmap = BitmapFactory.decodeResource(m_MA.getResources(), R.drawable.img2);
-//        Bitmap sourceBitmap = null;
-//        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-//        // 将Bitmap压缩成PNG编码，质量为100%存储
-//        sourceBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-//        byte[] avatar = os.toByteArray();
-//        ContentValues values = new ContentValues();
-//        values.put(Data.RAW_CONTACT_ID, contactId);
-//        values.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
-//        values.put(Photo.PHOTO, avatar);
-//        context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, values, null, null);
-
         String photoFilePure = "";  // 头像文件名，无后缀
         try {
             photoFilePure = jsonItem.getString("displayName");  // 从 jsonItem 的 key ="displayName" 中取头像文件名
@@ -259,19 +146,16 @@ public class ContactInsert {
             e.printStackTrace();
         }
 
-        //1、以文件流的方式，假设sdcard里面有a.png图片
-        //FileInputStream fs = new FileInputStream("/sdcard/test.png");
-        //Bitmap bitmap = BitmapFactory.decodeStream(fs);
-
         photoFilePure = photoFilePure.replace(" ", "_");  // 文件名空格全部替换为"_"
         String photoFile = getPhotoPath(m_sPathDownloads, photoFilePure);// 获得头像文件绝对路径。filepath 为文件路径，filename 为无后缀文件名
+        //System.out.println("photoFile = " + photoFile);
+        //I/System.out: photoFile = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png
+        ///sdcard/                                      Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png
+
         FileInputStream fs = null;
         Bitmap bmpPhoto = null;
         if (!TextUtils.isEmpty(photoFile)) {
             try {
-                //System.out.println("photoFile = " + photoFile);
-                //I/System.out: photoFile = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png
-                ///sdcard/                                      Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png
                 fs = new FileInputStream(photoFile);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -284,7 +168,6 @@ public class ContactInsert {
             return -1;
         }
 
-        //System.out.println("photoFile = " + photoFile);
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         bmpPhoto.compress(Bitmap.CompressFormat.PNG, 100, os);  // 将Bitmap压缩成PNG编码，质量为100%存储
         byte[] avatarPhoto = os.toByteArray();
@@ -292,11 +175,9 @@ public class ContactInsert {
         ContentValues cv = new ContentValues();
         cv.clear();
         cv.put(Data.RAW_CONTACT_ID, contactId);
-        cv.put(Data.MIMETYPE, mimeItem);                //StructuredName.CONTENT_ITEM_TYPE
-        //cv.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
-        cv.put(getMime(jsonMime, "photo"), avatarPhoto);
-        //cv.put(Photo.PHOTO, avatarPhoto);
-        System.out.println("photoFile = " + photoFile);
+        cv.put(Data.MIMETYPE, mimeItem);                        //Photo.CONTENT_ITEM_TYPE
+        cv.put(getMime(jsonMime, "photo"), avatarPhoto);  //cv.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
+        System.out.println("photoFile = " + photoFile);         //cv.put(Photo.PHOTO, avatarPhoto);
         //context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, cv, null, null);   //已有头像才能用 update 更新
         context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);                 //没有头像只能用 insert 插入
 
@@ -306,8 +187,9 @@ public class ContactInsert {
     // 获得头像文件绝对路径。filepath 为文件路径，filename 为无后缀文件名
     private String getPhotoPath(String filepath, String filenamePure) {
         String photoPath = "";
-        // filePath 为目录绝对路径，：filenamePure 不含后缀的文件名称
-        // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt(_x).txt 名称
+
+        // 查找最新图片文件名。filePath 为目录绝对路径，filenamePure 不含后缀的文件名称
+        // iFlag：0，不重名的新文件名称；iFlag：1，最新文件 Wang_Wu_19 名称
         String filename = m_Fun.GetNewPhotoFileName(filepath + "/Photo", filenamePure, 1);
 
         File filePhoto = new File(filepath + "/Photo", filename);
@@ -315,6 +197,8 @@ public class ContactInsert {
             photoPath = filePhoto.getAbsolutePath();
         }
 
+        //System.out.println("photoPath = " + photoPath);
+        //I/System.out: photoPath = /storage/emulated/0/Android/data/com.example.contacts2csv/files/Download/Photo/Wang_Wu_9.png
         return photoPath;
     }
 

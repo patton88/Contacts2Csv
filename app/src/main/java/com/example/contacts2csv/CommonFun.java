@@ -184,8 +184,8 @@ public class CommonFun {
         return nameNew;
     }
 
-    // filePath 为目录绝对路径，：filenamePure 不含后缀的文件名称
-    // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt(_x).txt 名称
+    // 查找最新图片文件名。filePath 为目录绝对路径，filenamePure 不含后缀的文件名称
+    // iFlag：0，不重名的新文件名称；iFlag：1，最新文件 Wang_Wu_19 名称
     public String GetNewPhotoFileName(String filePath, String filenamePure, int iFlag) {
         //filenamePure = filenamePure.substring(0, filenamePure.length() - 2);      //去除文件名后面的2个字符：_x
         if (filenamePure.indexOf("_") > 0) {      // 若 filenamePure 末尾包含 "_ddd" 数字子串，便去除
@@ -206,12 +206,12 @@ public class CommonFun {
                 continue;   // 若文件后缀非 "bmp"、"png"、"jpg"，则跳过后续处理，继续循环
             }
 
-            String sp = getFileNamePure(name);
-            if (sp.equals(filenamePure)) {
+            String pure = getFileNamePure(name);
+            if (pure.equals(filenamePure)) {
                 n = -1;
                 break;
-            } else if (sp.length() >= (filenamePure.length() + 2) && (sp.substring(0, filenamePure.length())).equals(filenamePure)){
-                String s = sp.substring(filenamePure.length() + 1, sp.length());
+            } else if (pure.length() >= (filenamePure.length() + 2) && (pure.substring(0, filenamePure.length())).equals(filenamePure)){
+                String s = pure.substring(filenamePure.length() + 1, pure.length());
                 if (isNum(s)) {
                     n = Math.max(n, Integer.valueOf(s));
                 }
@@ -219,7 +219,7 @@ public class CommonFun {
         }
 
         String filenameNew = "";
-        // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+        // iFlag：0，不重名的新文件名称；iFlag：1，最新文件 Wang_Wu_19 名称
         if (iFlag < 0 || iFlag > 1 || (1 == iFlag && 0 == n)) {
             return  "";    //iFlag非法，或者没有找到最新回执信息文件 Receipt(_x).txt 名称
         } else if (0 == iFlag) {
