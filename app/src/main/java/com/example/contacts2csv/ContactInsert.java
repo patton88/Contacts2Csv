@@ -119,6 +119,9 @@ public class ContactInsert {
         return true;
     }
 
+    //java.lang.SecurityException: Permission Denial: writing com.android.providers.contacts.ContactsProvider2
+    // uri content://com.android.contacts/raw_contacts from pid=5503, uid=10137
+    // requires android.permission.WRITE_CONTACTS, or grantUriPermission()
     // 专门处理 jsonG00StructName，用 addMimeItem00() 处理
     private long addMimeItem00(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context) {
         long contactId = -1;

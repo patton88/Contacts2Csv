@@ -157,11 +157,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         //处理动态权限申请。权限不足，就进入申请权限死循环
         int iHasWriteStoragePermission = -11;
+        int iHasWriteContacts = -11;
         int iHasReadContacts = -11;
-        while (iHasWriteStoragePermission != PackageManager.PERMISSION_GRANTED || iHasReadContacts != PackageManager.PERMISSION_GRANTED) {
+        while (iHasWriteStoragePermission != PackageManager.PERMISSION_GRANTED ||
+                iHasWriteContacts != PackageManager.PERMISSION_GRANTED ||
+                iHasReadContacts != PackageManager.PERMISSION_GRANTED) {
             //Toast.makeText(this, "权限不足。需要读写联系人权限、读写外部存储权限！", Toast.LENGTH_SHORT).show();
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS}, 1);
             iHasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            iHasWriteContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.WRITE_CONTACTS);
             iHasReadContacts = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS);
         }
 
