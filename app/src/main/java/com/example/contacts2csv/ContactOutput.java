@@ -626,8 +626,19 @@ public class ContactOutput {
                 if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                     continue;
                 }
-                String col = get4layColumnName(key1, key2);                 // 获取该类信息的在数据表中的列号(字段号)
-                String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
+
+                String data = "";
+                //专门处理 jsonG09GroupMember 的 {"groupTitle", Groups.TITLE}    //Group.TITLE = "title";
+                //由于新建联系人群组时一般是输入群组名称，所以在联系人信息中保存联系人群组名称
+                if (key2.equals("groupTitle") && m_jsonContactData.getJSONObject(idKey).has("groupId")){
+                    String groupId = m_jsonContactData.getJSONObject(idKey).getString("groupId");
+                    if (!TextUtils.isEmpty(groupId)){
+                        data = m_GroupOutput.getGroupsName(groupId);
+                    }
+                } else {
+                    String col = get4layColumnName(key1, key2);             // 获取该类信息的在数据表中的列号(字段号)
+                    data = cursor.getString(cursor.getColumnIndex(col));    // 获取数据表中的数据
+                }
                 put2json4lay(idKey, key1, key2, data, "");          // 将获取的数据存入 m_jsonContactData
             }
         } catch (JSONException e) {

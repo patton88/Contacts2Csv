@@ -127,6 +127,22 @@ public class GroupOutput {
         return sGroupHeader + "\n" + sGroupInfo;
     }
 
+    // 根据 groupId 查询 groupTitle
+    public String getGroupsName(String groupId) {
+        int iGroupId = Integer.valueOf(groupId.trim());
+        String groupTitle = "";     // 群组名称
+        Cursor cursor = m_MA.getContentResolver().query(Groups.CONTENT_URI, null, null, null, null);
+        while (cursor.moveToNext()) {
+            if (iGroupId == cursor.getInt(cursor.getColumnIndex(Groups._ID))) {
+                groupTitle = cursor.getString(cursor.getColumnIndex(Groups.TITLE));   // 得到组名称
+                break;
+            }
+        }
+        cursor.close();
+
+        return groupTitle;
+    }
+
     public void saveGroupinfo2File(String str) {
         File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_GROUP_INFO_FILENAME, 0);
         String path = file.getAbsolutePath();

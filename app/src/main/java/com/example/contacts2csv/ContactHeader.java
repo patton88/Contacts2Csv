@@ -276,8 +276,7 @@ public class ContactHeader {
                     {"__mimetype_fun", "fun02"},                            //无需处理 xxx.TYPE_CUSTOM，用 dumpJson4layAll() 处理
                     {"groupId", GroupMembership.GROUP_ROW_ID},              //GroupMembership.GROUP_ROW_ID = "data1";
                     {"groupSourceId", GroupMembership.GROUP_SOURCE_ID},     //GroupMembership.GROUP_SOURCE_ID = "group_sourceid";
-                    //{"groupsTitle", Groups.TITLE},                          //Group.TITLE = "title";
-
+                    {"groupTitle", Groups.TITLE},                           //Group.TITLE = "title";
             };
             Arr2Json(arr2jsonG09GroupMember, m_jsonHeader.getJSONObject("jsonG09GroupMember"));
 
