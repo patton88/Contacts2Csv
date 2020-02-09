@@ -136,6 +136,12 @@ public class CommonFun {
         return file;
     }
 
+    // 获得绝对路径PathAndName下面的新文件文件名称。
+    // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
+    public String GetNewFileName(String PathAndName, int iFlag) {
+        return GetNewFileName(getFilePath(PathAndName), getFileName(PathAndName), iFlag);
+    }
+
     // 获得绝对路径：mInFilePath + "/" + m_sInFileName下面的新文件文件名称。
     // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
     public String GetNewFileName(String filePath, String fileName, int iFlag) {
@@ -352,6 +358,19 @@ public class CommonFun {
     public void logJson(JSONObject json) {
         try {
             System.out.println("JSONObject : \n" + json.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 输出 JSONObject 完整结构到文件，filePath 为目录路径，fileName为文件名
+    public void Json2File(JSONObject json, String filePath, String fileName) {
+        String newFileName = GetNewFileName(filePath, fileName, 0);
+
+        try {
+            //System.out.println("JSONObject : \n" + json.toString(4));
+            String str = "JSONObject : \n" + json.toString(4);
+            writeFile(filePath + "/" + newFileName, str);
         } catch (JSONException e) {
             e.printStackTrace();
         }

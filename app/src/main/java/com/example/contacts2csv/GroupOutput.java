@@ -90,16 +90,16 @@ public class GroupOutput {
             String title = cursor.getString(cursor.getColumnIndex(Groups.TITLE));   // 得到组名称
             int count = getCountOfGroup(id);                                        // 得到组成员数
             //Log.e("MainActivity", id + "   " + title + "  " + count);
-            System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-            System.out.println("\n群组ID：" + id + "，群组名称：" + title + "，成员数：" + count);
+            //System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            //System.out.println("\n群组ID：" + id + "，群组名称：" + title + "，成员数：" + count);
 
             List<ContactEntity> m = getAllContactsByGroupId(id, m_MA); // 获取某个分组下的 所有联系人信息
             int i = 1;
             for (ContactEntity c : m) {
-                System.out.println("\t群组成员" + i++ + "：" + c.getContactName());
+                //System.out.println("\t群组成员" + i++ + "：" + c.getContactName());
             }
 
-            System.out.println("\n群组详细信息：\n{");
+            //System.out.println("\n群组详细信息：\n{");
             Iterator<String> it = m_groupHeader.m_jsonHeader.keys();
             String str = "";
             while (it.hasNext()) {
@@ -111,13 +111,13 @@ public class GroupOutput {
                     String mime = m_groupHeader.m_jsonHeader.getString(key);
                     String info = cursor.getString(cursor.getColumnIndex(mime));
                     str += TextUtils.isEmpty(str) ? info : ("," + info);
-                    System.out.println("\t" + key + ", " + info);
+                    //System.out.println("\t" + key + ", " + info);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            System.out.println("}\n");
-            System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            //System.out.println("}\n");
+            //System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 
             sGroupInfo += TextUtils.isEmpty(sGroupInfo) ? str : ("\n" + str);    //每个群组信息换行
             n++;
