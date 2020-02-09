@@ -177,7 +177,7 @@ public class ContactInsert {
         cv.put(Data.RAW_CONTACT_ID, contactId);
         cv.put(Data.MIMETYPE, mimeItem);                        //Photo.CONTENT_ITEM_TYPE
         cv.put(getMime(jsonMime, "photo"), avatarPhoto);  //cv.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
-        System.out.println("photoFile = " + photoFile);         //cv.put(Photo.PHOTO, avatarPhoto);
+        //System.out.println("photoFile = " + photoFile);         //cv.put(Photo.PHOTO, avatarPhoto);
         //context.getContentResolver().update(ContactsContract.Data.CONTENT_URI, cv, null, null);   //已有头像才能用 update 更新
         context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);                 //没有头像只能用 insert 插入
 

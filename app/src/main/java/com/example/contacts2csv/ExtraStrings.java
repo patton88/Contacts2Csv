@@ -77,6 +77,7 @@ public class ExtraStrings {
 	//output file and path
 	public static final String FILE_NAME_PARENT = "/mnt/sdcard/";
 	public static final String OUTPUT_FILENAME = "Contacts_1.txt";
+	public static final String OUTPUT_GROUP_INFO_FILENAME = "Group_1.txt";
 	public static final String OUTPUT_PATH = FILE_NAME_PARENT + OUTPUT_FILENAME;
 	public static final String JSON_OUTPUT_FILENAME = "JsonHeader结构.txt";
 	public static final String JSON_OUTPUT_PATH = FILE_NAME_PARENT + JSON_OUTPUT_FILENAME;

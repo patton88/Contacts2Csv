@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -355,4 +356,17 @@ public class CommonFun {
             e.printStackTrace();
         }
     }
+
+    // 写文本文件。sPath 是文件的绝对路径，str 是需要写入的字符串
+    public void writeFile(String sPath, String str) {
+        try {
+            File file = new File(sPath);
+            FileWriter writer = new FileWriter(file, false);
+            writer.write(str);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

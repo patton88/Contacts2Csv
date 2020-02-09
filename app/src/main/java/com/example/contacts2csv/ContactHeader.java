@@ -2,8 +2,6 @@
 //20190年12月09日
 package com.example.contacts2csv;
 
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.Email;
@@ -18,11 +16,13 @@ import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
+import android.provider.ContactsContract.Groups;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.LinkedHashMap;
+
 
 /**
  * @author glsite.com
@@ -42,7 +42,7 @@ public class ContactHeader {
     //联系人所有字段的MIMETYPE解释
     //import android.provider.ContactsContract.CommonDataKinds.xxx;
     //来自MIMETYPE字段官方文档：https://developer.android.google.cn/reference/android/provider/ContactsContract.Data.html
-    String[] MIMETYPES_temp = new String[]{
+    public String[] Mimetype_Contacts = new String[]{
             //mimetype数据字段                  //存储json变量            //旧存储json变量        //数据内容
             StructuredName.CONTENT_ITEM_TYPE,   //jsonG00StructName       //jsonG00StructName     //联系人名称 (G：Group)
             Phone.CONTENT_ITEM_TYPE,            //jsonG01Phone            //jsonG01Phone          //联系人电话
