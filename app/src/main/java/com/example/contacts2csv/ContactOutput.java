@@ -633,7 +633,7 @@ public class ContactOutput {
                 if (key2.equals("groupTitle") && m_jsonContactData.getJSONObject(idKey).has("groupId")){
                     String groupId = m_jsonContactData.getJSONObject(idKey).getString("groupId");
                     if (!TextUtils.isEmpty(groupId)){
-                        data = m_GroupOutput.getGroupsName(groupId);
+                        data = m_GroupOutput.getGroupName(groupId, m_MA);
                     }
                 } else {
                     String col = get4layColumnName(key1, key2);             // 获取该类信息的在数据表中的列号(字段号)
