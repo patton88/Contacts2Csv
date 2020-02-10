@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 public class FileEncodeUtil {
     //private static Logger logger = LoggerFactory.getLogger(FileEncodeUtil.class);
     private static int BYTE_SIZE = 8;
+    private static String m_fullFilePath;
 
     /**
      * 通过文件全名称获取编码集名称
@@ -49,6 +50,7 @@ public class FileEncodeUtil {
         //System.out.println("fullFilePath : " + fullFilePath);
         BufferedInputStream bis = null;
         String sEncode = "";
+        m_fullFilePath = fullFilePath;
         try {
             bis = new BufferedInputStream(new FileInputStream(fullFilePath));
             try {
@@ -104,7 +106,8 @@ public class FileEncodeUtil {
                 //I:\Android\Android-SDK-Windows\sources\android-29\java\nio\charset\Charset.java
                 sFilEncode = "UTF-8";   //Android不支持"UTF-8_BOM"
             }
-        } else if (isUTF8(bis)) {   //后面是不带文件头BOM
+        //} else if (isUTF8(bis)) {     //后面是不带文件头BOM
+        } else if (isUTF8_2()) {        //解决在 AS3.5 API 22 x86-x64 AVD 中运行报错的问题
             sFilEncode = "UTF-8";
         } else {
             //sFilEncode = "GBK";     //默认编码格式
@@ -113,6 +116,37 @@ public class FileEncodeUtil {
         //logger.info("result encode type : " + sFilEncode);
         //System.out.println("result encode type : " + sFilEncode);
         return sFilEncode;
+    }
+
+    /**
+     * 是否是无BOM的UTF8格式，不判断常规场景，只区分无BOM UTF8和GBK
+     *
+     * @param bis
+     * @return
+     */
+    // 解决在 AS3.5 API 22 x86-x64 AVD 中运行报错的问题
+    //W/System.err: java.io.IOException: Mark has been invalidated.
+    //        at java.io.BufferedInputStream.reset(BufferedInputStream.java:336)
+    //        at com.example.OctopusMessage.FileEncodeUtil.isUTF8(FileEncodeUtil.java:125)
+    private static boolean isUTF8_2(/*BufferedInputStream bis*/) throws Exception {
+        //bis.reset();
+        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(m_fullFilePath));
+
+        //读取第一个字节
+        int code = bis.read();
+        do {
+            BitSet bitSet = convert2BitSet(code);
+            //判断是否为单字节
+            if (bitSet.get(0)) {//多字节时，再读取N个字节
+                if (!checkMultiByte(bis, bitSet)) {//未检测通过,直接返回
+                    return false;
+                }
+            } else {
+                //单字节时什么都不用做，再次读取字节
+            }
+            code = bis.read();
+        } while (code != -1);
+        return true;
     }
 
     /**
