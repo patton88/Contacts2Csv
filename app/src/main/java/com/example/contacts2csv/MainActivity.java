@@ -3,7 +3,6 @@ package com.example.contacts2csv;
 import java.io.File;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     public ContactOutput m_output;      //导出联系人
     public ContactInsert m_insert;      //导入联系人
-    public ContactRemove m_remove;      //删除联系人
+    public ContactDel m_del;            //删除联系人
+    public GroupInsert m_insertGroup;   //导入群组
 
     //线程消息处理对象
     private Handler m_handler = new Handler() {
@@ -118,9 +118,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_Fun = new CommonFun();
         m_sFilePath = "";
         m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
-        m_output = new ContactOutput();      //导出联系人
-        m_insert = new ContactInsert();      //导入联系人
-        m_remove = new ContactRemove();      //删除联系人
+        m_output = new ContactOutput();     //导出联系人
+        m_insert = new ContactInsert();     //导入联系人
+        m_del = new ContactDel();           //删除联系人
+        m_insertGroup = new GroupInsert();  //导入群组
 
         m_etFilePath = (EditText) findViewById(R.id.et_filepath);
         m_btnHelp = (Button) findViewById(R.id.btn_help);
@@ -199,14 +200,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         false, ExtraStrings.DIALOG_TYPE_HELP);
                 break;
             case R.id.btn_insert:
-                m_remove.delAllContacts();
+                m_del.delAllContacts();
+                //m_insertGroup.delAllGroup(m_MA);
                 insertContact();
                 break;
             case R.id.btn_output:
                 outputContact();
                 break;
             case R.id.btn_del_all:
-                m_remove.delAllContacts();
+                m_del.delAllContacts();
+                m_insertGroup.delAllGroup(m_MA);
                 break;
             case R.id.rbtn_insert:
 //                setInsertWidgetEnabled(true);

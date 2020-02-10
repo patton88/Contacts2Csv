@@ -30,7 +30,7 @@ import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
  * @author glsite.com
  * @version 1.0.0$
  * @des Contact Groups Oupput
- * @updateAuthor MinJun$
+ * @updateAuthor MinJun, 20200209$
  * @updateDes Contact Groups Oupput
  */
 
@@ -128,8 +128,9 @@ public class GroupOutput {
     }
 
     // This is the code to get the Title of the group:
-    public String getGroupName(String groupId, Context context){
-        String groupTitle = "";     // 群组名称
+    // 也可以判断该群组是否存在
+    public String getGroupTitle(String groupId, Context context){
+        String groupTitle = "";
         Uri uri = Groups.CONTENT_URI;
         String where = String.format("%s = ?", Groups._ID);
         String[] whereParams = new String[]{groupId};

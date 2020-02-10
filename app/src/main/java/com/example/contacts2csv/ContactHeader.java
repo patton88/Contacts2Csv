@@ -275,8 +275,8 @@ public class ContactHeader {
                     {"__mimetype_item", GroupMembership.CONTENT_ITEM_TYPE}, //GroupMembership.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group_membership";
                     {"__mimetype_fun", "fun02"},                            //无需处理 xxx.TYPE_CUSTOM，用 dumpJson4layAll() 处理
                     {"groupId", GroupMembership.GROUP_ROW_ID},              //GroupMembership.GROUP_ROW_ID = "data1";
-                    {"groupSourceId", GroupMembership.GROUP_SOURCE_ID},     //GroupMembership.GROUP_SOURCE_ID = "group_sourceid";
-                    {"groupTitle", Groups.TITLE},                           //Group.TITLE = "title";
+                    //{"groupSourceId", GroupMembership.GROUP_SOURCE_ID},   //GroupMembership.GROUP_SOURCE_ID = "group_sourceid";   //处理该字段导入导出无意义
+                    {"groupTitle", Groups.TITLE},                           //Group.TITLE = "title";    //用 getGroupTitle() 特殊处理
             };
             Arr2Json(arr2jsonG09GroupMember, m_jsonHeader.getJSONObject("jsonG09GroupMember"));
 

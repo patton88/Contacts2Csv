@@ -36,6 +36,7 @@ import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
@@ -49,8 +50,9 @@ import static com.example.contacts2csv.MainActivity.m_MA;
 import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
 
 public class ContactInsert {
-    private JSONObject m_jsonInsertContact;        //用于存放获取的所有记录数据
-    private ContactHeader m_InsertContactHeader;         //用于存放通讯录所有记录的表头信息
+    private JSONObject m_jsonInsertContact;         //用于存放获取的所有记录数据
+    private ContactHeader m_InsertContactHeader;    //用于存放通讯录所有记录的表头信息
+    private GroupInsert m_GroupInsert;              //用于处理导入联系人群组
     private final String m_sTAG = getClass().getSimpleName();
     private int m_iSuccessCount = 0;
     private int m_iFailCount = 0;
@@ -59,6 +61,7 @@ public class ContactInsert {
     private void init() {
         m_jsonInsertContact = new JSONObject(new LinkedHashMap());
         m_InsertContactHeader = new ContactHeader();
+        m_GroupInsert = new GroupInsert();
         m_iSuccessCount = 0;
         m_iFailCount = 0;
     }
@@ -110,12 +113,14 @@ public class ContactInsert {
                     case Nickname.CONTENT_ITEM_TYPE:         //jsonG06NickName
                     case Note.CONTENT_ITEM_TYPE:             //jsonG07Note
                     case StructuredPostal.CONTENT_ITEM_TYPE: //jsonG08PostalSet
-                        //case GroupMembership.CONTENT_ITEM_TYPE:  //jsonG09GroupMember   //AS3.5的AVD无分组功能，只能用实体手机测试太麻烦，暂未实现
                     case Website.CONTENT_ITEM_TYPE:          //jsonG10WebSet
                     case Event.CONTENT_ITEM_TYPE:            //jsonG11Event
                     case Relation.CONTENT_ITEM_TYPE:         //jsonG12Relation
                     case SipAddress.CONTENT_ITEM_TYPE:       //jsonG13SipAddress
                         fun01_addMimeItem(mime, jsonItem, jsonMime, context, contactId);    // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
+                        break;
+                    case GroupMembership.CONTENT_ITEM_TYPE:  //jsonG09GroupMember           //AS3.5的AVD无分组功能，只能用实体手机测试太麻烦，暂未实现
+                        fun02_addMimeGroup(mime, jsonItem, jsonMime, context, contactId);   // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
                         break;
                     case Photo.CONTENT_ITEM_TYPE:            //jsonG03Photo
                         fun03_addMimePhoto(mime, jsonItem, jsonMime, context, contactId);   // 专门处理 jsonG03Photo，用 fun03_addMimePhoto() 处理
@@ -133,6 +138,35 @@ public class ContactInsert {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 处理导入头像 Begin
+
+    // 专门处理 jsonG09GroupMember，用 fun02_addMimeGroup() 处理
+    private long fun02_addMimeGroup(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, long contactId) {
+        String groupTitle = "";  // 群组名称
+
+        Iterator<String> it = jsonItem.keys();
+        while (it.hasNext()) {
+            String key = it.next();       //key: "displayName"、"lastName"、...、"groupTitle"、"groupTitle2"、"groupTitle3"、...
+            String[] arr = findKey(jsonMime, key);      // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"。注意 arr[0] 已经去除末尾数字
+            try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
+                groupTitle = jsonItem.getString(key);   // 从 jsonItem 的 key ="groupTitleDDD" 中取群组名称
+                //System.out.println("groupTitle = " + groupTitle);
+                //if (TextUtils.isEmpty(groupTitle) || !jsonMime.has(arr[0])) {
+                if (TextUtils.isEmpty(groupTitle) || !"groupTitle".equals(arr[0])) {     // 只处理 "groupTitle"
+                    continue;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                continue;
+            }
+            //System.out.println("arr[0] = " + arr[0]);
+
+            groupTitle = groupTitle.replace(" ", "_");                 // 空格全部替换为"_"
+            m_GroupInsert.addContactToGroup(String.valueOf(contactId), groupTitle, m_MA);   // android将联系人加入群组
+            System.out.println("createGroup Success, " + "groupTitle : " + groupTitle);
+        }
+
+        return contactId;
+    }
 
     // 专门处理 jsonG03Photo，用 fun03_addMimePhoto() 处理
     private long fun03_addMimePhoto(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, long contactId) {
@@ -341,7 +375,7 @@ public class ContactInsert {
     }
 
     // keyNew: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
-    // 返回数组 {keyNew2, keyHead}
+    // 返回数组 {keyNew2, keyHead}，注意 keyNew2 已经去除末尾数字
     // 遍历 jsonMime，若找到 keyNew 末尾含有 key 子串，则返回找到的 key、keyHead 组成的数组; 否则返回 keyNew2、keyHead 组成的数组
     private String[] findKey(JSONObject jsonMime, String keyNew) {
         String keyNew2 = keyNew.replaceAll("\\d+$", "");    // java 正则去掉字符串末尾数字
@@ -360,6 +394,45 @@ public class ContactInsert {
             }
         }
         return new String[]{keyNew2.trim(), keyHead.trim()};
+    }
+
+    // keyOld: "groupTitle"
+    // 返回数组 {keyNew2, keyHead}
+    // 遍历 jsonItem，若找到 key 去除末尾数字后等于 keyOld，则返回找到的 key 对应的 value 值
+    private String getStringJson2(JSONObject jsonItem, String keyOld) {
+        String value = "";
+        Iterator<String> it = jsonItem.keys();
+        while (it.hasNext()) {
+            String key = it.next().trim();                 //key 为："groupTitle"、"groupTitle2"、"groupTitle3"、...
+            String key2 = key.replaceAll("\\d+$", "");    // java 正则去掉字符串末尾数字
+            if (key2.equals(keyOld.trim())) {
+                try {
+                    System.out.println("groupTitle key : " + key);
+                    value = jsonItem.getString(key);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+        return value;
+    }
+
+    // keyOld: "groupTitle"
+    // 返回数组 {keyNew2, keyHead}
+    // 遍历 jsonItem，若找到 key 去除末尾数字后等于 keyOld，则返回找到的 key
+    private String findKey2(JSONObject jsonItem, String keyOld) {
+        String keyRet = "";
+        Iterator<String> it = jsonItem.keys();
+        while (it.hasNext()) {
+            String key = it.next().trim();                 //key 为："groupTitle"、"groupTitle2"、"groupTitle3"、...
+            String key2 = key.replaceAll("\\d+$", "");    // java 正则去掉字符串末尾数字
+            if (key2.equals(keyOld.trim())) {
+                keyRet = key;
+                break;
+            }
+        }
+        return keyRet;
     }
 
     // 将 arrList 转储到 json 中

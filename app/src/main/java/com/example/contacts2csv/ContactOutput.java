@@ -6,18 +6,14 @@ package com.example.contacts2csv;
 // 有警告，没关系：uses unchecked or unsafe operations. Recompile with -Xlint:unchecked for details.
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,17 +23,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.Groups;
 
 import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
@@ -633,7 +623,7 @@ public class ContactOutput {
                 if (key2.equals("groupTitle") && m_jsonContactData.getJSONObject(idKey).has("groupId")){
                     String groupId = m_jsonContactData.getJSONObject(idKey).getString("groupId");
                     if (!TextUtils.isEmpty(groupId)){
-                        data = m_GroupOutput.getGroupName(groupId, m_MA);
+                        data = m_GroupOutput.getGroupTitle(groupId, m_MA);
                     }
                 } else {
                     String col = get4layColumnName(key1, key2);             // 获取该类信息的在数据表中的列号(字段号)
