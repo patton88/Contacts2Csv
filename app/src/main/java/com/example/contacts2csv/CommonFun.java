@@ -203,6 +203,9 @@ public class CommonFun {
 
         File fileDir = new File(filePath);
         String[] filesNames = fileDir.list();   //获取 filePath 目录下的所有文件名称
+        if (null == filesNames) {   //若 null == filesNames ，App会崩溃
+            return "";
+        }
         int n = 0;
         String suffix = "";
         for (String name : filesNames){         //NamePhoneNicks_x.png
