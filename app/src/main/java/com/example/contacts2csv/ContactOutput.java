@@ -201,6 +201,9 @@ public class ContactOutput {
                         case "fun03":   // "jsonG03Photo"，单独用 fun03_dumpPhoto() 处理
                             fun03_dumpPhoto(sContactId, key1, cursor);
                             break;
+                        case "fun05":   // "jsonG09GroupMember"，单独用 fun05_dumpJson4lay() 处理
+                            fun05_dumpJson4lay(sContactId, key1, cursor);
+                            break;
                         default:
                             break;
                     }
@@ -603,6 +606,24 @@ public class ContactOutput {
         }
     }
 
+    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中。专门处理："jsonG09GroupMember"
+    // idKey : contactIdKey，如：contact1、contact2、...；
+    // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
+    // cursor : 查询游标
+    private void fun05_dumpJson4lay(String idKey, String key1, Cursor cursor) {
+        String key2 = "groupId";
+        String col = get4layColumnName(key1, key2);                     // 获取该类信息的在数据表中的列号(字段号)
+        String groupId = cursor.getString(cursor.getColumnIndex(col));  // 获取数据表中的数据
+        put2json4lay(idKey, key1, key2, groupId, "");           // 将获取的数据存入 m_jsonContactData
+
+        key2 = "groupTitle";
+        String groupTitle = "";     //由于新建联系人群组时一般是输入群组名称，所以在联系人信息中保存联系人群组名称
+        if (!TextUtils.isEmpty(groupId)){
+            groupTitle = m_GroupOutput.getGroupTitle(groupId, m_MA);
+        }
+        put2json4lay(idKey, key1, key2, groupTitle, "");          // 将获取的数据存入 m_jsonContactData
+    }
+
     // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如 jsonG00StructName
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
@@ -611,24 +632,14 @@ public class ContactOutput {
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
-                String key2 = it.next();                                    // key2："groupId"、"groupSourceId"、"__mimetype_xxx"、...
+                String key2 = it.next();                                    // key2："displayName"、"lastName"、"firstName"、...
                 // 跳过前面的元素 "__mimetype_xxx"
                 if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
                     continue;
                 }
 
-                String data = "";
-                //专门处理 jsonG09GroupMember 的 {"groupTitle", Groups.TITLE}    //Group.TITLE = "title";
-                //由于新建联系人群组时一般是输入群组名称，所以在联系人信息中保存联系人群组名称
-                if (key2.equals("groupTitle") && m_jsonContactData.getJSONObject(idKey).has("groupId")){
-                    String groupId = m_jsonContactData.getJSONObject(idKey).getString("groupId");
-                    if (!TextUtils.isEmpty(groupId)){
-                        data = m_GroupOutput.getGroupTitle(groupId, m_MA);
-                    }
-                } else {
-                    String col = get4layColumnName(key1, key2);             // 获取该类信息的在数据表中的列号(字段号)
-                    data = cursor.getString(cursor.getColumnIndex(col));    // 获取数据表中的数据
-                }
+                String col = get4layColumnName(key1, key2);                 // 获取该类信息的在数据表中的列号(字段号)
+                String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
                 put2json4lay(idKey, key1, key2, data, "");          // 将获取的数据存入 m_jsonContactData
             }
         } catch (JSONException e) {
