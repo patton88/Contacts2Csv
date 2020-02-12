@@ -1,6 +1,7 @@
 package com.example.contacts2csv;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -388,6 +389,16 @@ public class CommonFun {
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // 输出 cursor 查询到的所有字段名称
+    public void logFileds(Cursor cursor) {
+        String [] fileds = cursor.getColumnNames();
+        int len = fileds.length;
+        System.out.println("fields.length = " + len);
+        for (int i = 0; i < len; i++) {
+            System.out.println("\tcol" + i + " : " + fileds[i]);
         }
     }
 

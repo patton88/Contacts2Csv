@@ -119,7 +119,7 @@ public class ContactInsert {
                     case SipAddress.CONTENT_ITEM_TYPE:       //jsonG13SipAddress
                         fun01_addMimeItem(mime, jsonItem, jsonMime, context, contactId);    // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
                         break;
-                    case GroupMembership.CONTENT_ITEM_TYPE:  //jsonG09GroupMember           //AS3.5的AVD无分组功能，只能用实体手机测试太麻烦，暂未实现
+                    case GroupMembership.CONTENT_ITEM_TYPE:  //jsonG09GroupMember           //AS3.5的AVD无群组功能，只能用实体手机测试太麻烦，暂未实现
                         fun02_addMimeGroup(mime, jsonItem, jsonMime, context, contactId);   // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
                         break;
                     case Photo.CONTENT_ITEM_TYPE:            //jsonG03Photo

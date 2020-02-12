@@ -53,7 +53,7 @@ public class ContactHeader {
             Nickname.CONTENT_ITEM_TYPE,         //jsonG06NickName         //jsonG06NickName       //昵称
             Note.CONTENT_ITEM_TYPE,             //jsonG07Note             //jsonG05Remark         //备注
             StructuredPostal.CONTENT_ITEM_TYPE, //jsonG08PostalSet        //jsonG09PostalType     //地址
-            GroupMembership.CONTENT_ITEM_TYPE,  //jsonG09GroupMember      //                      //分组信息
+            GroupMembership.CONTENT_ITEM_TYPE,  //jsonG09GroupMember      //                      //群组信息
             Website.CONTENT_ITEM_TYPE,          //jsonG10WebSet           //jsonG08WebType        //网站
             Event.CONTENT_ITEM_TYPE,            //jsonG11Event            //jsonG03Event          //重要日期
             Relation.CONTENT_ITEM_TYPE,         //jsonG12Relation         //                      //家庭关系
@@ -269,7 +269,7 @@ public class ContactHeader {
             };
             Arr2Json(arr2jsonG08PostalSet, m_jsonHeader.getJSONObject("jsonG08PostalSet"));
 
-            //09、jsonG09GroupMember，分组信息。
+            //09、jsonG09GroupMember，群组信息。
             m_jsonHeader.put("jsonG09GroupMember", new JSONObject(new LinkedHashMap()));
             String arr2jsonG09GroupMember[][] = {
                     {"__mimetype_item", GroupMembership.CONTENT_ITEM_TYPE}, //GroupMembership.CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group_membership";

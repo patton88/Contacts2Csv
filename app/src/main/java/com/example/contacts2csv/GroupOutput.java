@@ -43,16 +43,16 @@ public class GroupOutput {
     private GroupHeader m_groupHeader;         //用于存放群组信息列表头
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 处理分组信息 Begin
+    // 处理群组信息 Begin
 
-    //Android联系人--群组分组查询。原创BunToy 最后发布于2015-03-04 11:03:03 阅读数 1223  收藏
+    //Android联系人--群组群组查询。原创BunToy 最后发布于2015-03-04 11:03:03 阅读数 1223  收藏
     //原文链接：https://blog.csdn.net/xiabing082/article/details/44057413
 
     public GroupOutput() {
         m_groupHeader = new GroupHeader();
     }
 
-    // 当 Groups.DELETED = 0 的时候， 是查询没有被删除的联系人分组
+    // 当 Groups.DELETED = 0 的时候， 是查询没有被删除的联系人群组
     public void getContactsGroups() {
         String[] RAW_PROJECTION = new String[]{Groups._ID, Groups.TITLE,};
         String RAW_CONTACTS_WHERE = Groups.DELETED + " = ? ";
@@ -66,7 +66,7 @@ public class GroupOutput {
         cursor.close();
     }
 
-    // 当 Groups.DELETED = 1 的时候，是查询删除的分组
+    // 当 Groups.DELETED = 1 的时候，是查询删除的群组
     public void getContactsGroups1() {
         String[] RAW_PROJECTION = new String[]{Groups._ID, Groups.TITLE};
         String RAW_CONTACTS_WHERE = Groups.DELETED + " = ? ";
@@ -79,7 +79,7 @@ public class GroupOutput {
         cursor.close();
     }
 
-    // 默认情况下查询所有的分组
+    // 默认情况下查询所有的群组
     public String getContactsGroups2() {
         String sGroupInfo = "";     //全部群组信息
         String sGroupHeader = "";   //群组信息表头
@@ -93,7 +93,7 @@ public class GroupOutput {
             //System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
             //System.out.println("\n群组ID：" + id + "，群组名称：" + title + "，成员数：" + count);
 
-            List<ContactEntity> m = getAllContactsByGroupId(id, m_MA); // 获取某个分组下的 所有联系人信息
+            List<ContactEntity> m = getAllContactsByGroupId(id, m_MA); // 获取某个群组下的 所有联系人信息
             int i = 1;
             for (ContactEntity c : m) {
                 //System.out.println("\t群组成员" + i++ + "：" + c.getContactName());
@@ -170,7 +170,7 @@ public class GroupOutput {
         m_Fun.writeFile(path, str);
     }
 
-    // 默认情况下查询所有的分组
+    // 默认情况下查询所有的群组
     public void getContactsGroups2_0() {
         Cursor cursor = m_MA.getContentResolver().query(Groups.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
@@ -180,7 +180,7 @@ public class GroupOutput {
             //Log.e("MainActivity", id + "   " + title + "  " + count);
             System.out.println("组ID：" + id + "，组名称：" + title + "，成员数：" + count);
 
-            List<ContactEntity> m = getAllContactsByGroupId(id, m_MA); // 获取某个分组下的 所有联系人信息
+            List<ContactEntity> m = getAllContactsByGroupId(id, m_MA); // 获取某个群组下的 所有联系人信息
             int i = 1;
             for (ContactEntity c : m) {
                 System.out.println("\t组成员" + i++ + "：" + c.getContactName());
@@ -205,7 +205,7 @@ public class GroupOutput {
 
     /**
      * @param 群组ID
-     * @return 查询当前分组中有多少个联系人
+     * @return 查询当前群组中有多少个联系人
      */
     private int getCountOfGroup(int groupId) {
         String selection = Data.MIMETYPE + "='" + GroupMembership.CONTENT_ITEM_TYPE + "' AND " + Data.DATA1 + "=" + groupId;
@@ -217,12 +217,12 @@ public class GroupOutput {
     }
 
 
-    //其实联系人分组实现原理是：
-    //  根据 Data.MIMETYPE 为 GroupMembership 类型，data1 中的组 id 来进行分组。
+    //其实联系人群组实现原理是：
+    //  根据 Data.MIMETYPE 为 GroupMembership 类型，data1 中的组 id 来进行群组。
     // 设置 Data.CONTENT_URI 中的 Data.MIMETYPE 为
-    // GroupMembership.CONTENT_ITEM_TYPE 类型，data1 字段为某一分组的组ID，
-    // 该值可查询 Groups.CONTENT_URI(该表保存了各分组的组_id，组名称 title 等分组信息)得到。
-    //例如查询具有某一分组的所有联系人的RawContacts._ID，代码如下
+    // GroupMembership.CONTENT_ITEM_TYPE 类型，data1 字段为某一群组的组ID，
+    // 该值可查询 Groups.CONTENT_URI(该表保存了各群组的组_id，组名称 title 等群组信息)得到。
+    //例如查询具有某一群组的所有联系人的RawContacts._ID，代码如下
     public static final String[] RAW_PROJECTION = new String[]{
         Data.RAW_CONTACT_ID,
     };
@@ -252,9 +252,9 @@ public class GroupOutput {
         }
     }
 
-    //Android通讯录之分组联系人，Ziv最后发布于2017-10-15
+    //Android通讯录之群组联系人，Ziv最后发布于2017-10-15
     //https://blog.csdn.net/qq_30180559/article/details/78242861
-    // 获取所有的 联系人分组信息
+    // 获取所有的 联系人群组信息
     public List<GroupEntity> getAllGroupInfo(Context context) {
         List<GroupEntity> groupList = new ArrayList<GroupEntity>();
         Cursor cursor = null;
@@ -309,7 +309,7 @@ public class GroupOutput {
     }
 
     /**
-     * 获取某个分组下的 所有联系人信息
+     * 获取某个群组下的 所有联系人信息
      * 思路：通过组的id 去查询 RAW_CONTACT_ID, 通过RAW_CONTACT_ID去查询联系人要查询得到 data表的Data.RAW_CONTACT_ID字段
      */
     public List<ContactEntity> getAllContactsByGroupId(int groupId, Context context) {
@@ -317,7 +317,7 @@ public class GroupOutput {
         String RAW_CONTACTS_WHERE = GroupMembership.GROUP_ROW_ID + "=?" + " and " +
                 Data.MIMETYPE + "=" + "'" + GroupMembership.CONTENT_ITEM_TYPE + "'";
 
-        // 通过分组的id 查询得到RAW_CONTACT_ID
+        // 通过群组的id 查询得到RAW_CONTACT_ID
         Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, RAW_PROJECTION,
                 RAW_CONTACTS_WHERE, new String[]{groupId + ""}, "data1 asc");
 
@@ -357,10 +357,10 @@ public class GroupOutput {
     }
 
 
-    ////方法是 通过分组的id 查询 该组的所有联系人
-    ////思路是 通过分组的id 查询出data表里的raw_contact_id
+    ////方法是 通过群组的id 查询 该组的所有联系人
+    ////思路是 通过群组的id 查询出data表里的raw_contact_id
     //// 通过raw_contact_id去查询联系人的姓名电话号码
-    ////self 是上下文  id是联系人分组的id
+    ////self 是上下文  id是联系人群组的id
     //
     //Cursor cursor = self
     //	.getContentResolver().query(Data.CONTENT_URI,
@@ -377,16 +377,16 @@ public class GroupOutput {
 
     //我想做个android通讯录的demo。
     //功能主要用：操作系统的通讯录联系人。这个比较简单，通过URL可以获取到，我可以实现。
-    //但是：我想获取联系人分组，就没有思路做了。android模拟器里，没有分组这个选项，只有收藏，但是真机里有分组这个功能的。
-    //那么要怎么样去，获取手机通讯录里设置的分组呢？大家说说思路吧！
-    //功能主要包括：可以在demo里获取手机通讯录里的分组，修改分组名字，可以添加分组，删除分组，添加组成员，移除组成员！
+    //但是：我想获取联系人群组，就没有思路做了。android模拟器里，没有群组这个选项，只有收藏，但是真机里有群组这个功能的。
+    //那么要怎么样去，获取手机通讯录里设置的群组呢？大家说说思路吧！
+    //功能主要包括：可以在demo里获取手机通讯录里的群组，修改群组名字，可以添加群组，删除群组，添加组成员，移除组成员！
     //谢谢大家了！我在百度 google里搜了很多资料，还是一头雾水。后来自己去研究了android通讯录数据库，大家帮忙指点下哦
     //0 2012-07-14 16:23:42
 
     private String COLUMN_NAME = "1";
     private String COLUMN_NUMBER = "2";
 
-    // 查询分组的联系人方法 outid是分组的id。https://bbs.csdn.net/topics/390134732
+    // 查询群组的联系人方法 outid是群组的id。https://bbs.csdn.net/topics/390134732
     public ArrayList<HashMap<String, String>> getContactsByGroupId(int outid, Context context) {
         Log.e(m_sTAG, "开始查询该组的联系人********************id:" + outid);
         ArrayList<HashMap<String, String>> mymaplist = new ArrayList<HashMap<String, String>>();
@@ -396,7 +396,7 @@ public class GroupOutput {
 
         String RAW_CONTACTS_WHERE = GroupMembership.GROUP_ROW_ID + "=?" + " and "
                 + Data.MIMETYPE + "=" + "'" + GroupMembership.CONTENT_ITEM_TYPE + "'";
-        // 通过分组的id outid；查询得到RAW_CONTACT_ID
+        // 通过群组的id outid；查询得到RAW_CONTACT_ID
         Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, RAW_PROJECTION,
                 RAW_CONTACTS_WHERE, new String[]{"" + outid}, "data1 asc");
 
@@ -448,14 +448,14 @@ public class GroupOutput {
 
 
     //2012-07-19 11:20:47只看TA 引用 举报 #3    得分 0	随雨诺
-    //先顶下，lz有个问题啊，你这分组的outid是哪里来的？自己跑到数据库区看的？
+    //先顶下，lz有个问题啊，你这群组的outid是哪里来的？自己跑到数据库区看的？
     //还有：代码比较乱，希望大家给优化！谢谢！
-    // 查询没有分组的联系人
+    // 查询没有群组的联系人
     public ArrayList<HashMap<String, String>> getContactsByNoGroup(Context context) {
-        Log.e(m_sTAG, "开始查询没有分组的联系人********************");
+        Log.e(m_sTAG, "开始查询没有群组的联系人********************");
         ArrayList<HashMap<String, String>> mymaplist = new ArrayList<HashMap<String, String>>();
         // 思路 我们通过组的id 去查询 RAW_CONTACT_ID, 通过RAW_CONTACT_ID去查询联系人
-        // 查询未分组联系人的过滤条件
+        // 查询未群组联系人的过滤条件
         String RAW_CONTACTS_IN_NO_GROUP_SELECTION = "1=1) and " + Data.RAW_CONTACT_ID + " not in( select "
                 + Data.RAW_CONTACT_ID + " from view_data_restricted where " + Data.MIMETYPE + "='"
                 + GroupMembership.CONTENT_ITEM_TYPE + "') group by (" + Data.RAW_CONTACT_ID;
@@ -507,10 +507,10 @@ public class GroupOutput {
             // }
             mymaplist.add(map);
         }
-        Log.e(m_sTAG, "结束查询没有分组的联系人，返回结合********************" + mymaplist.size());
+        Log.e(m_sTAG, "结束查询没有群组的联系人，返回结合********************" + mymaplist.size());
         return mymaplist;
     }
 
-    // 处理分组信息 End
+    // 处理群组信息 End
     ////////////////////////////////////////////////////////////////////////////////////////////////
 }
