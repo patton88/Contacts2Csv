@@ -7,20 +7,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import android.content.ContentResolver;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.provider.Contacts;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
@@ -40,6 +39,7 @@ import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
+import android.widget.Chronometer;
 
 
 import org.json.JSONException;
@@ -54,8 +54,10 @@ public class ContactInsert {
     private ContactHeader m_InsertContactHeader;    //用于存放通讯录所有记录的表头信息
     private GroupInsert m_GroupInsert;              //用于处理导入联系人群组
     private final String m_sTAG = getClass().getSimpleName();
+    private int m_iSum = 0;
     private int m_iSuccessCount = 0;
     private int m_iFailCount = 0;
+    private long m_lStartTimer;
     private ArrayList<ContactInfo> m_contactArrayList;
 
     private void init() {
@@ -66,11 +68,25 @@ public class ContactInsert {
         m_iFailCount = 0;
     }
 
+    public String getCurTime () {
+        int time = (int)((SystemClock.elapsedRealtime() - m_lStartTimer) / 1000);
+        //String hh = new DecimalFormat("00").format(time / 3600);
+        String mm = new DecimalFormat("00").format(time % 3600 / 60);
+        String ss = new DecimalFormat("00").format(time % 60);
+        //String timeFormat = new String(hh + ":" + mm + ":" + ss);
+        String timeFormat = new String(mm + "分" + ss + "秒");
+
+        return timeFormat;
+    }
+
     // 从文件读取全部联系人信息，并插入到 database
     public boolean insertContacts(Context context, String sPath) {
         init();
         ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
+        m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
+
+        m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
 
         Iterator<String> it = m_jsonInsertContact.keys();
         int n = 0;
@@ -79,6 +95,9 @@ public class ContactInsert {
             try {
                 if (doInsertContact(m_jsonInsertContact.getJSONObject(key), m_MA)) {   //插入一条联系人信息
                     m_iSuccessCount++;
+                    //android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
+                    //m_MA.m_tvResult.setText(String.format(ExtraStrings.INSERT_COUNT_UPDATE, m_iSuccessCount));
+                    m_MA.m_handler.sendEmptyMessage(ExtraStrings.INSERT_COUNTING);   // 更新插入联系人计数
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -502,6 +521,10 @@ public class ContactInsert {
         }
 
         return arrList;
+    }
+
+    public int getSum() {
+        return m_iSum;
     }
 
     public int getSuccessCount() {

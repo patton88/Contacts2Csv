@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Button m_btnOutput;
     private Button m_btnDelAll;
     private CheckBox m_chkPhoto;
-    private TextView m_tvResult;
+    public TextView m_tvResult;
     private TextView m_tvOs;
     private TextView m_tvQuality;
     private EditText m_etQuality;
@@ -57,10 +57,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public GroupInsert m_insertGroup;   //导入群组
 
     //线程消息处理对象
-    private Handler m_handler = new Handler() {
+    public Handler m_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case ExtraStrings.INSERT_COUNTING:
+                    m_tvResult.setText(String.format(ExtraStrings.INSERT_COUNT_UPDATE, m_insert.getSum(),
+                            m_insert.getSuccessCount(), m_insert.getFailCount(), m_insert.getCurTime()));
+                    break;
                 case ExtraStrings.INSERT_FAIL:
                     m_tvResult.setText(ExtraStrings.FAIL_INSERT);
                     endInsertContact();
@@ -340,7 +344,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         builder.show();
     }
 
-    //导入联系人
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 导入联系人 Begin
     private void insertContact() {
         //int n = 1;
         //System.out.println("insertContact_" + n++);
@@ -404,7 +409,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
     //处理导入联系人线程的代码 End
 
-    // 导出联系人
+    // 导入联系人 End
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 导出联系人 Begin
     private void outputContact() {
         //File file = new File(ExtraStrings.OUTPUT_PATH);
         File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
@@ -456,6 +465,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
     //处理导出联系人线程的代码 End
 
+    // 导出联系人 End
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     //动态访问权限回调函数
     private static final int NOT_NOTICE = 2;//如果勾选了不再询问
     private AlertDialog m_dla;
@@ -510,4 +523,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         }
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 }

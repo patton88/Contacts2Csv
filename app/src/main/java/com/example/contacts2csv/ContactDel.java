@@ -30,7 +30,7 @@ public class ContactDel {
             }
         }
         Toast.makeText(MainActivity.m_MA, "成功删除 " + success + " 记录，" +
-                fail + " 条记录删除失败", Toast.LENGTH_LONG).show();
+                fail + " 条记录删除失败", Toast.LENGTH_SHORT).show();
     }
 
     public void delAllContacts2(){
