@@ -95,10 +95,12 @@ public class ContactInsert {
             try {
                 if (doInsertContact(m_jsonInsertContact.getJSONObject(key), m_MA)) {   //插入一条联系人信息
                     m_iSuccessCount++;
-                    //android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
-                    //m_MA.m_tvResult.setText(String.format(ExtraStrings.INSERT_COUNT_UPDATE, m_iSuccessCount));
-                    m_MA.m_handler.sendEmptyMessage(ExtraStrings.INSERT_COUNTING);   // 更新插入联系人计数
+                } else {
+                    m_iFailCount++;
                 }
+                //android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
+                //m_MA.m_tvResult.setText(String.format(ExtraStrings.INSERT_COUNT_UPDATE, m_iSuccessCount));
+                m_MA.m_handler.sendEmptyMessage(ExtraStrings.INSERT_COUNTING);          // 更新插入联系人计数
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -109,9 +111,9 @@ public class ContactInsert {
 
     // 插入单个联系人信息到 database。jsonItem 为联系人数据
     private boolean doInsertContact(JSONObject jsonItem, Context context) {
+        long contactId = -2;
         try {
             Iterator<String> it1 = m_InsertContactHeader.m_jsonHeader.keys();
-            long contactId = -1;
             int n = 0;
             while (it1.hasNext()) {
                 String key1 = it1.next();   //key1: "jsonG00StructName"、"jsonG01Phone"、...
@@ -121,9 +123,7 @@ public class ContactInsert {
                     //mimetype数据字段                       //存储json变量
                     case StructuredName.CONTENT_ITEM_TYPE:   //jsonG00StructName
                         contactId = fun00_addMimeItem(mime, jsonItem, jsonMime, context);   // 专门处理 jsonG00StructName，用 fun00_addMimeItem() 处理
-                        if (-1 == contactId) {
-                            return false;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录、不做处理
-                        }
+                        //contactId = -1;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录、不做处理
                         break;
                     case Phone.CONTENT_ITEM_TYPE:            //jsonG01Phone
                     case Email.CONTENT_ITEM_TYPE:            //jsonG02Email
@@ -150,9 +150,13 @@ public class ContactInsert {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            return false;
+            contactId = -1;
         }
-        return true;
+        if (-1 == contactId) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,15 +288,16 @@ public class ContactInsert {
         cv.put(Data.MIMETYPE, mimeItem);                //StructuredName.CONTENT_ITEM_TYPE
 
         int i = 0;
+        int x = 0;  // 无名用户 anonymous 计数器
         Iterator<String> it = jsonItem.keys();
         while (it.hasNext()) {
             String key1 = it.next();                    //key1: "__mimetype_x"、"displayName"、"lastName"、...
-            String mime = "";
-            String val = "";
-
             String[] arr = findKey(jsonMime, key1);   // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"
             try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
                 if (TextUtils.isEmpty(jsonItem.getString(key1)) || !jsonMime.has(arr[0])) {
+                    if (key1.equals("displayName") || key1.equals("lastName") || key1.equals("firstName")) {
+                        i++;
+                    }
                     continue;
                 }
             } catch (JSONException e) {
@@ -300,25 +305,27 @@ public class ContactInsert {
                 continue;
             }
 
+            String mime = "";
+            String val = "";
             try {
-                mime = getMime(jsonMime, arr[0]);
-                val = jsonItem.getString(key1);
+                mime = getMime(jsonMime, arr[0]).trim();
+                val = jsonItem.getString(key1).trim();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
+            //System.out.println("key1 = " + key1 + ", mime = " + mime + ", val = " + val);
             if (!TextUtils.isEmpty(val)) {  // 非空便加入
                 cv.put(mime, val);
-            } else if (key1.equals("displayName") || key1.equals("lastName") || key1.equals("firstName")) {
-                i++;
             }
         }
 
-        if (3 == i) {
-            contactId = -1;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录，便不处理该记录
-        } else {
-            context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);
+        if (i >= 3) {
+            //contactId = -1;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录，便不处理该记录
+            //cv.put(getMime(jsonMime,"displayName"), "anonymous" + x++);   // 为无名记录添加名字
+            cv.put(StructuredName.DISPLAY_NAME, "anonymous_" + (++x));   // 为无名记录添加名字
         }
+        context.getContentResolver().insert(ContactsContract.Data.CONTENT_URI, cv);
 
         return contactId;
     }
@@ -503,7 +510,13 @@ public class ContactInsert {
             String strTemp = "";
             //一次读入一行，直到读入null为文件结束
             while ((strTemp = reader.readLine()) != null) {
+                strTemp = strTemp.trim();
                 strTemp = strTemp.replace("，", ",");    //将所有中文逗号全部替换为英文逗号
+                String str = strTemp.replaceAll("[,\\s]+", "");    //若strTemp只包含英文逗号和空格、也就是空记录，便跳过
+                //System.out.println("str = " + str);
+                if (TextUtils.isEmpty(strTemp) || TextUtils.isEmpty(str)) {
+                    continue;
+                }
                 arrList.add(strTemp);
                 //System.out.println(strTemp);
             }
