@@ -171,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         //启动时选中导出联系人
-        //doCheck(m_rbtnArrMode[1], true);
-        doCheck(m_rbtnArrMode[0], true);
+        doCheck(m_rbtnArrMode[1], true);
+        //doCheck(m_rbtnArrMode[0], true);
 
         //m_rbtnArrMode[1].setChecked(true);
         //setInsertWidgetEnabled(false);

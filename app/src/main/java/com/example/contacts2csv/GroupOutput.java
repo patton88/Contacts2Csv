@@ -132,9 +132,9 @@ public class GroupOutput {
     public String getGroupTitle(String groupId, Context context){
         String groupTitle = "";
         Uri uri = Groups.CONTENT_URI;
+        String[] selectColumns = {Groups.TITLE};
         String where = String.format("%s = ?", Groups._ID);
         String[] whereParams = new String[]{groupId};
-        String[] selectColumns = {Groups.TITLE};
         Cursor cursor = context.getContentResolver().query(uri, selectColumns, where, whereParams, null);
 
         try{

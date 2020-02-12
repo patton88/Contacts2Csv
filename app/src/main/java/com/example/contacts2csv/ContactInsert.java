@@ -162,7 +162,7 @@ public class ContactInsert {
 
             groupTitle = groupTitle.replace(" ", "_");                 // 空格全部替换为"_"
             m_GroupInsert.addContactToGroup(String.valueOf(contactId), groupTitle, m_MA);   // android将联系人加入群组
-            System.out.println("createGroup Success, " + "groupTitle : " + groupTitle);
+            //System.out.println("createGroup Success, " + "groupTitle : " + groupTitle);
         }
 
         return contactId;
@@ -246,9 +246,20 @@ public class ContactInsert {
     private long fun00_addMimeItem(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context) {
         long contactId = -1;
         ContentValues cv = new ContentValues();
+
+        // 先新建一个联系人 Uri
         Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv);  // 新建一个新的联系人 Uri
         contactId = ContentUris.parseId(uri);           // 得到新建联系人 Uri 的 contactID
 
+        // 先在 raw_contact 表里面添加联系人id
+//        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+//        ContentResolver resolver = context.getContentResolver();
+//        Cursor cursor = resolver.query(uri, null, null, null, null);
+//        contactId = cursor.getCount() + 1;
+//        cv.put("contact_id", contactId);
+//        resolver.insert(uri, cv);
+
+        // 添加 StructuredName 姓名数据
         cv.clear();
         cv.put(Data.RAW_CONTACT_ID, contactId);
         cv.put(Data.MIMETYPE, mimeItem);                //StructuredName.CONTENT_ITEM_TYPE
