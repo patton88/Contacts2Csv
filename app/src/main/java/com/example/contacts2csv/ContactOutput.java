@@ -239,6 +239,9 @@ public class ContactOutput {
             Iterator<String> it = jsonSource.keys();
             while (it.hasNext()) {
                 String key = it.next(); //contact592、contact593、...
+                if (jsonSource.getJSONObject(key).length() == 0) {  // 若该条为空记录，便跳过
+                    continue;
+                }
                 jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
                 dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
             }
