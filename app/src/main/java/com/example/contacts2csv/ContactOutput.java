@@ -151,7 +151,8 @@ public class ContactOutput {
         //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一
         //所以，最后再以mContactsHeader中各种数据大小的最终值为标准，再次将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
         m_jsonContactData2 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
-        dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
+        //dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
+        filterJsonContactData(m_jsonContactData, m_jsonContactData2);
 
         // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
         m_Fun.Json2File(m_jsonContactData, m_sPathDownloads, "m_jsonContactData_1.txt");
@@ -218,6 +219,34 @@ public class ContactOutput {
             e.printStackTrace();
         }
         return mimetype;
+    }
+
+    // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+    private void filterJsonContactData(JSONObject jsonSource, JSONObject jsonTarget) {
+        //JSONObject属性遍历
+        try {
+            Iterator<String> it = jsonSource.keys();
+            while (it.hasNext()) {
+                String key = it.next(); //contact592、contact593、...
+                if (jsonSource.getJSONObject(key).length() == 0) {  // 若该条为空记录，便跳过
+                    continue;
+                }
+                //JSONObject json = new JSONObject(new LinkedHashMap());
+
+                Iterator<String> it2 = jsonSource.getJSONObject(key).keys();
+                while (it2.hasNext()) {
+                    String key2 = it2.next(); //displayName、lastName、firstName、...
+                    if (!(key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
+                        if (!TextUtils.isEmpty(jsonSource.getJSONObject(key).getString(key2))) {
+                            jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
+                            dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
