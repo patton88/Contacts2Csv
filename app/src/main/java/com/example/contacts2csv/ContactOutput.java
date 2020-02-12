@@ -90,25 +90,27 @@ public class ContactOutput {
     public String getAllContacts() {
         m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
 
+        // 注意：mimetype 都尽量使用 Android 规范命名，避免使用硬字符串，以增强适应性
         //RawContacts.CONTENT_URI = "content://com.android.contacts/raw_contacts"
         //Data.CONTENT_URI = "content://com.android.contacts/data"
         //Data.CONTACT_ID = "contact_id";
         //Data.MIMETYPE = "mimetype";   // 注意：在 data 表中查询不到"mimetype_id"字段，只能查询到"mimetype"字段
 
-        // 查询联系人 "raw_contacts" 表，具体查询表中的 "contact_id" 字段
+        // 查询联系人 "raw_contacts" 表，具体查询表中的 "contact_id" 字段。
         ContentResolver resolver = m_MA.getContentResolver();
         Uri uriId = RawContacts.CONTENT_URI;
         String[] selectId = new String[]{Data.CONTACT_ID};
-        String whereId = Data.CONTACT_ID + " != ?";            // 选区(查询范围)，不等于某个值
-        String whereArgsId[] = new String[]{"null"};           // 选择条件数组，只需要非空记录
-        Cursor cursorId = resolver.query(Uri.parse("content://com.android.contacts/raw_contacts"), null, whereId, whereArgsId, null);
+        String whereId = Data.CONTACT_ID + " != ?";             // 选区(查询范围)，不等于某个值
+        String whereArgsId[] = new String[]{"null"};            // 选择条件数组，只需要非空记录
+        String sortOrderId = Data.CONTACT_ID;                   // 查询结果排序规则
+        Cursor cursorId = resolver.query(uriId, selectId, whereId, whereArgsId, sortOrderId);
         while (cursorId.moveToNext()) {
             //m_Fun.logFileds(cursorId);
-            int iColId = cursorId.getColumnIndex("contact_id");   //"contact_id"
+            int iColId = cursorId.getColumnIndex(sortOrderId);  //"contact_id"
             String contactId = cursorId.getString(iColId);
 
             String contactIdKey = "contact" + contactId;
-            m_contactHeaderCount = new ContactHeader();        //用于存放获取的每条记录每一列的计数器
+            m_contactHeaderCount = new ContactHeader();         //用于存放获取的每条记录每一列的计数器
             try {
                 m_jsonContactData.put(contactIdKey, new JSONObject(new LinkedHashMap()));
             } catch (JSONException e) {
@@ -121,10 +123,11 @@ public class ContactOutput {
             //data1			        数据，data
             Uri uriData = Data.CONTENT_URI;                                 // 查询表的 Uri 路径
             // 注意：在 data 表中查询不到"mimetype_id"字段，只能查询到"mimetype"字段
-            String[] selectData = new String[]{Data.MIMETYPE, Data.DATA1, Data.RAW_CONTACT_ID};  // 要查询出来的列名(字段)数组
-            String whereData = Data.RAW_CONTACT_ID + " = ?";                // 选区(查询范围)        //String where = String.format("%s = ?", Groups._ID);
+            String[] selectData = new String[]{Data.MIMETYPE, Data.DATA1, Data.RAW_CONTACT_ID};     // 要查询出来的列名(字段)数组
+            String whereData = Data.RAW_CONTACT_ID + " = ?";                // 选区(查询范围)       //String where = String.format("%s = ?", Groups._ID);
             String whereArgsData[] = new String[]{contactId};               // 选择条件数组
             String sortOrderData = Data.MIMETYPE;                           // 查询结果排序规则
+            // 注意：必须查询全部字段，不然很多数据无法读出，导致 App 崩溃
             Cursor cursorData = resolver.query(uriData, null, whereData, whereArgsData, sortOrderData);
 
             //System.out.println("contactId = " + contactId);
