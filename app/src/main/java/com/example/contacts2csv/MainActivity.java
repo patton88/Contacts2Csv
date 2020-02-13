@@ -573,7 +573,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     // Begin 调用系统文件浏览组件，返回文件路径
 
     // startActivityForResult 函数的回调函数 onActivityResult 响应了选择文件的操作。
-    //@Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //高版本onActivityResult必须调用父类的onActivityResult，否则报错：overriding should call super.onActivityResult
         super.onActivityResult(requestCode, resultCode, data);
