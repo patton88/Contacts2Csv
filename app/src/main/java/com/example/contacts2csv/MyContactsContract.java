@@ -9170,7 +9170,7 @@ public final class MyContactsContract {
          * with the user before sending the message (because in this case it is unknown which app
          * sent the intent, it could be malicious).
          * <p>
-         * To allow the Voice Assistant to help users with contacts disambiguation, the messaging
+         * To allow the Voice Assistant to btn_help users with contacts disambiguation, the messaging
          * app may choose to integrate with the Contacts Provider. You will need to specify a new
          * MIME type in order to store your app’s unique contact IDs and optional human readable
          * labels in the Data table. The Voice Assistant needs to know this MIME type and {@link

@@ -2,7 +2,7 @@
     <string name="app_name_0">Contacts2Csv</string>
     <string name="hello">Hello World, ContactActivity!</string>
     <string name="app_name">联系人导入导出工具</string>
-    <string name="insert_contact">导入联系人</string>
+    <string name="btn_insert_contact">导入联系人</string>
     <string name="read_file">导入文件</string>
     <string name="deal_photo">处理头像</string>
     <string name="radio_png">png格式</string>
@@ -10,14 +10,16 @@
     <string name="choose_mode">请选择处理模式：</string>
     <string name="insert">导入</string>
     <string name="output">导出</string>
-    <string name="output_contact">导出联系人</string>
+    <string name="btn_output_contact">导出联系人</string>
     <string name="input_file_name">请输入文件路径：</string>
-    <string name="help">帮助</string>
+    <string name="btn_help">帮助</string>
+    <string name="btn_del_all">删除所有联系人</string>
+    <string name="btn_browse">浏览</string>
     <string name="hint_text1">文件路径：</string>
     <string name="tv_quality">图像质量（1到100）：</string>
     <string name="et_quality">1到100</string>
 
-    <string name="tv_deal_namesake">联系人同名处理方式：</string>
+    <string name="tv_deal_name_only">剔除仅含姓名、无其他信息的联系人</string>
     <string name="rbtn_merge">合并</string>
     <string name="rbtn_only_old">只保留旧的</string>
     <string name="rbtn_only_new">只保留新的</string>

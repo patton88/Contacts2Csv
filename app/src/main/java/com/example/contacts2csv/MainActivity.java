@@ -33,6 +33,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static MainActivity m_MA;
+    public boolean m_bFilter;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+
     private EditText m_etFilePath;
     private Button m_btnHelp;
     private Button m_btnInsert;
@@ -120,6 +122,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void init() {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
+
+        boolean m_bFilter = true;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+
         m_sFilePath = "";
         m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
         m_output = new ContactOutput();     //导出联系人

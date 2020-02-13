@@ -221,7 +221,20 @@ public class ContactOutput {
         return mimetype;
     }
 
-    // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+    //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
+    //m_jsonHeader->jsonG00StructName->displayName->__first
+    //2、第二类型有5层结构，mJsonG07、mJsonG09
+    //m_jsonHeader->jsonG04OrgSet->jsonG04_00WorkOrgType->workCompany->__first
+
+    //                     ->it1、key1     ->it2、key2          ->it3、key3                 ->it4、key4
+    //class ContactHeader  ->JSONObject    ->JSONObject         ->JSONObject                ->JSONObject    ->JSONObject
+    //class ContactHeader  ->m_jsonHeader  ->jsonG04OrgSet      ->jsonG04_00WorkOrgType     ->workCompany   ->__first
+    //class ContactHeader  ->m_jsonHeader  ->jsonG00StructName  ->displayName               ->__first
+
+    // 由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一，
+    // 并且各信息字段的顺序和位置也不一致。所以，最后再以mContactsHeader中各种数据大小的最终值为标准，
+    // 再次将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
+    // 转储过程中，同时剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
     private void filterJsonContactData(JSONObject jsonSource, JSONObject jsonTarget) {
         //JSONObject属性遍历
         try {
@@ -233,15 +246,20 @@ public class ContactOutput {
                     continue;
                 }
 
-                Iterator<String> it2 = json.keys();
-                while (it2.hasNext()) {
-                    String key2 = it2.next(); //displayName、lastName、firstName、...
-                    if (!(key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
-                        if (!TextUtils.isEmpty(json.getString(key2))) {
-                            jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
-                            dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                if (m_MA.m_bFilter) {   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+                    Iterator<String> it2 = json.keys();
+                    while (it2.hasNext()) {
+                        String key2 = it2.next(); //displayName、lastName、firstName、...
+                        if (!(key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
+                            if (!TextUtils.isEmpty(json.getString(key2))) {
+                                jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
+                                dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                            }
                         }
                     }
+                } else {
+                    jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
+                    dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
                 }
             }
         } catch (JSONException e) {

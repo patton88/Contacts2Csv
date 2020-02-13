@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="26dp"
         android:layout_marginLeft="26dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="0dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -30,7 +30,7 @@
 
         <RadioButton
             android:id="@+id/rbtn_insert"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="@string/insert" />
 
@@ -76,7 +76,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="26dp"
         android:layout_marginLeft="26dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,7 +84,7 @@
 
         <RadioButton
             android:id="@+id/rbtn_png"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="@string/radio_png" />
 
@@ -99,9 +99,9 @@
         android:id="@+id/tv_quality"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="14dp"
         android:text="@string/tv_quality"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
@@ -110,100 +110,75 @@
         android:id="@+id/et_quality"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="0dp"
         android:ems="10"
         android:hint="@string/et_quality"
         android:inputType="numberDecimal"
         app:layout_constraintStart_toEndOf="@+id/tv_quality"
         app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
 
-    <TextView
-        android:id="@+id/tv_deal_namesake"
+    <CheckBox
+        android:id="@+id/chk_deal_name_only"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/tv_deal_namesake"
+        android:layout_marginTop="16dp"
+        android:text="@string/tv_deal_name_only"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_quality" />
-
-    <RadioGroup
-        android:id="@+id/rbtn_group_deal_namesake"
-        android:orientation="horizontal"
-        android:layout_width="360dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_deal_namesake">
-
-        <RadioButton
-            android:id="@+id/rbtn_merge"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:text="@string/rbtn_merge" />
-
-        <RadioButton
-            android:id="@+id/rbtn_only_old"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:text="@string/rbtn_only_old" />
-
-        <RadioButton
-            android:id="@+id/rbtn_only_new"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rbtn_only_new" />
-    </RadioGroup>
 
     <Button
         android:id="@+id/btn_insert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/insert_contact"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_insert_contact"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.08"
+        app:layout_constraintHorizontal_bias="0.082"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_deal_namesake" />
+        app:layout_constraintTop_toBottomOf="@+id/chk_deal_name_only" />
 
     <Button
         android:id="@+id/btn_del_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginLeft="48dp"
-        android:layout_marginTop="20dp"
-        android:text="删除所有联系人"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_del_all"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.14"
         app:layout_constraintStart_toEndOf="@+id/btn_insert"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_deal_namesake" />
+        app:layout_constraintTop_toBottomOf="@+id/chk_deal_name_only" />
 
     <Button
         android:id="@+id/btn_output"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/output_contact"
+        android:text="@string/btn_output_contact"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.08"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
     <Button
+        android:id="@+id/btn_browse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_browse"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.12"
+        app:layout_constraintStart_toEndOf="@+id/btn_output"
+        app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
+
+    <Button
         android:id="@+id/btn_help"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginLeft="48dp"
         android:layout_marginTop="16dp"
-        android:text="@string/help"
+        android:text="@string/btn_help"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.109"
-        app:layout_constraintStart_toEndOf="@+id/btn_output"
+        app:layout_constraintHorizontal_bias="0.26"
+        app:layout_constraintStart_toEndOf="@+id/btn_browse"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
     <TextView
@@ -215,7 +190,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_output"
-        android:text="显示处理结果信息"
-        app:layout_constraintVertical_bias="0.5" />
+        android:hint="显示处理信息"
+        app:layout_constraintVertical_bias="0.2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
