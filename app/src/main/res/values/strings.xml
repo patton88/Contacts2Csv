@@ -19,7 +19,7 @@
     <string name="tv_quality">图像质量（1到100）：</string>
     <string name="et_quality">1到100</string>
 
-    <string name="tv_deal_name_only">剔除仅含姓名、无其他信息的联系人</string>
+    <string name="tv_filter_name_only">剔除仅含姓名、无其他信息的联系人</string>
     <string name="rbtn_merge">合并</string>
     <string name="rbtn_only_old">只保留旧的</string>
     <string name="rbtn_only_new">只保留新的</string>

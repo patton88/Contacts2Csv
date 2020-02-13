@@ -176,7 +176,9 @@ public class ContactOutput {
                 fun02_dumpJson4layAll(contactIdKey, key1, cursor);
                 break;
             case "fun03":       // "jsonG03Photo"，单独用 fun03_dumpPhoto() 处理
-                fun03_dumpPhoto(contactIdKey, key1, cursor);
+                if (m_MA.m_bDealPhoto) {
+                    fun03_dumpPhoto(contactIdKey, key1, cursor);
+                }
                 break;
             case "fun05":       // "jsonG09GroupMember"，单独用 fun05_dumpJson4lay() 处理
                 fun05_dumpJson4lay(contactIdKey, key1, cursor);
@@ -246,7 +248,7 @@ public class ContactOutput {
                     continue;
                 }
 
-                if (m_MA.m_bFilter) {   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+                if (m_MA.m_bFilterNameOnly) {   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
                     Iterator<String> it2 = json.keys();
                     while (it2.hasNext()) {
                         String key2 = it2.next(); //displayName、lastName、firstName、...

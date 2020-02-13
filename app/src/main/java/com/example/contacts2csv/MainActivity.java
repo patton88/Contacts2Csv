@@ -33,14 +33,20 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static MainActivity m_MA;
-    public boolean m_bFilter;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
 
     private EditText m_etFilePath;
     private Button m_btnHelp;
     private Button m_btnInsert;
     private Button m_btnOutput;
     private Button m_btnDelAll;
-    private CheckBox m_chkPhoto;
+    private Button m_btnBrowse;
+
+    public boolean m_bDealPhoto;
+    private CheckBox m_chkDealPhoto;
+
+    public boolean m_bFilterNameOnly;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+    private CheckBox m_chkNameOnly;
+
     public TextView m_tvResult;
     private TextView m_tvOs;
     private TextView m_tvQuality;
@@ -123,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
 
-        boolean m_bFilter = true;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
-
         m_sFilePath = "";
         m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
         m_output = new ContactOutput();     //导出联系人
@@ -141,8 +145,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnOutput.setOnClickListener(this);
         m_btnDelAll = (Button) findViewById(R.id.btn_del_all);
         m_btnDelAll.setOnClickListener(this);
+        m_btnBrowse = (Button) findViewById(R.id.btn_browse);
+        m_btnBrowse.setOnClickListener(this);
+
+        m_chkNameOnly = findViewById(R.id.chk_filter_name_only);
+        m_chkNameOnly.setOnClickListener(this);
+        m_bFilterNameOnly = false;   // 默认不选。剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+        m_chkNameOnly.setChecked(m_bFilterNameOnly);
+
         m_tvResult = (TextView) findViewById(R.id.tv_result);
-        m_tvOs = (TextView) findViewById(R.id.chk_photo);
+        m_tvOs = (TextView) findViewById(R.id.chk_deal_photo);
         m_rbtnArrPhoto[0] = (RadioButton) findViewById(R.id.rbtn_png);
         // set png default
         m_rbtnArrPhoto[0].setChecked(true);
@@ -152,15 +164,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_rbtnArrMode[1] = (RadioButton) findViewById(R.id.rbtn_output);
         m_rbtnArrMode[1].setOnClickListener(this);
 
-        m_chkPhoto = findViewById(R.id.chk_photo);
-        m_chkPhoto.setOnClickListener(this);
+        m_chkDealPhoto = findViewById(R.id.chk_deal_photo);
+        m_chkDealPhoto.setOnClickListener(this);
         m_tvQuality = findViewById(R.id.tv_quality);
         m_tvQuality.setOnClickListener(this);
         m_etQuality = findViewById(R.id.et_quality);
         m_etQuality.setOnClickListener(this);
+        m_bDealPhoto = false;
         //默认不选中
-        doCheck(m_chkPhoto, false);
-        //m_chkPhoto.setChecked(false);
+        doCheck(m_chkDealPhoto, m_bDealPhoto);
+        //m_chkDealPhoto.setChecked(false);
         //setPhotoWidgetEnabled(false);
         m_etQuality.setText("100"); // 默认100
         m_etQuality.setFilters(new InputFilter[]{new InputFilterMinMax(1,100)});    //设置监听
@@ -232,8 +245,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
-            case R.id.chk_photo:
-                setPhotoWidgetEnabled(m_chkPhoto.isChecked());
+            case R.id.chk_deal_photo:
+                m_bDealPhoto = m_chkDealPhoto.isChecked();
+                setPhotoWidgetEnabled(m_bDealPhoto);
+            case R.id.chk_filter_name_only:
+                m_bFilterNameOnly = m_chkNameOnly.isChecked();
                 break;
         }
     }

@@ -61,7 +61,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_filepath" />
 
     <CheckBox
-        android:id="@+id/chk_photo"
+        android:id="@+id/chk_deal_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -80,7 +80,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chk_photo">
+        app:layout_constraintTop_toBottomOf="@+id/chk_deal_photo">
 
         <RadioButton
             android:id="@+id/rbtn_png"
@@ -118,11 +118,11 @@
         app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
 
     <CheckBox
-        android:id="@+id/chk_deal_name_only"
+        android:id="@+id/chk_filter_name_only"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/tv_deal_name_only"
+        android:text="@string/tv_filter_name_only"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_quality" />
 
@@ -135,7 +135,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.082"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chk_deal_name_only" />
+        app:layout_constraintTop_toBottomOf="@+id/chk_filter_name_only" />
 
     <Button
         android:id="@+id/btn_del_all"
@@ -146,7 +146,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.14"
         app:layout_constraintStart_toEndOf="@+id/btn_insert"
-        app:layout_constraintTop_toBottomOf="@+id/chk_deal_name_only" />
+        app:layout_constraintTop_toBottomOf="@+id/chk_filter_name_only" />
 
     <Button
         android:id="@+id/btn_output"
