@@ -14,7 +14,7 @@
     <string name="input_file_name">请输入文件路径：</string>
     <string name="btn_help">帮助</string>
     <string name="btn_del_all">删除所有联系人</string>
-    <string name="btn_browse">浏览</string>
+    <string name="btn_browse_file">浏览</string>
     <string name="hint_text1">文件路径：</string>
     <string name="tv_quality">图像质量（1到100）：</string>
     <string name="et_quality">1到100</string>
@@ -24,4 +24,5 @@
     <string name="rbtn_only_old">只保留旧的</string>
     <string name="rbtn_only_new">只保留新的</string>
 
+    <string name="dlg_info_1">必须选择&#160;txt&#160;扩展名的文本文件！</string>
 </resources>

@@ -1,18 +1,28 @@
 package com.example.contacts2csv;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
+import android.os.storage.StorageManager;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -24,6 +34,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -55,7 +66,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
     private RadioButton[] m_rbtnArrMode = new RadioButton[2];
     public static String m_sPathDownloads;    //存储数据的默认路径
-    public String m_sFilePath;              //文件路径
+    public String m_sFilePath;              //目录绝对路径，末尾不含斜杠、不含文件名。Import输入信息的文件路径
+    private String m_sFileName;             //前面不含目录和斜杠的单纯文件名。Import输入信息的文件名
     public String m_sInsertFilePath;        //导入文件路径
     public static CommonFun m_Fun;    //通用函数类
 
@@ -130,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_Fun = new CommonFun();
 
         m_sFilePath = "";
+        m_sFileName = "";
         m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
         m_output = new ContactOutput();     //导出联系人
         m_insert = new ContactInsert();     //导入联系人
@@ -145,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnOutput.setOnClickListener(this);
         m_btnDelAll = (Button) findViewById(R.id.btn_del_all);
         m_btnDelAll.setOnClickListener(this);
-        m_btnBrowse = (Button) findViewById(R.id.btn_browse);
+        m_btnBrowse = (Button) findViewById(R.id.btn_browse_file);
         m_btnBrowse.setOnClickListener(this);
 
         m_chkNameOnly = findViewById(R.id.chk_filter_name_only);
@@ -250,6 +263,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 setPhotoWidgetEnabled(m_bDealPhoto);
             case R.id.chk_filter_name_only:
                 m_bFilterNameOnly = m_chkNameOnly.isChecked();
+                break;
+            case R.id.btn_browse_file:     //浏览文件
+                //Android调用系统自带的文件管理器进行文件选择并获得路径
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");  //设置类型，我这里是任意类型，任意后缀的可以这样写。
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                //回调函数 onActivityResult 响应了选择文件的操作，Android中调用文件管理器并返回选中文件的路径。
+                //该语句将调用回调函数 onActivityResult，不再返回，其后面的语句不会被执行
+                startActivityForResult(intent, 1);
                 break;
         }
     }
@@ -544,6 +567,45 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         }
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Begin 调用系统文件浏览组件，返回文件路径
+
+    // startActivityForResult 函数的回调函数 onActivityResult 响应了选择文件的操作。
+    //@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //高版本onActivityResult必须调用父类的onActivityResult，否则报错：overriding should call super.onActivityResult
+        super.onActivityResult(requestCode, resultCode, data);
+        String pathAll = "";
+
+        if (resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            if ("file".equalsIgnoreCase(uri.getScheme())) { //使用第三方应用打开
+                pathAll = uri.getPath();
+                return;
+            }
+
+            //System.out.println("Build.VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
+            //Build.VERSION.SDK_INT = 22
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {   // 大于 19 (Android 4.4)
+                pathAll = FileUriUtils.getPath(this, uri);
+            } else {    // 小于 19 (Android 4.4) 系统调用方法
+                pathAll = FileUriUtils.getRealPathFromURI(this, uri);
+            }
+
+            //若选择文件后缀不是txt，则不做任何操作
+            if (m_Fun.getFileSuffix(pathAll).equals("txt")) {
+                m_sFilePath = m_Fun.getFilePath(pathAll);
+                m_sFileName = m_Fun.getFileName(pathAll);
+                m_etFilePath.setText(m_sFilePath + "/" + m_sFileName);
+            } else {
+                Toast.makeText(MainActivity.this, getString(R.string.dlg_info_1), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // End 调用系统文件浏览组件，返回文件路径
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

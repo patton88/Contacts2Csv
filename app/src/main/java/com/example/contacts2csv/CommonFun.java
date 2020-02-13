@@ -55,6 +55,9 @@ public class CommonFun {
 
     //获取含后缀的文件名
     public String getFileName(String PathAndName) {
+        if (TextUtils.isEmpty(PathAndName)) {
+            return PathAndName;
+        }
         int start = PathAndName.lastIndexOf("/");
         if (start != -1) {
             return PathAndName.substring(start + 1);
@@ -100,12 +103,14 @@ public class CommonFun {
 
     //获取文件后缀(不含点号)
     public String getFileSuffix(String PathAndName) {
-        int start = PathAndName.lastIndexOf(".");
-        if (start != -1) {
-            return PathAndName.substring(start + 1);
-        } else {
-            return "";
+        String suffix = "";
+        if (!TextUtils.isEmpty(PathAndName)) {
+            int start = PathAndName.lastIndexOf(".");
+            if (start != -1) {
+                suffix = PathAndName.substring(start + 1);
+            }
         }
+        return suffix;
     }
 
     //获取不含后缀的文件名
@@ -123,6 +128,9 @@ public class CommonFun {
 
     //获取文件所在目录
     public String getFilePath(String PathAndName) {
+        if (TextUtils.isEmpty(PathAndName)) {
+            return PathAndName;
+        }
         int end = PathAndName.lastIndexOf("/");
         if (end != -1) {
             return PathAndName.substring(0, end);
