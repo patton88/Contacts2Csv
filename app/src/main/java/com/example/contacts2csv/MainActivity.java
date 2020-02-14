@@ -1,28 +1,19 @@
 package com.example.contacts2csv;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
-import android.os.storage.StorageManager;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -44,6 +35,9 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static MainActivity m_MA;
+    private boolean m_bInserting;    // 正在处理过程中的标志
+    private boolean m_bOutputing;    // 正在处理过程中的标志
+    private boolean m_bDeling;       // 正在处理过程中的标志
 
     private EditText m_etFilePath;
     private Button m_btnHelp;
@@ -52,6 +46,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Button m_btnDelAll;
     private Button m_btnBrowse;
 
+    private TextView m_tvPhote;
+    private TextView m_tvQuality;
+    private EditText m_etQuality;
     public boolean m_bDealPhoto;
     private CheckBox m_chkDealPhoto;
 
@@ -59,9 +56,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox m_chkNameOnly;
 
     public TextView m_tvResult;
-    private TextView m_tvOs;
-    private TextView m_tvQuality;
-    private EditText m_etQuality;
 
     private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
     private RadioButton[] m_rbtnArrMode = new RadioButton[2];
@@ -109,10 +103,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     break;
                 case ExtraStrings.DEL_FAIL:
                     m_tvResult.setText(ExtraStrings.FAIL_DEL);
+                    endDelContact();
                     break;
                 case ExtraStrings.DEL_SUCCESS:
                     m_tvResult.setText(String.format(ExtraStrings.SUCCESS_DEL,
                             m_del.m_iSuccess, m_del.m_iFail, m_del.getCurTime()));
+                    endDelContact();
                     break;
                 case ExtraStrings.DEL_COUNTING:
                     m_tvResult.setText(String.format(ExtraStrings.DEL_COUNT_UPDATE,
@@ -184,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_chkNameOnly.setChecked(m_bFilterNameOnly);
 
         m_tvResult = (TextView) findViewById(R.id.tv_result);
-        m_tvOs = (TextView) findViewById(R.id.chk_deal_photo);
+        m_tvPhote = (TextView) findViewById(R.id.chk_deal_photo);
         m_rbtnArrPhoto[0] = (RadioButton) findViewById(R.id.rbtn_png);
         // set png default
         m_rbtnArrPhoto[0].setChecked(true);
@@ -225,10 +221,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //启动时选中导出联系人
         //doCheck(m_rbtnArrMode[1], true);
         doCheck(m_rbtnArrMode[0], true);
-        m_etFilePath.setText("/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_2.txt");
+        m_etFilePath.setText("/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_4.txt");
 
         //m_rbtnArrMode[1].setChecked(true);
-        //setInsertWidgetEnabled(false);
+        //setWidgetsEnable(false);
         //setOutputWidgetEnabled(true);
     }
 
@@ -251,29 +247,37 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.btn_help:
                 createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
                         false, ExtraStrings.DIALOG_TYPE_HELP);
+                if (m_bOutputing || m_bInserting || m_bDeling) {
+                    setWidgetsEnable(false);
+                }
                 break;
             case R.id.btn_insert:
                 //m_del.delAllContacts(this);
-                //m_insertGroup.delAllGroup(m_MA);
-                delContact();
-                insertContact();
+                //delContact();
+                createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
+                        ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_etFilePath.getText().toString(),
+                        true, ExtraStrings.DIALOG_TYPE_INSERT);
                 break;
             case R.id.btn_output:
-                outputContact();
+                createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
+                        ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE + "\n\n" + m_etFilePath.getText().toString(),
+                        true, ExtraStrings.DIALOG_TYPE_OUTPUT);
                 break;
             case R.id.btn_del_all:
+                createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE,
+                        true, ExtraStrings.DIALOG_TYPE_DEL_ALL);
                 //m_del.delAllContacts(this);
-                m_insertGroup.delAllGroup(this);
-                delContact();
+                //m_insertGroup.delAllGroup(this);
+                //delContact();
                 break;
             case R.id.rbtn_insert:
-//                setInsertWidgetEnabled(true);
+//                setWidgetsEnable(true);
 //                setOutputWidgetEnabled(false);
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
             case R.id.rbtn_output:
-//                setInsertWidgetEnabled(false);
+//                setWidgetsEnable(false);
 //                setOutputWidgetEnabled(true);
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
                 m_etFilePath.setText(file.getAbsolutePath());
@@ -356,26 +360,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_etQuality.setEnabled(bEnable);
     }
 
-    //为导出联系人、导出联系人设置控件状态
-    private void setInsertWidgetEnabled(boolean bEnable) {
-        m_rbtnArrPhoto[0].setEnabled(bEnable);
-        m_rbtnArrPhoto[1].setEnabled(bEnable);
+    //为导出联系人、导出、删除联系人设置控件状态
+    private void setWidgetsEnable(boolean bEnable) {
         m_btnInsert.setEnabled(bEnable);
-        m_etFilePath.setEnabled(bEnable);
-        int iVisable = bEnable ? View.VISIBLE : View.INVISIBLE;
-        m_rbtnArrPhoto[0].setVisibility(iVisable);
-        m_rbtnArrPhoto[1].setVisibility(iVisable);
-        m_tvOs.setVisibility(iVisable);
-        if (!bEnable) {
-            m_tvResult.setText(ExtraStrings.NO_TEXT);
-        }
-    }
-
-    private void setOutputWidgetEnabled(boolean bEnable) {
         m_btnOutput.setEnabled(bEnable);
-        if (!bEnable) {
-            m_tvResult.setText(ExtraStrings.NO_TEXT);
-        }
+        m_btnBrowse.setEnabled(bEnable);
+        m_btnDelAll.setEnabled(bEnable);
+
+        m_chkDealPhoto.setEnabled(bEnable);
+        m_chkNameOnly.setEnabled(bEnable);
+        setPhotoWidgetEnabled(bEnable && m_chkDealPhoto.isChecked());
+
+        m_rbtnArrMode[0].setEnabled(bEnable);
+        m_rbtnArrMode[1].setEnabled(bEnable);
+
+        m_etFilePath.setEnabled(bEnable);
     }
 
     //弹出警告对话框
@@ -390,10 +389,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         dialog.cancel();
                         break;
                     case ExtraStrings.DIALOG_TYPE_INSERT:
-                        doInsertContact();
+                        m_insertGroup.delAllGroup(m_MA);
+                        delContact();
+                        insertContact();
                         break;
                     case ExtraStrings.DIALOG_TYPE_OUTPUT:
-                        doOutputContact();
+                        outputContact();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_DEL_ALL:
+                        m_insertGroup.delAllGroup(m_MA);
+                        delContact();
                         break;
                 }
             }
@@ -439,15 +444,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     //处理导入联系人线程的代码 Begin
     private void doInsertContact() {
-        setInsertWidgetEnabled(false);
         if (m_threadInsert != null) {
+            m_bInserting = true;
+            setWidgetsEnable(false);
             m_threadInsert.start();
         }
     }
 
     private void endInsertContact() {
-        //m_etFilePath.setText(ExtraStrings.NO_TEXT);
-        setInsertWidgetEnabled(true);
+        m_bInserting = false;
+        if (!(m_bOutputing || m_bInserting || m_bDeling)) {
+            setWidgetsEnable(true);
+        }
     }
 
     class InsertRunnable implements Runnable {
@@ -492,19 +500,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     //处理导出联系人线程的代码 Begin
     private void doOutputContact() {
-        setOutputWidgetEnabled(false);
         if (m_threadOutput != null) {
             m_threadOutput.interrupt();
             m_threadOutput = null;
         }
         m_threadOutput = new Thread(new OutputRunnable(this));
         if (m_threadOutput != null) {
+            m_bOutputing = true;
+            setWidgetsEnable(false);
             m_threadOutput.start();
         }
     }
 
     private void endOutputContact() {
-        setOutputWidgetEnabled(true);
+        m_bOutputing = false;
+        if (!(m_bOutputing || m_bInserting || m_bDeling)) {
+            setWidgetsEnable(true);
+        }
     }
 
     class OutputRunnable implements Runnable {
@@ -540,7 +552,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         m_threadDel = new Thread(new DelRunnable(this));
         if (m_threadDel != null) {
+            m_bDeling = true;
+            setWidgetsEnable(false);
             m_threadDel.start();
+        }
+    }
+
+    private void endDelContact() {
+        m_bDeling = false;
+        if (!(m_bOutputing || m_bInserting || m_bDeling)) {
+            setWidgetsEnable(true);
         }
     }
 
