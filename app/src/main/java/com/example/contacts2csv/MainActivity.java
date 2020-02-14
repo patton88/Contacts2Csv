@@ -586,13 +586,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 return;
             }
 
-            //System.out.println("Build.VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
-            //Build.VERSION.SDK_INT = 22
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {   // 大于 19 (Android 4.4)
-                pathAll = FileUriUtils.getPath(this, uri);
-            } else {    // 小于 19 (Android 4.4) 系统调用方法
-                pathAll = FileUriUtils.getRealPathFromURI(this, uri);
-            }
+            pathAll = FileUriUtils.getRealPathFromUri(this, uri);
 
             //若选择文件后缀不是txt，则不做任何操作
             if (m_Fun.getFileSuffix(pathAll).equals("txt")) {

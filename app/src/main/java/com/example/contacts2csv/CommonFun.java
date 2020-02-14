@@ -410,4 +410,19 @@ public class CommonFun {
         }
     }
 
+    public void logArray(String [] arr) {
+        System.out.println("----- Begin : Array.length = " + arr.length + " -----------------------------------------");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println("array[" + i + "] = " + arr[i]);
+        }
+        System.out.println("----- End : Array.length = " + arr.length + " -----------------------------------------");
+    }
+
+    public void logString(String str) {
+        System.out.println("String = " + str);
+    }
+
+    public void logString(int data) {
+        System.out.println("int = " + data);
+    }
 }
