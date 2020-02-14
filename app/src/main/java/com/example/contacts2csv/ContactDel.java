@@ -25,10 +25,11 @@ public class ContactDel {
     public boolean delAllContacts(Context context) {
         ContentResolver resolver = context.getContentResolver();
         Cursor cursor = resolver.query(Contacts.CONTENT_URI, null, null, null, null);
+
         m_iSum = cursor.getCount();
+        m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
         m_iSuccess = 0;
         m_iFail = 0;
-        m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
         while (cursor.moveToNext()) {
             try {
                 String lookupKey = cursor.getString(cursor.getColumnIndex(Contacts.LOOKUP_KEY));

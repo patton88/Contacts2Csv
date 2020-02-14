@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -24,6 +25,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
@@ -53,13 +55,25 @@ public class ContactOutput {
     private ContactHeader m_contactHeader;         //用于存放通讯录所有记录的表头信息
     private ContactHeader m_contactHeaderCount;    //用于存放获取的每条记录每一列的计数器
 
-    public int getSum() {
-        return m_jsonContactData2.length();
-    }
+    private int m_iSum;
+    private int m_iSuccessCount;
+    private int m_iFailCount;
+    private long m_lStartTimer;
 
     public ContactOutput() {
         m_GroupOutput = new GroupOutput();
         m_contactHeader = new ContactHeader();
+    }
+
+    public String getCurTime () {
+        int time = (int)((SystemClock.elapsedRealtime() - m_lStartTimer) / 1000);
+        //String hh = new DecimalFormat("00").format(time / 3600);
+        String mm = new DecimalFormat("00").format(time % 3600 / 60);
+        String ss = new DecimalFormat("00").format(time % 60);
+        //String timeFormat = new String(hh + ":" + mm + ":" + ss);
+        String timeFormat = new String(mm + "分" + ss + "秒");
+
+        return timeFormat;
     }
 
     //导出导入联系人时，处理组信息的方式
@@ -104,6 +118,12 @@ public class ContactOutput {
         String whereArgsId[] = new String[]{"null"};            // 选择条件数组，只需要非空记录
         String sortOrderId = Data.CONTACT_ID;                   // 查询结果排序规则
         Cursor cursorId = resolver.query(uriId, selectId, whereId, whereArgsId, sortOrderId);
+
+        m_iSum = cursorId.getCount();                       // 导出联系人总数
+        m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
+        m_iSuccessCount = 0;
+        m_iFailCount = 0;
+
         while (cursorId.moveToNext()) {
             //m_Fun.logFileds(cursorId);
             int iColId = cursorId.getColumnIndex(sortOrderId);  //"contact_id"
@@ -142,9 +162,17 @@ public class ContactOutput {
                 String contactDataMime = cursorData.getString(iColData);
                 //System.out.println("contactDataMime = " + contactDataMime);
                 // 获取 cursorData 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
-                getContactsData(contactIdKey, contactDataMime, cursorData);
+                int ret = getContactsData(contactIdKey, contactDataMime, cursorData);
+                if (-1 != ret) {
+                    if (1 == ret) { // 只统计处理姓名字段是否成功
+                        m_iSuccessCount++;
+                    } else if (0 == ret){
+                        m_iFailCount++;
+                    }
+                }
             }
             cursorData.close();
+            m_MA.m_handler.sendEmptyMessage(ExtraStrings.OUTPUT_COUNTING);          // 更新导出联系人计数
         }
         cursorId.close();
 
@@ -162,7 +190,8 @@ public class ContactOutput {
     }
 
     // 获取 cursor 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
-    private void getContactsData(String contactIdKey, String mimetype, Cursor cursor) {
+    private int getContactsData(String contactIdKey, String mimetype, Cursor cursor) {
+        int ret = -1;
         String key1 = getKey1(mimetype);    // 根据 mimetype 确定 key1: "jsonG00StructName"、"jsonG01Phone"、...
         switch (getMimetype4lay(key1, "__mimetype_fun")) {
             case "fun00":       // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
@@ -173,7 +202,13 @@ public class ContactOutput {
                 fun00_dumpJson4lay(contactIdKey, key1, cursor, 1);
                 break;
             case "fun02":       // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData 中，比如 jsonG00StructName，必须要循环处理
-                fun02_dumpJson4layAll(contactIdKey, key1, cursor);
+                if (key1.equals("jsonG00StructName")) {
+                    if (fun02_dumpJson4layAll(contactIdKey, key1, cursor)) {
+                        ret = 1;
+                    } else {
+                        ret = 0;
+                    }
+                }
                 break;
             case "fun03":       // "jsonG03Photo"，单独用 fun03_dumpPhoto() 处理
                 if (m_MA.m_bDealPhoto) {
@@ -186,6 +221,7 @@ public class ContactOutput {
             default:
                 break;
         }
+        return ret;
     }
 
     //在多级 JSONObject 的第1级中数据中(从0级起)，根据 value 获取 key 值，必须 value 值不重复
@@ -531,7 +567,8 @@ public class ContactOutput {
 
     // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
-    private void fun00_dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
+    private boolean fun00_dumpJson4lay(String idKey, String key1, Cursor cursor, int iPhone) {
+        boolean ret = false;
         // 正确用法！取当前 cursor 对应的信息子类型
         String type = getMimetype4lay(key1, "__mimetype_type").trim();  // type 为大类型(data2)：Phone.TYPE、Email.TYPE、...
         int iSubtype = cursor.getInt(cursor.getColumnIndex(type));      // subtype 为子类型，比如 xxx.TYPE_HOME、xxx.TYPE_WORK、...
@@ -561,8 +598,9 @@ public class ContactOutput {
                     val = funRemove(val);       // 电话号码才处理
                 }
             }
-            put2json4lay(idKey, key1, key2, val, prefix);   // 将获取的数据存入 m_jsonContactData
+            ret = put2json4lay(idKey, key1, key2, val, prefix);   // 将获取的数据存入 m_jsonContactData
         }
+        return ret;
     }
 
     public String getSubtype2(String key1, String key2) {
@@ -602,10 +640,10 @@ public class ContactOutput {
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
     // cursor : 查询游标
-    private void fun05_dumpJson4lay(String idKey, String key1, Cursor cursor) {
+    private boolean fun05_dumpJson4lay(String idKey, String key1, Cursor cursor) {
         String key2 = "groupId";
-        String col = get4layColumnName(key1, key2);                     // 获取该类信息的在数据表中的列号(字段号)
-        String groupId = cursor.getString(cursor.getColumnIndex(col));  // 获取数据表中的数据
+        String col = get4layColumnName(key1, key2);                      // 获取该类信息的在数据表中的列号(字段号)
+        String groupId = cursor.getString(cursor.getColumnIndex(col));   // 获取数据表中的数据
         put2json4lay(idKey, key1, key2, groupId, "");           // 将获取的数据存入 m_jsonContactData
 
         key2 = "groupTitle";
@@ -613,14 +651,15 @@ public class ContactOutput {
         if (!TextUtils.isEmpty(groupId)){
             groupTitle = m_GroupOutput.getGroupTitle(groupId, m_MA);
         }
-        put2json4lay(idKey, key1, key2, groupTitle, "");          // 将获取的数据存入 m_jsonContactData
+        return put2json4lay(idKey, key1, key2, groupTitle, ""); // 将获取的数据存入 m_jsonContactData
     }
 
     // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData 中，比如 jsonG00StructName，必须要循环处理
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
     // cursor : 查询游标
-    private void fun02_dumpJson4layAll(String idKey, String key1, Cursor cursor) {  // 该函数必须要循环处理
+    private boolean fun02_dumpJson4layAll(String idKey, String key1, Cursor cursor) {  // 该函数必须要循环处理
+        boolean ret = false;
         try {
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
@@ -634,9 +673,12 @@ public class ContactOutput {
                 String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
                 put2json4lay(idKey, key1, key2, data, "");          // 将获取的数据存入 m_jsonContactData
             }
+            ret = true;
         } catch (JSONException e) {
             e.printStackTrace();
+            ret = false;
         }
+        return ret;
     }
 
     // 将获取的数据存入 m_jsonContactData
@@ -646,7 +688,8 @@ public class ContactOutput {
     // val: 存入的数据 data
     // prefix: 子类型前缀，home、work、other、...
     // cursor : 查询游标
-    private void put2json4lay(String idKey, String key1, String key2, String val, String prefix) {
+    private boolean put2json4lay(String idKey, String key1, String key2, String val, String prefix) {
+        boolean ret = false;
         String keyNew = prefix + key2;
         try {
             int n = Integer.valueOf(m_contactHeaderCount.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second"));
@@ -660,9 +703,12 @@ public class ContactOutput {
             //没有下面两行就只能获得某种数据的第一个值。比如只能获得第一个手机号，其他手机号丢失
             n = java.lang.Math.max(n, Integer.valueOf(m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).getString("__second")));
             m_contactHeader.m_jsonHeader.getJSONObject(key1).getJSONObject(key2).put("__second", String.valueOf(n));
+            ret = true;
         } catch (JSONException e) {
             e.printStackTrace();
+            ret = false;
         }
+        return ret;
     }
 
     private String get4layColumnName(String key1, String key2) {
@@ -806,7 +852,8 @@ public class ContactOutput {
     //03、jsonG03Photo，头像。
     // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如 jsonG00StructName
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
-    private void fun03_dumpPhoto(String idKey, String key1, Cursor cursor) {
+    private boolean fun03_dumpPhoto(String idKey, String key1, Cursor cursor) {
+        boolean ret = false;
         String typePhoto = getMimetype4lay(key1, "photo").trim();  // typePhoto 为：Photo.PHOTO
 
         Bitmap photoBmp = null;
@@ -835,8 +882,8 @@ public class ContactOutput {
             filename = "anonymity_1";
             e.printStackTrace();
         }
-        saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename, "png", 100);
-        //return photoBmp;
+        ret = saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename, "png", 100);
+        return ret;
     }
 
     // 获取联系人头像。原文链接：https://blog.csdn.net/angcyo/article/details/52177832
@@ -863,7 +910,8 @@ public class ContactOutput {
     //原文链接：https://blog.csdn.net/yangye608/article/details/75332958
     // filename 不带后缀；photoType : jpg、png；iQuality：压缩质量 50 - 100
     // 默认字符变量、特殊类型变量可以不带前缀，比如：String path、BufferedOutputStream bos
-    private File saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality) {
+    private boolean saveBmpFile(Bitmap bmp, String path, String filename, String photoType, int iQuality) {
+        boolean ret = false;
         File dirFile = new File(path);
         if (!dirFile.exists()) {
             dirFile.mkdir();
@@ -901,11 +949,26 @@ public class ContactOutput {
             }
             bos.flush();
             bos.close();
+            ret = true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            ret = false;
         } catch (IOException e) {
             e.printStackTrace();
+            ret = false;
         }
-        return file;
+        return ret;
+    }
+
+    public int getSum() {
+        return m_iSum;
+    }
+
+    public int getSuccessCount() {
+        return m_iSuccessCount;
+    }
+
+    public int getFailCount() {
+        return m_iFailCount;
     }
 }

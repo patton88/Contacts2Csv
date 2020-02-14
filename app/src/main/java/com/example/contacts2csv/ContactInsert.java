@@ -54,9 +54,9 @@ public class ContactInsert {
     private ContactHeader m_InsertContactHeader;    //用于存放通讯录所有记录的表头信息
     private GroupInsert m_GroupInsert;              //用于处理导入联系人群组
     private final String m_sTAG = getClass().getSimpleName();
-    private int m_iSum = 0;
-    private int m_iSuccessCount = 0;
-    private int m_iFailCount = 0;
+    private int m_iSum;
+    private int m_iSuccessCount;
+    private int m_iFailCount;
     private long m_lStartTimer;
     private ArrayList<ContactInfo> m_contactArrayList;
 
@@ -64,8 +64,6 @@ public class ContactInsert {
         m_jsonInsertContact = new JSONObject(new LinkedHashMap());
         m_InsertContactHeader = new ContactHeader();
         m_GroupInsert = new GroupInsert();
-        m_iSuccessCount = 0;
-        m_iFailCount = 0;
     }
 
     public String getCurTime () {
@@ -84,9 +82,11 @@ public class ContactInsert {
         init();
         ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
-        m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
 
+        m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
         m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
+        m_iSuccessCount = 0;
+        m_iFailCount = 0;
 
         Iterator<String> it = m_jsonInsertContact.keys();
         int n = 0;

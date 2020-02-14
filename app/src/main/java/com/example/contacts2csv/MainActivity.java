@@ -83,11 +83,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             switch (msg.what) {
                 case ExtraStrings.INSERT_FAIL:
                     m_tvResult.setText(ExtraStrings.FAIL_INSERT);
-                    //endInsertContact();
+                    endInsertContact();
                     break;
                 case ExtraStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, m_insert.getSuccessCount(), m_insert.getFailCount()));
-                    //endInsertContact();
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT,
+                            m_insert.getSuccessCount(), m_insert.getFailCount(), m_insert.getCurTime()));
+                    endInsertContact();
                     break;
                 case ExtraStrings.INSERT_COUNTING:
                     m_tvResult.setText(String.format(ExtraStrings.INSERT_COUNT_UPDATE, m_insert.getSum(),
@@ -95,17 +96,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     break;
                 case ExtraStrings.OUTPUT_FAIL:
                     m_tvResult.setText(ExtraStrings.FAIL_OUTPUT);
-                    //endOutputContact();
+                    endOutputContact();
                     break;
                 case ExtraStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT + "到：\n" + m_sFilePath, m_output.getSum()));
-                    //endOutputContact();
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT,
+                            m_output.getSuccessCount(), m_output.getFailCount(), m_output.getCurTime()));
+                    endOutputContact();
+                    break;
+                case ExtraStrings.OUTPUT_COUNTING:
+                    m_tvResult.setText(String.format(ExtraStrings.OUTPUT_COUNT_UPDATE, m_output.getSum(),
+                            m_output.getSuccessCount(), m_output.getFailCount(), m_output.getCurTime()));
                     break;
                 case ExtraStrings.DEL_FAIL:
                     m_tvResult.setText(ExtraStrings.FAIL_DEL);
                     break;
                 case ExtraStrings.DEL_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_DEL, m_del.m_iSum));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_DEL,
+                            m_del.m_iSuccess, m_del.m_iFail, m_del.getCurTime()));
                     break;
                 case ExtraStrings.DEL_COUNTING:
                     m_tvResult.setText(String.format(ExtraStrings.DEL_COUNT_UPDATE,
@@ -433,15 +440,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     //处理导入联系人线程的代码 Begin
     private void doInsertContact() {
         setInsertWidgetEnabled(false);
-        m_tvResult.setText(ExtraStrings.STATUS_INSERTING);
         if (m_threadInsert != null) {
             m_threadInsert.start();
-            //System.out.println("doInsertContact");
         }
     }
 
     private void endInsertContact() {
-        m_etFilePath.setText(ExtraStrings.NO_TEXT);
+        //m_etFilePath.setText(ExtraStrings.NO_TEXT);
         setInsertWidgetEnabled(true);
     }
 
@@ -488,7 +493,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     //处理导出联系人线程的代码 Begin
     private void doOutputContact() {
         setOutputWidgetEnabled(false);
-        m_tvResult.setText(ExtraStrings.STATUS_OUTPUTING);
         if (m_threadOutput != null) {
             m_threadOutput.interrupt();
             m_threadOutput = null;
@@ -520,7 +524,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         }
     }
-    //处理导出联系人线程的代码 End
 
     // 导出联系人 End
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -534,13 +537,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_threadDel.interrupt();
             m_threadDel = null;
         }
-        m_threadDel = new Thread(new DelRunnable(this));
-        doDelContact();
-    }
 
-    // 处理删除联系人线程的代码 Begin
-    private void doDelContact() {
-        m_tvResult.setText(ExtraStrings.STATUS_INSERTING);
+        m_threadDel = new Thread(new DelRunnable(this));
         if (m_threadDel != null) {
             m_threadDel.start();
         }
@@ -563,7 +561,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         }
     }
-    // 处理删除联系人线程的代码 End
 
     // 删除联系人 End
     ////////////////////////////////////////////////////////////////////////////////////////////////
