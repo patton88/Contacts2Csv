@@ -23,7 +23,12 @@ public class ExtraStrings {
 	public static final String STATUS_INSERTING = "正在导入联系人...";
 	public static final String INSERT_COUNT_UPDATE = "导入总数%d条，成功 %d 条，失败 %d 条，用时%s";
 	public static final String STATUS_OUTPUTING = "正在导出联系人...";
-	public static final String HELP_MESSAGE = 
+
+	public static final String SUCCESS_DEL = "已成功删除 %d 条联系人记录";
+	public static final String FAIL_DEL = "删除联系人失败";
+	public static final String DEL_COUNT_UPDATE = "删除总数%d条，成功 %d 条，失败 %d 条，用时%s";
+
+	public static final String HELP_MESSAGE =
 	"原作者 Jose Mourinho \n" +
 	"QQ:546771679\n" +
 	"使用说明: \n" + 
@@ -41,9 +46,12 @@ public class ExtraStrings {
 	//insert output status
 	public static final int INSERT_FAIL = -1;
 	public static final int INSERT_SUCCESS = 1;
+	public static final int INSERT_COUNTING = 3;
 	public static final int OUTPUT_FAIL = -2;
 	public static final int OUTPUT_SUCCESS = 2;
-	public static final int INSERT_COUNTING = 3;
+	public static final int DEL_FAIL = -4;
+	public static final int DEL_SUCCESS = 4;
+	public static final int DEL_COUNTING = 5;
 
 	//charset
 	public static final String CHARSET_GBK = "gbk";
