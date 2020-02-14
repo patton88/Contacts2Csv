@@ -206,8 +206,7 @@ public class FileUriUtils {
         String column = MediaStore.MediaColumns.DATA;
         String[] projection = {column};
         try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
-                    null);
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int column_index = cursor.getColumnIndexOrThrow(column);
                 dataColumn = cursor.getString(column_index);

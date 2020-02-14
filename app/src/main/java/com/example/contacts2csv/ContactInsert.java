@@ -114,7 +114,6 @@ public class ContactInsert {
         long contactId = -2;
         try {
             Iterator<String> it1 = m_InsertContactHeader.m_jsonHeader.keys();
-            int n = 0;
             while (it1.hasNext()) {
                 String key1 = it1.next();   //key1: "jsonG00StructName"、"jsonG01Phone"、...
                 JSONObject jsonMime = m_InsertContactHeader.m_jsonHeader.getJSONObject(key1);
