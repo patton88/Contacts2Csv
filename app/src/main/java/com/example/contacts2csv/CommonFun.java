@@ -429,4 +429,8 @@ public class CommonFun {
     public void logString(long data) {
         System.out.println("long = " + data);
     }
+
+    public void logString(boolean data) {
+        System.out.println("long = " + data);
+    }
 }

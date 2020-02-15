@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private boolean m_bOutputing;    // 正在处理过程中的标志
     private boolean m_bDeling;       // 正在处理过程中的标志
 
+    private boolean m_bDealGroup;    // 是否处理群组信息
+
     private EditText m_etFilePath;
     private Button m_btnHelp;
     private Button m_btnInsert;
@@ -242,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     @Override
     public void onClick(View v) {
-        File file;
         switch (v.getId()) {
             case R.id.btn_help:
                 createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
@@ -259,8 +260,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         true, ExtraStrings.DIALOG_TYPE_INSERT);
                 break;
             case R.id.btn_output:
+                File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
+                m_sFilePath = file.getAbsolutePath();
                 createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
-                        ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE + "\n\n" + m_etFilePath.getText().toString(),
+                        ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE + "\n\n" + m_sFilePath,
                         true, ExtraStrings.DIALOG_TYPE_OUTPUT);
                 break;
             case R.id.btn_del_all:
@@ -377,8 +380,79 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_etFilePath.setEnabled(bEnable);
     }
 
-    //弹出警告对话框
+    // 带可选项的对话框
     public void createDialog(Context context, String title, String message, boolean hasCancel, final int type) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        // 为对话框设置标题，会自动折行，setTitle只能显示2行(setMessage可显示多行)。添加该行可以显示对话框多选项
+        builder.setTitle(title);
+        //builder.setMessage(message);  // 为对话框设置内容，会自动折行。添加该行不能显示对话框多选项
+        builder.setIcon(android.R.drawable.ic_dialog_info);     // 设置图标
+
+        // 在带可选项的对话框中不能使用 setMessage 。可以用下面方法为对话框添加文本标签，用于显示多行信息
+        TextView TvDlg = new TextView(this);
+        TvDlg.setText("    " + message);
+        builder.setView(TvDlg);
+
+        //为对话框设置多选按钮
+        final String[] items = {"处理联系人群组信息"};
+        final boolean[] checkeds = {true};
+        if (type == ExtraStrings.DIALOG_TYPE_INSERT || type == ExtraStrings.DIALOG_TYPE_DEL_ALL ) {
+            builder.setMultiChoiceItems(items, checkeds, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    //m_bDealGroup = checkeds[which];
+                }
+            });
+        }
+
+        // 为对话框设置确定按钮
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int arg1) {
+                switch (type) {
+                    case ExtraStrings.DIALOG_TYPE_HELP:
+                        dialog.cancel();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_INSERT:
+                        if (checkeds[0]) {
+                            m_insertGroup.delAllGroup(m_MA);
+                            m_Fun.logString(checkeds[0]);
+                        }
+                        delContact();
+                        insertContact();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_OUTPUT:
+                        outputContact();
+                        break;
+                    case ExtraStrings.DIALOG_TYPE_DEL_ALL:
+                        if (checkeds[0]) {
+                            m_insertGroup.delAllGroup(m_MA);
+                            //m_Fun.logString(checkeds[0]);
+                        }
+                        delContact();
+                        break;
+                }
+
+            }
+        });
+
+        if (hasCancel) {
+            builder.setNeutralButton(ExtraStrings.DIALOG_CANCEL, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    dialog.cancel();
+                }
+            });
+        }
+
+        // 为对话框设置中立按钮
+        //builder.setNeutralButton(getString(R.string.dlg_save_btn_browse), null);
+
+        builder.show();         // 使用show()方法显示对话框
+    }
+
+    //弹出警告对话框
+    public void createDialog0(Context context, String title, String message, boolean hasCancel, final int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
