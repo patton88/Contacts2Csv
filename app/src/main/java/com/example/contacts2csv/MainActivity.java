@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Button m_btnOutput;
     private Button m_btnDelAll;
     private Button m_btnBrowse;
+    private Button m_btnGetLastFile;
+    private Button m_btnGetUniqueFile;
 
     private TextView m_tvPhote;
     private TextView m_tvQuality;
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public TextView m_tvResult;
 
     private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
-    private RadioButton[] m_rbtnArrMode = new RadioButton[2];
     public static String m_sPathDownloads;    //存储数据的默认路径
     public String m_sFilePath;              //目录绝对路径，末尾不含斜杠、不含文件名。Import输入信息的文件路径
     private String m_sFileName;             //前面不含目录和斜杠的单纯文件名。Import输入信息的文件名
@@ -175,6 +176,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnDelAll.setOnClickListener(this);
         m_btnBrowse = (Button) findViewById(R.id.btn_browse_file);
         m_btnBrowse.setOnClickListener(this);
+        m_btnGetLastFile = (Button) findViewById(R.id.btn_get_last_file);
+        m_btnGetLastFile.setOnClickListener(this);
+        m_btnGetUniqueFile = (Button) findViewById(R.id.btn_get_unique_file);
+        m_btnGetUniqueFile.setOnClickListener(this);
 
         m_chkNameOnly = findViewById(R.id.chk_filter_name_only);
         m_chkNameOnly.setOnClickListener(this);
@@ -187,10 +192,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // set png default
         m_rbtnArrPhoto[0].setChecked(true);
         m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
-        m_rbtnArrMode[0] = (RadioButton) findViewById(R.id.rbtn_insert);
-        m_rbtnArrMode[0].setOnClickListener(this);
-        m_rbtnArrMode[1] = (RadioButton) findViewById(R.id.rbtn_output);
-        m_rbtnArrMode[1].setOnClickListener(this);
 
         m_chkDealPhoto = findViewById(R.id.chk_deal_photo);
         m_chkDealPhoto.setOnClickListener(this);
@@ -222,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         //启动时选中导出联系人
         //doCheck(m_rbtnArrMode[1], true);
-        doCheck(m_rbtnArrMode[0], true);
+        //doCheck(m_rbtnArrMode[0], true);
         m_etFilePath.setText("/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_4.txt");
 
         //m_rbtnArrMode[1].setChecked(true);
@@ -273,15 +274,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 //m_insertGroup.delAllGroup(this);
                 //delContact();
                 break;
-            case R.id.rbtn_insert:
-//                setWidgetsEnable(true);
-//                setOutputWidgetEnabled(false);
+            case R.id.btn_get_last_file:
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
-            case R.id.rbtn_output:
-//                setWidgetsEnable(false);
-//                setOutputWidgetEnabled(true);
+            case R.id.btn_get_unique_file:
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
                 m_etFilePath.setText(file.getAbsolutePath());
                 break;
@@ -373,9 +370,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_chkDealPhoto.setEnabled(bEnable);
         m_chkNameOnly.setEnabled(bEnable);
         setPhotoWidgetEnabled(bEnable && m_chkDealPhoto.isChecked());
-
-        m_rbtnArrMode[0].setEnabled(bEnable);
-        m_rbtnArrMode[1].setEnabled(bEnable);
 
         m_etFilePath.setEnabled(bEnable);
     }

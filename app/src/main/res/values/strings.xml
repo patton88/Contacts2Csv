@@ -11,6 +11,8 @@
     <string name="insert">导入</string>
     <string name="output">导出</string>
     <string name="btn_output_contact">导出联系人</string>
+    <string name="btn_get_last_file">最新文件名(导入用)</string>
+    <string name="btn_get_unique_file">唯一文件名(导出用)</string>
     <string name="input_file_name">请输入文件路径：</string>
     <string name="btn_help">帮助</string>
     <string name="btn_del_all">删除所有联系人</string>

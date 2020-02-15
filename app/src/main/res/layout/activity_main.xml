@@ -7,48 +7,13 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/tv_deal_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/choose_mode"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <RadioGroup
-        android:id="@+id/rbtn_group_fun"
-        android:layout_width="260dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginTop="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_deal_mode">
-
-        <RadioButton
-            android:id="@+id/rbtn_insert"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="@string/insert" />
-
-        <RadioButton
-            android:id="@+id/rbtn_output"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/output" />
-    </RadioGroup>
-
-    <TextView
         android:id="@+id/tv_filepath"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/input_file_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_fun" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/et_filepath"
@@ -181,6 +146,28 @@
         app:layout_constraintStart_toEndOf="@+id/btn_browse_file"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
+    <Button
+        android:id="@+id/btn_get_last_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_get_last_file"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.096"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_output" />
+
+    <Button
+        android:id="@+id/btn_get_unique_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_get_unique_file"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.288"
+        app:layout_constraintStart_toEndOf="@+id/btn_get_last_file"
+        app:layout_constraintTop_toBottomOf="@+id/btn_output" />
+
     <TextView
         android:id="@+id/tv_result"
         android:layout_width="fill_parent"
@@ -189,7 +176,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_output"
+        app:layout_constraintTop_toBottomOf="@+id/btn_get_last_file"
         android:hint="显示处理信息"
         app:layout_constraintVertical_bias="0.2" />
 
