@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         //android获取项目名称
         m_sAppName = getApplicationInfo().loadLabel(getPackageManager()).toString();   //m_sAppName = "章鱼短信"
+        //m_Fun.logString(m_sAppName);
     }
 
     // 实现 CheckBox 选择事件的对应操作
