@@ -402,10 +402,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     String mes = "";
                     if (type == ExtraStrings.DIALOG_TYPE_INSERT) {
                         mes = checkeds[0] ? ExtraStrings.INSERT_WARNDIALOG_MESSAGE : ExtraStrings.INSERT_WARNDIALOG_MESSAGE_NoGroup;
+                        mes += "\n\n" + m_sFilePath;
                     } else if (type == ExtraStrings.DIALOG_TYPE_DEL_ALL) {
                         mes = checkeds[0] ? ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE : ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE_NoGroup;
                     }
-                    m_tvDlg.setText("    " + mes + "\n\n" + m_sFilePath);
+                    m_tvDlg.setText("    " + mes);
                 }
             });
         }
