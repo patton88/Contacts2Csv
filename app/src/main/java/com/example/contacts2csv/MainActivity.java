@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public ContactDel m_del;            //删除联系人
     public GroupInsert m_insertGroup;   //导入群组
 
+    private AlertDialog m_DlgCheck;     // 对话框。控件命名以m_大写字母开头,类型用m_小写字母开头
+    private TextView m_tvDlg;
+
     //线程消息处理对象
     public Handler m_handler = new Handler() {
         @Override
@@ -256,8 +259,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.btn_insert:
                 //m_del.delAllContacts(this);
                 //delContact();
+                m_sFilePath = m_etFilePath.getText().toString();
                 createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
-                        ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_etFilePath.getText().toString(),
+                        ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_sFilePath,
                         true, ExtraStrings.DIALOG_TYPE_INSERT);
                 break;
             case R.id.btn_output:
@@ -366,6 +370,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnOutput.setEnabled(bEnable);
         m_btnBrowse.setEnabled(bEnable);
         m_btnDelAll.setEnabled(bEnable);
+        m_btnGetLastFile.setEnabled(bEnable);
+        m_btnGetUniqueFile.setEnabled(bEnable);
 
         m_chkDealPhoto.setEnabled(bEnable);
         m_chkNameOnly.setEnabled(bEnable);
@@ -384,10 +390,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         builder.setIcon(android.R.drawable.ic_dialog_info);     // 设置图标
 
         // 在带可选项的对话框中不能使用 setMessage 。可以用下面方法为对话框添加文本标签，用于显示多行信息
-        TextView TvDlg = new TextView(this);
-        TvDlg.setText("    " + message);
-        builder.setView(TvDlg);
-
+        m_tvDlg = new TextView(this);
         //为对话框设置多选按钮
         final String[] items = {"处理联系人群组信息"};
         final boolean[] checkeds = {true};
@@ -396,9 +399,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     //m_bDealGroup = checkeds[which];
+                    String mes = "";
+                    if (type == ExtraStrings.DIALOG_TYPE_INSERT) {
+                        mes = checkeds[0] ? ExtraStrings.INSERT_WARNDIALOG_MESSAGE : ExtraStrings.INSERT_WARNDIALOG_MESSAGE_NoGroup;
+                    } else if (type == ExtraStrings.DIALOG_TYPE_DEL_ALL) {
+                        mes = checkeds[0] ? ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE : ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE_NoGroup;
+                    }
+                    m_tvDlg.setText("    " + mes + "\n\n" + m_sFilePath);
                 }
             });
         }
+        m_tvDlg.setText("    " + message);
+        builder.setView(m_tvDlg);
 
         // 为对话框设置确定按钮
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -486,16 +498,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Thread m_threadInsert;
 
     private void insertContact() {
-        //int n = 1;
-        //System.out.println("insertContact_" + n++);
-        String sPath = m_etFilePath.getText().toString();
-        if (TextUtils.isEmpty(sPath)) {
+        // m_sFilePath 中已经存放导入文件绝对路径
+        if (TextUtils.isEmpty(m_sFilePath)) {
             m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
         //sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
-        if (!new File(sPath).exists()) {
+        if (!new File(m_sFilePath).exists()) {
             m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
@@ -504,7 +514,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        m_threadInsert = new Thread(new InsertRunnable(this, sPath));
+        m_threadInsert = new Thread(new InsertRunnable(this, m_sFilePath));
         //createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE, true, ExtraStrings.DIALOG_TYPE_INSERT);
         doInsertContact();
         //System.out.println("insertContact_" + n++);
@@ -515,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (m_threadInsert != null) {
             m_bInserting = true;
             setWidgetsEnable(false);
+            m_etFilePath.setText(m_sFilePath);
             m_threadInsert.start();
         }
     }
@@ -555,9 +566,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Thread m_threadOutput;
 
     private void outputContact() {
-        //File file = new File(ExtraStrings.OUTPUT_PATH);
-        File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
-        m_sFilePath = file.getAbsolutePath();
+        // m_sFilePath 中已经存放导出文件绝对路径
+        File file = new File(m_sFilePath);
         if (file.exists()) {
             createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE,
                     true, ExtraStrings.DIALOG_TYPE_OUTPUT);
@@ -576,6 +586,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (m_threadOutput != null) {
             m_bOutputing = true;
             setWidgetsEnable(false);
+            m_etFilePath.setText(m_sFilePath);
             m_threadOutput.start();
         }
     }

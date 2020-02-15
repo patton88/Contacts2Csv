@@ -7,8 +7,10 @@ public class ExtraStrings {
     public static final String DIALOG_CANCEL = "取消";
     public static final String WARNDIALOG_TITLE = "警告";
     public static final String INSERT_WARNDIALOG_MESSAGE = "该操作将删除所有联系人和群组信息，然后从下面文件中导入新的联系人，是否执行？";
+    public static final String INSERT_WARNDIALOG_MESSAGE_NoGroup = "该操作将删除所有联系人信息，然后从下面文件中导入新的联系人，是否执行？";
     public static final String OUTPUT_WARNDIALOG_MESSAGE = "\n    该操作将把所有联系人和群组信息导出到下面文件中，是否执行？";
     public static final String DEL_ALL_WARNDIALOG_MESSAGE = "该操作将删除所有联系人和群组信息，是否执行？";
+    public static final String DEL_ALL_WARNDIALOG_MESSAGE_NoGroup = "该操作将删除所有联系人信息，是否执行？";
     public static final String HELP_DIALOG_TITLE = "帮助信息";
 
     //insert output status strings
