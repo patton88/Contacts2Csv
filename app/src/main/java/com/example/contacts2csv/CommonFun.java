@@ -1,5 +1,7 @@
 package com.example.contacts2csv;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
@@ -432,5 +434,22 @@ public class CommonFun {
 
     public void logString(boolean data) {
         System.out.println("long = " + data);
+    }
+
+    public boolean putinClipboard(String mes) {
+        //Android 内容复制到剪贴板
+        ClipboardManager cm;
+        ClipData m_ClipData;
+        //获取剪贴板管理器：
+        cm = (ClipboardManager)m_MA.getSystemService(Context.CLIPBOARD_SERVICE);
+        //android 获取 app 名称
+        String sAppName = m_MA.getApplicationInfo().loadLabel(m_MA.getPackageManager()).toString();   // 获得app名称
+        // 创建普通字符型ClipData
+        m_ClipData = ClipData.newPlainText(sAppName, mes);
+        // 将ClipData内容放到系统剪贴板里。
+        cm.setPrimaryClip(m_ClipData);
+        //Toast.makeText(m_MA, mes + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
+
+        return true;
     }
 }

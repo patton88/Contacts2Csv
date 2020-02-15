@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private AlertDialog m_DlgCheck;     // 对话框。控件命名以m_大写字母开头,类型用m_小写字母开头
     private TextView m_tvDlg;
 
+    private String m_sAppName;
+
     //线程消息处理对象
     public Handler m_handler = new Handler() {
         @Override
@@ -232,6 +234,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //m_rbtnArrMode[1].setChecked(true);
         //setWidgetsEnable(false);
         //setOutputWidgetEnabled(true);
+
+        //android获取项目名称
+        m_sAppName = getApplicationInfo().loadLabel(getPackageManager()).toString();   //m_sAppName = "章鱼短信"
     }
 
     // 实现 CheckBox 选择事件的对应操作
@@ -280,11 +285,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
             case R.id.btn_get_last_file:
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
-                m_etFilePath.setText(file.getAbsolutePath());
+                m_etFilePath.setText(m_sFilePath = file.getAbsolutePath());
+                m_Fun.putinClipboard(m_sFilePath);
+                Toast.makeText(m_MA, m_sFilePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn_get_unique_file:
                 file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
-                m_etFilePath.setText(file.getAbsolutePath());
+                m_etFilePath.setText(m_sFilePath = file.getAbsolutePath());
+                m_Fun.putinClipboard(m_sFilePath);
+                Toast.makeText(m_MA, m_sFilePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.chk_deal_photo:
                 m_bDealPhoto = m_chkDealPhoto.isChecked();
@@ -527,6 +536,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_bInserting = true;
             setWidgetsEnable(false);
             m_etFilePath.setText(m_sFilePath);
+            m_Fun.putinClipboard(m_sFilePath);
             m_threadInsert.start();
         }
     }
@@ -588,6 +598,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_bOutputing = true;
             setWidgetsEnable(false);
             m_etFilePath.setText(m_sFilePath);
+            m_Fun.putinClipboard(m_sFilePath);
             m_threadOutput.start();
         }
     }
