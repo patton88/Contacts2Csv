@@ -59,6 +59,7 @@ public class ContactOutput {
     private int m_iSuccessCount;
     private int m_iFailCount;
     private long m_lStartTimer;
+    int m_iAnonymous;  // 无名用户 anonymous 计数器
 
     public ContactOutput() {
         m_GroupOutput = new GroupOutput();
@@ -102,6 +103,7 @@ public class ContactOutput {
     */
 
     public String getAllContacts() {
+        m_iAnonymous = 0;  // 无名用户 anonymous 计数器
         m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
 
         // 注意：mimetype 都尽量使用 Android 规范命名，避免使用硬字符串，以增强适应性
@@ -202,12 +204,9 @@ public class ContactOutput {
                 fun00_dumpJson4lay(contactIdKey, key1, cursor, 1);
                 break;
             case "fun02":       // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData 中，比如 jsonG00StructName，必须要循环处理
+                boolean bRet = fun02_dumpJson4layAll(contactIdKey, key1, cursor);
                 if (key1.equals("jsonG00StructName")) {
-                    if (fun02_dumpJson4layAll(contactIdKey, key1, cursor)) {
-                        ret = 1;
-                    } else {
-                        ret = 0;
-                    }
+                    ret = bRet ? 1 : 0;
                 }
                 break;
             case "fun03":       // "jsonG03Photo"，单独用 fun03_dumpPhoto() 处理
@@ -661,6 +660,8 @@ public class ContactOutput {
     private boolean fun02_dumpJson4layAll(String idKey, String key1, Cursor cursor) {  // 该函数必须要循环处理
         boolean ret = false;
         try {
+            int i = 0;  // 判断是否是无名用户的计数器
+            boolean bDealAnonymous = true;  // 需要为无名用户添加 "displayName"
             Iterator<String> it = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
             while (it.hasNext()) {
                 String key2 = it.next();                                    // key2："displayName"、"lastName"、"firstName"、...
@@ -671,7 +672,16 @@ public class ContactOutput {
 
                 String col = get4layColumnName(key1, key2);                 // 获取该类信息的在数据表中的列号(字段号)
                 String data = cursor.getString(cursor.getColumnIndex(col)); // 获取数据表中的数据
+                // 处理无名用户的计数器增量
+                if (TextUtils.isEmpty(data) && (key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
+                    i++;
+                }
                 put2json4lay(idKey, key1, key2, data, "");          // 将获取的数据存入 m_jsonContactData
+
+                if (bDealAnonymous && 3 == i) {   // 为无名记录添加名字
+                    m_jsonContactData.getJSONObject(idKey).put("displayName", "anonymous_" + (++m_iAnonymous));
+                    bDealAnonymous = false;
+                }
             }
             ret = true;
         } catch (JSONException e) {

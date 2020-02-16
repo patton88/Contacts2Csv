@@ -286,7 +286,7 @@ public class ContactInsert {
         cv.put(Data.RAW_CONTACT_ID, contactId);
         cv.put(Data.MIMETYPE, mimeItem);                //StructuredName.CONTENT_ITEM_TYPE
 
-        int i = 0;
+        int i = 0;  // 判断是否是无名用户的计数器
         int x = 0;  // 无名用户 anonymous 计数器
         Iterator<String> it = jsonItem.keys();
         while (it.hasNext()) {
