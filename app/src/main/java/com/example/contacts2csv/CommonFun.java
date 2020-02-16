@@ -147,10 +147,18 @@ public class CommonFun {
         return file;
     }
 
-    // 获得绝对路径PathAndName下面的新文件文件名称。
-    // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
-    public String GetNewFileName(String PathAndName, int iFlag) {
-        return GetNewFileName(getFilePath(PathAndName), getFileName(PathAndName), iFlag);
+    // 获得绝对路径PathAndName下面的新文件绝对路径
+    // iFlag：0，不重名的新文件绝对路径；iFlag：1，最新回执信息文件绝对路径
+    // 比如：/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_X.txt
+    public String getNewAbsolutePath(String PathAndName, int iFlag) {
+        return getNewAbsolutePath(getFilePath(PathAndName), getFileName(PathAndName), iFlag);
+    }
+
+    // 获得绝对路径 filePath + "/" + fileName 下面的新文件绝对路径
+    // iFlag：0，不重名的新文件绝对路径；iFlag：1，最新回执信息文件绝对路径
+    // 比如：/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_X.txt
+    public String getNewAbsolutePath(String filePath, String fileName, int iFlag) {
+        return filePath + "/" + GetNewFileName(filePath, fileName, iFlag);
     }
 
     // 获得绝对路径：mInFilePath + "/" + m_sInFileName下面的新文件文件名称。

@@ -62,10 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public TextView m_tvResult;
 
     private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
-    public static String m_sPathDownloads;    //存储数据的默认路径
-    public String m_sFilePath;              //目录绝对路径，末尾不含斜杠、不含文件名。Import输入信息的文件路径
-    private String m_sFileName;             //前面不含目录和斜杠的单纯文件名。Import输入信息的文件名
-    public String m_sInsertFilePath;        //导入文件路径
+    public static String m_sPathDownloads;    //存储数据的默认路径，无文件名
+    public String m_sFileAbsolutePath;        //文件绝对路径，包括完整的目录和文件名
     public static CommonFun m_Fun;    //通用函数类
 
     public ContactOutput m_output;      //导出联系人
@@ -162,9 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
 
-        m_sFilePath = "";
-        m_sFileName = "";
-        m_sInsertFilePath = m_sPathDownloads + "/" + ExtraStrings.OUTPUT_FILENAME;
+        m_sFileAbsolutePath = "";
         m_output = new ContactOutput();     //导出联系人
         m_insert = new ContactInsert();     //导入联系人
         m_del = new ContactDel();           //删除联系人
@@ -229,7 +225,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //启动时选中导出联系人
         //doCheck(m_rbtnArrMode[1], true);
         //doCheck(m_rbtnArrMode[0], true);
-        m_etFilePath.setText("/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_4.txt");
+        //m_etFilePath.setText("/storage/sdcard/Android/data/com.example.contacts2csv/files/Download/Contacts_4.txt");
+        m_sFileAbsolutePath = m_Fun.getNewAbsolutePath(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
+        m_etFilePath.setText(m_sFileAbsolutePath);
+        m_Fun.putinClipboard(m_sFileAbsolutePath);
 
         //m_rbtnArrMode[1].setChecked(true);
         //setWidgetsEnable(false);
@@ -265,16 +264,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.btn_insert:
                 //m_del.delAllContacts(this);
                 //delContact();
-                m_sFilePath = m_etFilePath.getText().toString();
+                m_sFileAbsolutePath = m_etFilePath.getText().toString();
                 createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
-                        ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_sFilePath,
+                        ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_sFileAbsolutePath,
                         true, ExtraStrings.DIALOG_TYPE_INSERT);
                 break;
             case R.id.btn_output:
-                File file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
-                m_sFilePath = file.getAbsolutePath();
+                m_sFileAbsolutePath = m_Fun.getNewAbsolutePath(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
                 createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
-                        ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE + "\n\n" + m_sFilePath,
+                        ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE + "\n\n" + m_sFileAbsolutePath,
                         true, ExtraStrings.DIALOG_TYPE_OUTPUT);
                 break;
             case R.id.btn_del_all:
@@ -285,16 +283,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 //delContact();
                 break;
             case R.id.btn_get_last_file:
-                file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
-                m_etFilePath.setText(m_sFilePath = file.getAbsolutePath());
-                m_Fun.putinClipboard(m_sFilePath);
-                Toast.makeText(m_MA, m_sFilePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
+                m_sFileAbsolutePath = m_Fun.getNewAbsolutePath(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
+                m_etFilePath.setText(m_sFileAbsolutePath);
+                m_Fun.putinClipboard(m_sFileAbsolutePath);
+                Toast.makeText(m_MA, m_sFileAbsolutePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn_get_unique_file:
-                file = m_Fun.GetNewFile(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
-                m_etFilePath.setText(m_sFilePath = file.getAbsolutePath());
-                m_Fun.putinClipboard(m_sFilePath);
-                Toast.makeText(m_MA, m_sFilePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
+                m_sFileAbsolutePath = m_Fun.getNewAbsolutePath(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 0);
+                m_etFilePath.setText(m_sFileAbsolutePath);
+                m_Fun.putinClipboard(m_sFileAbsolutePath);
+                Toast.makeText(m_MA, m_sFileAbsolutePath + "\n已经复制到剪贴板", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.chk_deal_photo:
                 m_bDealPhoto = m_chkDealPhoto.isChecked();
@@ -412,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     String mes = "";
                     if (type == ExtraStrings.DIALOG_TYPE_INSERT) {
                         mes = checkeds[0] ? ExtraStrings.INSERT_WARNDIALOG_MESSAGE : ExtraStrings.INSERT_WARNDIALOG_MESSAGE_NoGroup;
-                        mes += "\n\n" + m_sFilePath;
+                        mes += "\n\n" + m_sFileAbsolutePath;
                     } else if (type == ExtraStrings.DIALOG_TYPE_DEL_ALL) {
                         mes = checkeds[0] ? ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE : ExtraStrings.DEL_ALL_WARNDIALOG_MESSAGE_NoGroup;
                     }
@@ -509,14 +507,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Thread m_threadInsert;
 
     private void insertContact() {
-        // m_sFilePath 中已经存放导入文件绝对路径
-        if (TextUtils.isEmpty(m_sFilePath)) {
+        // m_sFileAbsolutePath 中已经存放导入文件绝对路径
+        if (TextUtils.isEmpty(m_sFileAbsolutePath)) {
             m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
         //sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
-        if (!new File(m_sFilePath).exists()) {
+        if (!new File(m_sFileAbsolutePath).exists()) {
             m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
@@ -525,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_threadInsert.interrupt();
             m_threadInsert = null;
         }
-        m_threadInsert = new Thread(new InsertRunnable(this, m_sFilePath));
+        m_threadInsert = new Thread(new InsertRunnable(this, m_sFileAbsolutePath));
         //createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.INSERT_WARNDIALOG_MESSAGE, true, ExtraStrings.DIALOG_TYPE_INSERT);
         doInsertContact();
         //System.out.println("insertContact_" + n++);
@@ -536,8 +534,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (m_threadInsert != null) {
             m_bInserting = true;
             setWidgetsEnable(false);
-            m_etFilePath.setText(m_sFilePath);
-            m_Fun.putinClipboard(m_sFilePath);
+            m_etFilePath.setText(m_sFileAbsolutePath);
+            m_Fun.putinClipboard(m_sFileAbsolutePath);
             m_threadInsert.start();
         }
     }
@@ -578,8 +576,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Thread m_threadOutput;
 
     private void outputContact() {
-        // m_sFilePath 中已经存放导出文件绝对路径
-        File file = new File(m_sFilePath);
+        // m_sFileAbsolutePath 中已经存放导出文件绝对路径
+        File file = new File(m_sFileAbsolutePath);
         if (file.exists()) {
             createDialog(this, ExtraStrings.WARNDIALOG_TITLE, ExtraStrings.OUTPUT_WARNDIALOG_MESSAGE,
                     true, ExtraStrings.DIALOG_TYPE_OUTPUT);
@@ -598,8 +596,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (m_threadOutput != null) {
             m_bOutputing = true;
             setWidgetsEnable(false);
-            m_etFilePath.setText(m_sFilePath);
-            m_Fun.putinClipboard(m_sFilePath);
+            m_etFilePath.setText(m_sFileAbsolutePath);
+            m_Fun.putinClipboard(m_sFileAbsolutePath);
             m_threadOutput.start();
         }
     }
@@ -620,7 +618,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean result = m_output.outputAllContacts(m_context, m_sFilePath);
+            boolean result = m_output.outputAllContacts(m_context, m_sFileAbsolutePath);
             if (result) {
                 m_handler.sendEmptyMessage(ExtraStrings.OUTPUT_SUCCESS);
             } else {
@@ -756,9 +754,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             //若选择文件后缀不是txt，则不做任何操作
             if (m_Fun.getFileSuffix(pathAll).equals("txt")) {
-                m_sFilePath = m_Fun.getFilePath(pathAll);
-                m_sFileName = m_Fun.getFileName(pathAll);
-                m_etFilePath.setText(m_sFilePath + "/" + m_sFileName);
+                m_sFileAbsolutePath = pathAll;
+                m_etFilePath.setText(m_sFileAbsolutePath);
+                m_Fun.putinClipboard(m_sFileAbsolutePath);
             } else {
                 Toast.makeText(MainActivity.this, getString(R.string.dlg_info_1), Toast.LENGTH_SHORT).show();
             }
