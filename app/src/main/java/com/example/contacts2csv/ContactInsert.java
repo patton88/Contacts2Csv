@@ -270,7 +270,8 @@ public class ContactInsert {
         ContentValues cv = new ContentValues();
 
         // 先新建一个联系人 Uri
-        Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv);  // 新建一个新的联系人 Uri
+        cv.put(RawContacts.AGGREGATION_MODE,RawContacts.AGGREGATION_MODE_DISABLED);     // 禁用同名聚合，否则会丢失许多同名记录信息
+        Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv);     // 新建一个新的联系人 Uri
         contactId = ContentUris.parseId(uri);           // 得到新建联系人 Uri 的 contactID
 
         // 先在 raw_contact 表里面添加联系人id

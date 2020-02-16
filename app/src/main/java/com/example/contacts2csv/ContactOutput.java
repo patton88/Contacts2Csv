@@ -132,6 +132,8 @@ public class ContactOutput {
             String contactId = cursorId.getString(iColId);
 
             String contactIdKey = "contact" + contactId;
+            //m_Fun.logString(contactIdKey);
+
             m_contactHeaderCount = new ContactHeader();         //用于存放获取的每条记录每一列的计数器
             try {
                 m_jsonContactData.put(contactIdKey, new JSONObject(new LinkedHashMap()));
