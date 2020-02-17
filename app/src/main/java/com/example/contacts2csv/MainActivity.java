@@ -132,6 +132,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         init();
     }
 
+    // Android再次激活Activity时触发事件用于列表重新读取载入，重载 onResume() 方法
+    @Override
+    protected void onResume(){
+        super.onResume();
+        setWidgetsEnable(false);
+        if (!(m_bOutputing || m_bInserting || m_bDeling)) {
+            setWidgetsEnable(true);
+        }
+    }
+
     private String getUserPath() {
         String sPath = "";
 
