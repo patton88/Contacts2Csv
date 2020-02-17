@@ -83,6 +83,10 @@ public class ContactInsert {
         ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
 
+        if (m_MA.m_bAggregateSameName) {
+            AggregateSameName(m_jsonInsertContact);         // 聚合同名联系人信息
+        }
+
         m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
         m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
         m_iSuccessCount = 0;
@@ -470,6 +474,10 @@ public class ContactInsert {
             }
         }
         return keyRet;
+    }
+
+    // 聚合同名联系人信息
+    private void AggregateSameName(JSONObject json) {
     }
 
     // 将 arrList 转储到 json 中

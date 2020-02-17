@@ -59,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public boolean m_bFilterNameOnly;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
     private CheckBox m_chkNameOnly;
 
+    public boolean m_bAggregateSameName;        // 聚合同名联系人信息
+    private CheckBox m_chkAggregateSameName;
+
     public TextView m_tvResult;
 
     private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
@@ -203,6 +206,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // set png default
         m_rbtnArrPhoto[0].setChecked(true);
         m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
+
+        m_bAggregateSameName = true;        // 聚合同名联系人信息
 
         m_chkDealPhoto = findViewById(R.id.chk_deal_photo);
         m_chkDealPhoto.setOnClickListener(this);
