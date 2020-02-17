@@ -414,9 +414,9 @@ public class CommonFun {
     public void logFileds(Cursor cursor) {
         String [] fileds = cursor.getColumnNames();
         int len = fileds.length;
-        System.out.println("fields.length = " + len);
+        System.out.println("(test11) fields.length = " + len);
         for (int i = 0; i < len; i++) {
-            System.out.println("\tcol" + i + " : " + fileds[i]);
+            System.out.println("\t(test11) col" + i + " : " + fileds[i]);
         }
     }
 

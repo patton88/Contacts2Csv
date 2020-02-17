@@ -126,13 +126,15 @@ public class ContactOutput {
         m_iSuccessCount = 0;
         m_iFailCount = 0;
 
+        m_Fun.logString(m_iSum);
+
         while (cursorId.moveToNext()) {
             //m_Fun.logFileds(cursorId);
             int iColId = cursorId.getColumnIndex(sortOrderId);  //"contact_id"
             String contactId = cursorId.getString(iColId);
 
             String contactIdKey = "contact" + contactId;
-            //m_Fun.logString(contactIdKey);
+            m_Fun.logString(contactIdKey);
 
             m_contactHeaderCount = new ContactHeader();         //用于存放获取的每条记录每一列的计数器
             try {
@@ -158,12 +160,15 @@ public class ContactOutput {
             //System.out.println("cursorId.getCount() = " + cursorId.getCount());         //I/System.out: cursorId.getCount() = 4
             //System.out.println("cursorData.getCount() = " + cursorData.getCount());     //I/System.out: cursorData.getCount() = 25
 
+            m_Fun.logString(cursorData.getCount());
             while (cursorData.moveToNext()) {
                 int iColData = cursorData.getColumnIndex(Data.MIMETYPE);      // 注意：查询结果中没有"mimetype_id"字段，只有"mimetype"字段
                 if (iColData < 0) {
                     continue;
                 }
                 String contactDataMime = cursorData.getString(iColData);
+                m_Fun.logString(contactDataMime);
+
                 //System.out.println("contactDataMime = " + contactDataMime);
                 // 获取 cursorData 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
                 int ret = getContactsData(contactIdKey, contactDataMime, cursorData);

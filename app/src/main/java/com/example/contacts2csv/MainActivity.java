@@ -434,8 +434,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             m_insertGroup.delAllGroup(m_MA);
                             m_Fun.logString(checkeds[0]);
                         }
-                        delContact();
-                        insertContact();
+                        // 该函数是为了避免 delContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
+                        delAndInsert();
                         break;
                     case ExtraStrings.DIALOG_TYPE_OUTPUT:
                         outputContact();
@@ -630,6 +630,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     // 导出联系人 End
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // 该函数是为了避免 delContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
+    private void delAndInsert() {
+        delContact();
+        insertContact();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 删除联系人 Begin
     private Thread m_threadDel;
@@ -641,6 +647,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         m_threadDel = new Thread(new DelRunnable(this));
+
         if (m_threadDel != null) {
             m_bDeling = true;
             setWidgetsEnable(false);
