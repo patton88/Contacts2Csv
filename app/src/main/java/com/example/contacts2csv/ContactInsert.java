@@ -90,6 +90,7 @@ public class ContactInsert {
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
 
         m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
+        m_MA.m_iSameName = 0;                               // 同名联系人记录计数器
         m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
         m_iSuccessCount = 0;
         m_iFailCount = 0;
@@ -298,6 +299,7 @@ public class ContactInsert {
                 m_MA.m_output.m_jsonContactOne = null;
                 m_MA.m_output.getContactOne(contactId, context);
                 m_MA.m_bHasSameName = true;
+                m_MA.m_iSameName++;
                 return contactId;
             }
         }

@@ -21,7 +21,7 @@ public class ExtraStrings {
     public static final String FAIL_READ_FIRE = "读取文件出错";
 
     public static final String INSERT_COUNT_UPDATE = "导入总数%d条，成功 %d 条，失败 %d 条，用时%s";
-    public static final String SUCCESS_INSERT = "导入联系人成功 %d 条，失败 %d 条，用时%s";
+    public static final String SUCCESS_INSERT = "导入联系人成功 %d 条，失败 %d 条，合并 %d 条，用时%s";
     public static final String FAIL_INSERT = "导入联系人失败";
 
     public static final String OUTPUT_COUNT_UPDATE = "导出总数%d条，成功 %d 条，失败 %d 条，用时%s";
