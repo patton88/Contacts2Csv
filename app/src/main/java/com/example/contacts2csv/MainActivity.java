@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox m_chkNameOnly;
 
     public boolean m_bAggregateSameName;        // 聚合同名联系人信息
+    public boolean m_bHasSameName;              // 是否存在同名联系人记录
     private CheckBox m_chkAggregateSameName;
 
     public TextView m_tvResult;
