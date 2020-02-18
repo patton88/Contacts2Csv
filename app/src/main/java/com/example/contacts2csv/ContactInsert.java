@@ -395,13 +395,15 @@ public class ContactInsert {
         ContentValues cv = new ContentValues();
 
         Iterator<String> it1 = jsonItem.keys();
+        int n = -1;
         while (it1.hasNext()) {
-            String key1 = it1.next();       //key1: "displayName"、"lastName"、...、"mobile"、"mobile2"、...
+            n++;
+            String key1 = it1.next().trim();       //key1: "displayName"、"lastName"、...、"mobile"、"mobile2"、...
             String[] arr = findKey(jsonMime, key1);  // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"
             String mime = "";
             String val = "";
             try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
-                val = jsonItem.getString(key1);
+                val = jsonItem.getString(key1).trim();
                 if (TextUtils.isEmpty(val) || !jsonMime.has(arr[0])) {
                     continue;
                 }
@@ -411,6 +413,10 @@ public class ContactInsert {
             }
 
             if (m_MA.m_bHasSameName && hasValue(key1, val)) {    // 聚合同名联系人信息
+                continue;
+            }
+
+            if (m_MA.m_bAggregateMimeSameData && hasSameMimeValue(key1, val, n, jsonItem, jsonMime)) {    // 聚合所有联系人同类型同样内容的数据
                 continue;
             }
 
@@ -461,6 +467,45 @@ public class ContactInsert {
         return contactId;
     }
 
+    private boolean hasSameMimeValue(String oldKey1, String oldVal1, int oldN, JSONObject jsonItem, JSONObject jsonMime) {
+        boolean ret = false;
+        oldKey1 = oldKey1.trim();
+        oldKey1 = oldKey1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        oldVal1 = oldVal1.trim();
+
+        // 在 jsonItem 的前面 oldN - 1 个元素中的属于 jsonMime 类型中的元素，判断是否存在类似 oldKey1、oldVal1 的元素
+        Iterator<String> it1 = jsonItem.keys();
+        int n = 0;
+        while (it1.hasNext() && n < oldN) {
+            n++;
+            String key1 = it1.next().trim();       //key1: "displayName"、"lastName"、...、"mobile"、"mobile2"、...
+            String[] arr = findKey(jsonMime, key1);  // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"
+            String val1 = "";
+            try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
+                val1 = jsonItem.getString(key1).trim();
+                if (TextUtils.isEmpty(val1) || !jsonMime.has(arr[0])) {
+                    continue;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            String key2 = key1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+            String val2 = val1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+
+            if (key2.equals(oldKey1) && val2.equals(oldVal1)) {
+                ret = true;
+                break;
+            } else if (m_MA.m_bAggregateAllSameData && val2.equals(oldVal1)) {
+                ret = true;
+                break;
+            }
+        }
+
+        return ret;
+    }
+
     private boolean hasValue(String key1, String val1) {
         boolean ret = false;
         key1 = key1.trim();
@@ -475,6 +520,10 @@ public class ContactInsert {
                 String key = it.next().trim(); //key : "displayName"、"lastName"、"homeNum"、"homeNum2"、...、"mobile"、"mobile2"、...
                 String key2 = key.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
                 String val2 = jsonContactOne.getString(key).trim();
+                if (key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName")) {    // 跳过名字处理，名字不允许有多个
+                    continue;
+                }
+
                 if (key2.equals(key1) && val2.equals(val1)) {
                     ret = true;
                     break;
@@ -489,56 +538,6 @@ public class ContactInsert {
 
         return ret;
     }
-
-    //android根据手机号码获取姓名2019-08-13，原创太坑不好 最后发布于2019-08-13 14:43:26 阅读数 163  收藏
-    //原文链接：https://blog.csdn.net/wengsheng147/article/details/99434545
-    public String getContactName(String number, Context context) {
-        String name = "";
-        if (TextUtils.isEmpty(number)) {
-            return name;
-        }
-
-        Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-        String[] projection = new String[]{PhoneLookup._ID, PhoneLookup.DISPLAY_NAME};
-        Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
-            name = cursor.getString(1);
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        return name;
-    }
-
-    private void getIM (String contactId, JSONObject data, Context context) throws JSONException {
-        Cursor cursor = null;
-        try {
-            String where = Data.CONTACT_ID + " = ? AND " + Data.MIMETYPE + " = ?";
-            String[] whereArgs = new String[]{contactId, Im.CONTENT_ITEM_TYPE};
-            cursor = context.getContentResolver().query(Data.CONTENT_URI, null, where, whereArgs, null);
-
-            JSONArray imList = new JSONArray();
-            while (cursor.moveToNext()) {
-                String imName = cursor.getString(cursor.getColumnIndex(Im.DATA));
-                int type = cursor.getInt(cursor.getColumnIndex(Im.TYPE));
-                String imType = Im.getTypeLabel(context.getResources(), type, "").toString();
-
-                JSONObject item = new JSONObject();
-                item.put("imName", imName);
-                item.put("imType", imType);
-
-                imList.put(item);
-            }
-
-            data.put("IM", imList);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
 
     private String getMime(JSONObject json, String key) {
         String mime = "";

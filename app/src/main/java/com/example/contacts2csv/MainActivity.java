@@ -60,9 +60,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox m_chkNameOnly;
 
     public boolean m_bAggregateSameName;        // 聚合同名联系人信息
-    public boolean m_bAggregateSameData;        // 聚合同名联系人同样内容的数据
     public boolean m_bHasSameName;              // 是否存在同名联系人记录
     private CheckBox m_chkAggregateSameName;
+    public boolean m_bAggregateSameData;        // 聚合同名联系人同样内容的数据
+    private CheckBox m_chkAggregateSameData;
+
+    public boolean m_bAggregateMimeSameData;    // 聚合所有联系人同类型同样内容的数据
+    private CheckBox m_chkAggregateMimeSameData;
+    public boolean m_bAggregateAllSameData;     // 聚合所有联系人同样内容的数据
+    private CheckBox m_chkAggregateAllSameData;
 
     public TextView m_tvResult;
 
@@ -211,6 +217,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         m_bAggregateSameName = true;        // 聚合同名联系人信息
         m_bAggregateSameData = true;        // 聚合同名联系人同样内容的数据
+        m_bAggregateAllSameData = true;     // 聚合所有联系人同样内容的数据
+        m_bAggregateMimeSameData = true;    // 聚合所有联系人同类型同样内容的数据
 
         m_chkDealPhoto = findViewById(R.id.chk_deal_photo);
         m_chkDealPhoto.setOnClickListener(this);

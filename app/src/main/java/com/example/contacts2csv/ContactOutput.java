@@ -50,8 +50,6 @@ import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
 public class ContactOutput {
     private GroupOutput m_GroupOutput;             //处理导出群组信息
 
-    public String m_sName;
-    public String m_sContactId;
     public JSONObject m_jsonContactOne;            //用于存放获取的单条记录
 
     private JSONObject m_jsonContactData;            //用于存放获取的所有记录中间数据
@@ -66,10 +64,8 @@ public class ContactOutput {
     int m_iAnonymous;  // 无名用户 anonymous 计数器
 
     public ContactOutput() {
-        m_sName = "";
-        m_sContactId = "";
         m_GroupOutput = new GroupOutput();
-        m_contactHeader = new ContactHeader();
+        m_contactHeader = new ContactHeader();      //用于存放通讯录所有记录的表头信息
     }
 
     public String getCurTime () {
@@ -111,6 +107,7 @@ public class ContactOutput {
     public String getAllContacts() {
         m_iAnonymous = 0;  // 无名用户 anonymous 计数器
         m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
+        m_contactHeader = new ContactHeader();      //用于存放通讯录所有记录的表头信息
 
         // 注意：mimetype 都尽量使用 Android 规范命名，避免使用硬字符串，以增强适应性
         //RawContacts.CONTENT_URI = "content://com.android.contacts/raw_contacts"
@@ -242,6 +239,7 @@ public class ContactOutput {
 
         // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
         m_Fun.Json2File(m_jsonContactOne, m_sPathDownloads, "m_jsonContactOne_1.txt");
+
 
         return traverseJSON(m_jsonContactOne);
     }
