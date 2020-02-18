@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public boolean m_bFilterNameOnly;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
     private CheckBox m_chkNameOnly;
 
-    public boolean m_bAggregateSameName;        // 聚合同名联系人信息
+    public int m_iAggregateSameName;            // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
     public boolean m_bHasSameName;              // 是否存在同名联系人记录
     public int m_iSameName;                     // 同名联系人记录计数器
     private CheckBox m_chkAggregateSameName;
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_rbtnArrPhoto[0].setChecked(true);
         m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
 
-        m_bAggregateSameName = true;        // 聚合同名联系人信息
+        m_iAggregateSameName = 1;           // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
         m_bAggregateSameData = true;        // 聚合同名联系人同样内容的数据
         m_bAggregateAllSameData = true;     // 聚合所有联系人同样内容的数据
         m_bAggregateMimeSameData = true;    // 聚合所有联系人同类型同样内容的数据

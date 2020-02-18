@@ -169,7 +169,7 @@ public class ContactOutput {
                 if (iColData < 0) {
                     continue;
                 }
-                String contactDataMime = cursorData.getString(iColData);
+                String contactDataMime = cursorData.getString(iColData);    // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
                 m_Fun.logString(contactDataMime);
 
                 //System.out.println("contactDataMime = " + contactDataMime);
@@ -247,6 +247,7 @@ public class ContactOutput {
     // 获取 cursor 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
     private int getContactsData(String contactIdKey, String mimetype, JSONObject jsonContactData, Cursor cursor) {
         int ret = -1;
+        // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
         String key1 = getKey1(mimetype);    // 根据 mimetype 确定 key1: "jsonG00StructName"、"jsonG01Phone"、...
         switch (getMimetype4lay(key1, "__mimetype_fun")) {
             case "fun00":       // 默认需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理

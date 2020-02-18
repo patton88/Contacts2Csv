@@ -29,7 +29,6 @@ import android.text.TextUtils;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
@@ -47,7 +46,6 @@ import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
 
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -291,10 +289,12 @@ public class ContactInsert {
     private int fun00_addMimeItem(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context) {
         int contactId = -1;
         ContentValues cv = new ContentValues();
+
         m_MA.m_bHasSameName = false;
-        if (m_MA.m_bAggregateSameName) {    // 聚合同名联系人信息
+        if (m_MA.m_iAggregateSameName >= 0 && m_MA.m_iAggregateSameName <= 3) {    // 聚合同名联系人信息
             // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
-            contactId = hasContact(jsonItem, m_MA);
+            // m_iAggregateSameName : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+            contactId = hasContact(jsonItem, m_MA, m_MA.m_iAggregateSameName);
             if (contactId != -1) { // 存在同名记录
                 m_MA.m_output.m_jsonContactOne = null;
                 m_MA.m_output.getContactOne(contactId, context);
@@ -303,6 +303,7 @@ public class ContactInsert {
                 return contactId;
             }
         }
+
         if (-1 == contactId) {
             // 先新建一个联系人 Uri
             cv.put(RawContacts.AGGREGATION_MODE,RawContacts.AGGREGATION_MODE_DISABLED); // 禁用同名聚合，否则会丢失许多同名记录信息
@@ -367,29 +368,101 @@ public class ContactInsert {
     }
 
     // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
-    public int hasContact(JSONObject jsonItem, Context context) {
+    // iFlag : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+    public int hasContact(JSONObject jsonItem, Context context, int iFlag) {
         int contactId = -1;
+        String [] longerName = {"", "", ""};
 
-        String name = "";
+        String name0 = "";   // 新增记录姓名
+        String name1 = "";
+        String name2 = "";
         try {
-            name = jsonItem.getString("displayName").trim();
+            name0 = jsonItem.getString("displayName").trim();
+            name1 = jsonItem.getString("lastName").trim();
+            name2 = jsonItem.getString("firstName").trim();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if (TextUtils.isEmpty(name)) {
+        if (TextUtils.isEmpty(name0)) {
             return contactId;
         }
 
-        Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
+        //Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
+        Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
-            String contactName = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME)).trim();
-            if (contactName.equalsIgnoreCase(name)) {
+            String contactName = cursor.getString(cursor.getColumnIndex(StructuredName.DISPLAY_NAME));    // 待比较姓名
+            String lastName = cursor.getString(cursor.getColumnIndex(StructuredName.GIVEN_NAME));
+            String firstName = cursor.getString(cursor.getColumnIndex(StructuredName.FAMILY_NAME));
+            if (TextUtils.isEmpty(contactName)) {
+                contactName = "";
+            }
+            if (TextUtils.isEmpty(lastName)) {
+                lastName = "";
+            }
+            if (TextUtils.isEmpty(firstName)) {
+                firstName = "";
+            }
+            longerName[0] = (contactName.length() > name0.length()) ? contactName.trim() : name0;
+            longerName[1] = (lastName.length() > name1.length()) ? lastName.trim() : name1;
+            longerName[2] = (firstName.length() > name2.length()) ? firstName.trim() : name2;
+
+            //String类的toUpperCase()和toLowerCase()两个方法只对A~Z和a~z英文字母有效，对其余字符无任何效果。
+            contactName = contactName.toLowerCase().trim();
+            name0 = name0.toLowerCase().trim();
+
+            // iFlag : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+            if (0 == iFlag && name0.equalsIgnoreCase(contactName)) {                 // 0 完全相同
                 contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
+                updateName(contactId, longerName, context);
+                break;
+            } else if (1 == iFlag) {            // 1 头部相同
+                if ((contactName.length() > name0.length() && 0 == contactName.indexOf(name0)) ||
+                        (contactName.length() < name0.length() && 0 == name0.indexOf(contactName))) {
+                    contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
+                    updateName(contactId, longerName, context);
+                    break;
+                }
+            } else if (2 == iFlag) {                                                // 2 尾部相同
+                if (contactName.length() > name0.length()) {
+                    if (name0.equals(contactName.substring(contactName.length() - name0.length()))) {
+                        contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
+                        updateName(contactId, longerName, context);
+                        break;
+                    }
+                } else if (contactName.length() < name0.length()) {
+                    if (contactName.equals(name0.substring(name0.length() - contactName.length()))) {
+                        contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
+                        updateName(contactId, longerName, context);
+                        break;
+                    }
+                }
+            } else if (3 == iFlag && (-1 != contactName.indexOf(name0) || -1 != name0.indexOf(contactName))) {   // 3 任何位置相同
+                contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
+                updateName(contactId, longerName, context);
                 break;
             }
         }
 
         return contactId;
+    }
+
+    // 更新联系人
+    public void updateName(int contactId, String [] nameArr, Context context)
+    {
+        // 这里没什么好说的，跟创建联系人那边大同小异
+        ContentResolver resolver = context.getContentResolver();
+        ContentValues values = new ContentValues();
+
+        //更新联系人姓名
+        values.clear();
+        values.put(StructuredName.DISPLAY_NAME, nameArr[0]);
+        values.put(StructuredName.GIVEN_NAME, nameArr[1]);
+        values.put(StructuredName.FAMILY_NAME, nameArr[2]);
+        //对im操作要注意：data2的数据类型若为3、Im.TYPE_OTHER、自定义类型，就要取Data.data3字段值，自定义的名称 Label
+        values.put(Data.DATA3, "");
+        String Where = Data.RAW_CONTACT_ID + " = ? and " + Data.MIMETYPE + " = ?";
+        String[] WhereParams = new String[]{"" + contactId, StructuredName.CONTENT_ITEM_TYPE};
+        resolver.update(Data.CONTENT_URI, values, Where, WhereParams);
     }
 
     // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
