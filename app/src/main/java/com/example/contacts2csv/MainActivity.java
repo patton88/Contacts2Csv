@@ -98,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     endInsertContact();
                     break;
                 case ExtraStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT,
-                            m_insert.getSuccessCount(), m_insert.getFailCount(), m_MA.m_iSameName, m_insert.getCurTime()));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, m_insert.getSuccessCount() - m_MA.m_iSameName,
+                            m_insert.getFailCount(), m_MA.m_iSameName, m_insert.getCurTime()));
                     endInsertContact();
                     break;
                 case ExtraStrings.INSERT_COUNTING:
