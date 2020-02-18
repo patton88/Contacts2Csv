@@ -58,6 +58,7 @@ public class ContactInsert {
     private ContactHeader m_InsertContactHeader;    //用于存放通讯录所有记录的表头信息
     private GroupInsert m_GroupInsert;              //用于处理导入联系人群组
     private final String m_sTAG = getClass().getSimpleName();
+    public int m_iAnonymous;                        //无名用户 anonymous 计数器
     private int m_iSum;
     private int m_iSuccessCount;
     private int m_iFailCount;
@@ -68,6 +69,7 @@ public class ContactInsert {
         m_jsonInsertContact = new JSONObject(new LinkedHashMap());
         m_InsertContactHeader = new ContactHeader();
         m_GroupInsert = new GroupInsert();
+        m_iAnonymous = 0;                        //无名用户 anonymous 计数器
     }
 
     public String getCurTime () {
@@ -87,6 +89,7 @@ public class ContactInsert {
         ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
 
+        m_iAnonymous = 0;                                   //无名用户 anonymous 计数器
         m_iSum = m_jsonInsertContact.length();              // 导入联系人总数
         m_MA.m_iSameName = 0;                               // 同名联系人记录计数器
         m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
@@ -325,7 +328,6 @@ public class ContactInsert {
         cv.put(Data.MIMETYPE, mimeItem);                //StructuredName.CONTENT_ITEM_TYPE
 
         int i = 0;  // 判断是否是无名用户的计数器
-        int x = 0;  // 无名用户 anonymous 计数器
         Iterator<String> it = jsonItem.keys();
         while (it.hasNext()) {
             String key1 = it.next();                    //key1: "__mimetype_x"、"displayName"、"lastName"、...
@@ -359,8 +361,8 @@ public class ContactInsert {
 
         if (i >= 3) {
             //contactId = -1;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录，便不处理该记录
-            //cv.put(getMime(jsonMime,"displayName"), "anonymous" + x++);   // 为无名记录添加名字
-            cv.put(StructuredName.DISPLAY_NAME, "anonymous_" + (++x));   // 为无名记录添加名字
+            //cv.put(getMime(jsonMime,"displayName"), "anonymous" + m_iAnonymous++);   // 为无名记录添加名字
+            cv.put(StructuredName.DISPLAY_NAME, "anonymous_" + (++m_iAnonymous));   // 为无名记录添加名字
         }
         context.getContentResolver().insert(Data.CONTENT_URI, cv);
 
