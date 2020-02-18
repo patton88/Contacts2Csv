@@ -478,6 +478,9 @@ public class ContactInsert {
                 if (key2.equals(key1) && val2.equals(val1)) {
                     ret = true;
                     break;
+                } else if (m_MA.m_bAggregateSameData && val2.equals(val1)) {
+                    ret = true;
+                    break;
                 }
             }
         } catch (JSONException e) {

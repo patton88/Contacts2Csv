@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox m_chkNameOnly;
 
     public boolean m_bAggregateSameName;        // 聚合同名联系人信息
+    public boolean m_bAggregateSameData;        // 聚合同名联系人同样内容的数据
     public boolean m_bHasSameName;              // 是否存在同名联系人记录
     private CheckBox m_chkAggregateSameName;
 
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
 
         m_bAggregateSameName = true;        // 聚合同名联系人信息
+        m_bAggregateSameData = true;        // 聚合同名联系人同样内容的数据
 
         m_chkDealPhoto = findViewById(R.id.chk_deal_photo);
         m_chkDealPhoto.setOnClickListener(this);
