@@ -482,42 +482,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         builder.show();         // 使用show()方法显示对话框
     }
 
-    //弹出警告对话框
-    public void createDialog0(Context context, String title, String message, boolean hasCancel, final int type) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(ExtraStrings.DIALOG_OK, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                switch (type) {
-                    case ExtraStrings.DIALOG_TYPE_HELP:
-                        dialog.cancel();
-                        break;
-                    case ExtraStrings.DIALOG_TYPE_INSERT:
-                        m_insertGroup.delAllGroup(m_MA);
-                        delContact();
-                        insertContact();
-                        break;
-                    case ExtraStrings.DIALOG_TYPE_OUTPUT:
-                        outputContact();
-                        break;
-                    case ExtraStrings.DIALOG_TYPE_DEL_ALL:
-                        m_insertGroup.delAllGroup(m_MA);
-                        delContact();
-                        break;
-                }
-            }
-        });
-        if (hasCancel) {
-            builder.setNeutralButton(ExtraStrings.DIALOG_CANCEL, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.cancel();
-                }
-            });
-        }
-        builder.show();
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 导入联系人 Begin
     private Thread m_threadInsert;
@@ -529,12 +493,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
             return;
         }
-        //sPath = ExtraStrings.FILE_NAME_PARENT + sPath;
         if (!new File(m_sFileAbsolutePath).exists()) {
             m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
         }
+
         if (m_threadInsert != null) {   //若已经启动线程，先终止清空
             m_threadInsert.interrupt();
             m_threadInsert = null;
@@ -648,6 +612,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     // 该函数是为了避免 delContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
     private void delAndInsert() {
+        // 删除记录前先判断要导入的文件是否存在更为稳妥。避免出现不存在要导入的文件，又已经删除记录的情况
+        // m_sFileAbsolutePath 中已经存放导入文件绝对路径
+        if (TextUtils.isEmpty(m_sFileAbsolutePath)) {
+            m_Fun.showToast(this, ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
+            m_tvResult.setText(ExtraStrings.FAIL_EDITTEXT_NOT_INPUT);
+            return;
+        }
+        if (!new File(m_sFileAbsolutePath).exists()) {
+            m_Fun.showToast(this, ExtraStrings.FAIL_FIRE_NOT_EXIST);
+            m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
+            return;
+        }
         delContact();
         insertContact();
     }

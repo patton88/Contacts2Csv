@@ -753,6 +753,8 @@ public class ContactOutput {
     // val: 存入的数据 data
     // prefix: 子类型前缀，home、work、other、...
     // cursor : 查询游标
+    // private ContactHeader m_contactHeader;         //用于存放通讯录所有记录的表头信息
+    // private ContactHeader m_contactHeaderCount;    //用于存放获取的每条记录每一列的计数器
     private boolean put2json4lay(String idKey, String key1, String key2, String val, String prefix, JSONObject jsonContactData) {
         boolean ret = false;
         String keyNew = prefix + key2;

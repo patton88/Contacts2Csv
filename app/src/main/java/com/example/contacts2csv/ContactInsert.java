@@ -294,6 +294,12 @@ public class ContactInsert {
         if (m_MA.m_bAggregateSameName) {    // 聚合同名联系人信息
             // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
             contactId = hasContact(jsonItem, m_MA);
+            if (contactId != -1) { // 存在同名记录
+                m_MA.m_output.m_jsonContactOne = null;
+                m_MA.m_output.getContactOne(contactId, context);
+                m_MA.m_bHasSameName = true;
+                return contactId;
+            }
         }
         if (-1 == contactId) {
             // 先新建一个联系人 Uri
@@ -360,14 +366,14 @@ public class ContactInsert {
 
     // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
     public int hasContact(JSONObject jsonItem, Context context) {
+        int contactId = -1;
+
         String name = "";
         try {
-            name = jsonItem.getString("displayName");
+            name = jsonItem.getString("displayName").trim();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        int contactId = -1;
         if (TextUtils.isEmpty(name)) {
             return contactId;
         }
@@ -375,16 +381,10 @@ public class ContactInsert {
         Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
             String contactName = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME)).trim();
-            if (contactName.equalsIgnoreCase(name.trim())) {
+            if (contactName.equalsIgnoreCase(name)) {
                 contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
                 break;
             }
-        }
-
-        if (contactId != -1) { // 存在同名记录
-            m_MA.m_output.m_jsonContactOne = null;
-            m_MA.m_output.getContactOne(contactId, context);
-            m_MA.m_bHasSameName = true;
         }
 
         return contactId;
@@ -463,17 +463,18 @@ public class ContactInsert {
 
     private boolean hasValue(String key1, String val1) {
         boolean ret = false;
-        key1 = key1.replaceAll("\\d+$", "");    // java 正则去掉字符串末尾数字
-        Iterator<String> it0 = m_MA.m_output.m_jsonContactOne.keys();
+        key1 = key1.trim();
+        key1 = key1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        Iterator<String> it0 = m_MA.m_output.m_jsonContactOne.keys();  // 只有一条数据
 
         //JSONObject属性遍历
         try {
-            JSONObject jsonContactOne = m_MA.m_output.m_jsonContactOne.getJSONObject(it0.next());
+            JSONObject jsonContactOne = m_MA.m_output.m_jsonContactOne.getJSONObject(it0.next());  // 只有一条数据
             Iterator<String> it = jsonContactOne.keys();
             while (it.hasNext()) {
-                String key = it.next(); //key : "displayName"、"lastName"、"homeNum"、"homeNum2"、...、"mobile"、"mobile2"、...
-                String key2 = key.replaceAll("\\d+$", "");    // java 正则去掉字符串末尾数字
-                String val2 = jsonContactOne.getString(key);
+                String key = it.next().trim(); //key : "displayName"、"lastName"、"homeNum"、"homeNum2"、...、"mobile"、"mobile2"、...
+                String key2 = key.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+                String val2 = jsonContactOne.getString(key).trim();
                 if (key2.equals(key1) && val2.equals(val1)) {
                     ret = true;
                     break;
