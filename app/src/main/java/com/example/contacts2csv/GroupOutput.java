@@ -213,6 +213,7 @@ public class GroupOutput {
         //Cursor cursor = m_MA.getContentResolver().query(Groups.CONTENT_URI, null, null, null, null);
         Cursor cursor = m_MA.getContentResolver().query(Data.CONTENT_URI, colvalue, selection, null, "data1 asc");
         int count = cursor.getCount();
+        cursor.close();
         return count;
     }
 
@@ -416,6 +417,7 @@ public class GroupOutput {
                 contacts_name = cursor01.getString(cursor01.getColumnIndex("data1"));
                 Log.e(m_sTAG, "联系人姓名:" + contacts_name);
             }
+            cursor01.close();
             map.put(COLUMN_NAME, contacts_name);
 
             String[] RAW_PROJECTION03 = new String[]{Phone.NUMBER,};
@@ -438,10 +440,12 @@ public class GroupOutput {
                 // map.put("phonekey", phonenum);
                 Log.e(m_sTAG, "联系人电话号码:" + phonenum);
             }
+            cursor02.close();
             map.put(COLUMN_NUMBER, phonenum);
             // }
             mymaplist.add(map);
         }
+        cursor.close();
         Log.e(m_sTAG, "结束查询改组的联系人，返回联系人的集合********************" + mymaplist.size());
         return mymaplist;
     }
@@ -482,6 +486,7 @@ public class GroupOutput {
                 contacts_name = cursor01.getString(cursor01.getColumnIndex("data1"));
                 Log.e(m_sTAG, "联系人姓名:" + contacts_name);
             }
+            cursor01.close();
             map.put(COLUMN_NAME, contacts_name);
             // 有多个号码时
 
@@ -503,10 +508,12 @@ public class GroupOutput {
                 map.put("phonekey", phonenum);
                 Log.e(m_sTAG, "联系人电话号码:" + phonenum);
             }
+            cursor02.close();
             map.put(COLUMN_NUMBER, phonenum);
             // }
             mymaplist.add(map);
         }
+        cursor.close();
         Log.e(m_sTAG, "结束查询没有群组的联系人，返回结合********************" + mymaplist.size());
         return mymaplist;
     }

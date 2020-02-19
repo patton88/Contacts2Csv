@@ -44,6 +44,7 @@ public class GroupInsert {
             String[] where_params = new String[]{groupId};
             context.getContentResolver().delete(Groups.CONTENT_URI, where, where_params);
         }
+        cursor.close();
     }
 
     // This is the code to get the ID of the group:
@@ -61,6 +62,9 @@ public class GroupInsert {
                 groupId = cursor.getString(0);
             }
         } finally {
+            cursor.close();
+        }
+        if (cursor != null) {
             cursor.close();
         }
         return groupId;
@@ -81,6 +85,9 @@ public class GroupInsert {
                 groupTitle = cursor.getString(0);
             }
         } finally {
+            cursor.close();
+        }
+        if (cursor != null) {
             cursor.close();
         }
         return groupTitle;
@@ -109,8 +116,10 @@ public class GroupInsert {
                 + "' AND " + Data.RAW_CONTACT_ID + " = '" + contactId + "'";
         Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, new String[]{Data.DISPLAY_NAME}, where, null, null);
         if (cursor.moveToFirst()) {
+            cursor.close();
             return true;
         } else {
+            cursor.close();
             return false;
         }
     }

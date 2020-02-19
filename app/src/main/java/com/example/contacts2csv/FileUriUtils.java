@@ -130,8 +130,9 @@ public class FileUriUtils {
      */
     private static String getFilePathForN(Context context, Uri uri) {
         String filePath = "";
+        Cursor returnCursor = null;
         try {
-            Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
+            returnCursor = context.getContentResolver().query(uri, null, null, null, null);
             int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
             returnCursor.moveToFirst();
             String name = (returnCursor.getString(nameIndex));
@@ -148,12 +149,14 @@ public class FileUriUtils {
             while ((read = inputStream.read(buffers)) != -1) {
                 outputStream.write(buffers, 0, read);
             }
-            returnCursor.close();
             inputStream.close();
             outputStream.close();
             filePath = file.getPath();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (returnCursor != null) {
+            returnCursor.close();
         }
         return filePath;
     }
@@ -183,8 +186,10 @@ public class FileUriUtils {
         String filePath = "";
         String[] projection = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            filePath = cursor.getString(cursor.getColumnIndex(projection[0]));
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(cursor.getColumnIndex(projection[0]));
+            }
             cursor.close();
         }
         return filePath;

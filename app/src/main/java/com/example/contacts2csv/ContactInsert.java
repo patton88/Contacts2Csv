@@ -293,26 +293,26 @@ public class ContactInsert {
         int contactId = -1;
         ContentValues cv = new ContentValues();
 
-        m_MA.m_bHasSameName = false;
-        if (m_MA.m_iAggregateSameName >= 0 && m_MA.m_iAggregateSameName <= 3) {    // 聚合同名联系人信息
-            // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
-            // m_iAggregateSameName : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
-            contactId = hasContact(jsonItem, m_MA, m_MA.m_iAggregateSameName);
-            if (contactId != -1) { // 存在同名记录
-                m_MA.m_output.m_jsonContactOne = null;
-                m_MA.m_output.getContactOne(contactId, context);
-                m_MA.m_bHasSameName = true;
-                m_MA.m_iSameName++;
-                return contactId;
-            }
-        }
+//        m_MA.m_bHasSameName = false;
+//        if (m_MA.m_iAggregateSameName >= 0 && m_MA.m_iAggregateSameName <= 3) {    // 聚合同名联系人信息
+//            // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
+//            // m_iAggregateSameName : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+//            contactId = hasContact(jsonItem, m_MA, m_MA.m_iAggregateSameName);
+//            if (contactId != -1) { // 存在同名记录
+//                m_MA.m_output.m_jsonContactOne = null;
+//                m_MA.m_output.getContactOne(contactId, context);
+//                m_MA.m_bHasSameName = true;
+//                m_MA.m_iSameName++;
+//                return contactId;
+//            }
+//        }
 
-        if (-1 == contactId) {
-            // 先新建一个联系人 Uri
-            cv.put(RawContacts.AGGREGATION_MODE,RawContacts.AGGREGATION_MODE_DISABLED); // 禁用同名聚合，否则会丢失许多同名记录信息
-            Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv); // 新建一个新的联系人 Uri
-            contactId = (int)ContentUris.parseId(uri);                                  // 得到新建联系人 Uri 的 contactID
-        }
+        //if (-1 == contactId) {
+        // 先新建一个联系人 Uri
+        cv.put(RawContacts.AGGREGATION_MODE,RawContacts.AGGREGATION_MODE_DISABLED); // 禁用同名聚合，否则会丢失许多同名记录信息
+        Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv); // 新建一个新的联系人 Uri
+        contactId = (int)ContentUris.parseId(uri);                                  // 得到新建联系人 Uri 的 contactID
+        //}
 
         // 先在 raw_contact 表里面添加联系人id
 //        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
@@ -447,6 +447,7 @@ public class ContactInsert {
                 break;
             }
         }
+        cursor.close();
 
         return contactId;
     }
@@ -492,13 +493,13 @@ public class ContactInsert {
                 continue;
             }
 
-            if (m_MA.m_bHasSameName && hasValue(key1, val)) {    // 聚合同名联系人信息
-                continue;
-            }
-
-            if (m_MA.m_bAggregateMimeSameData && hasSameMimeValue(key1, val, n, jsonItem, jsonMime)) {    // 聚合所有联系人同类型同样内容的数据
-                continue;
-            }
+//            if (m_MA.m_bHasSameName && hasValue(key1, val)) {    // 聚合同名联系人信息
+//                continue;
+//            }
+//
+//            if (m_MA.m_bAggregateMimeSameData && hasSameMimeValue(key1, val, n, jsonItem, jsonMime)) {    // 聚合所有联系人同类型同样内容的数据
+//                continue;
+//            }
 
             //必须每次清空，否则可能会有重复数据
             cv.clear();                                     //   对jsonItem中每条有内容的用户数据处理步骤

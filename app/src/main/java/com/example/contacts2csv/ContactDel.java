@@ -43,6 +43,7 @@ public class ContactDel {
             //m_MA.m_tvResult.setText(String.format(ExtraStrings.DEL_COUNT_UPDATE, m_iSum, m_iSuccess, m_iFail, getCurTime()));
             m_MA.m_handler.sendEmptyMessage(ExtraStrings.DEL_COUNTING);          // 更新删除联系人计数
         }
+        cursor.close();
         //Toast.makeText(m_MA, "成功删除 " + m_iSuccess + " 记录，" + m_iFail + " 条记录删除失败", Toast.LENGTH_SHORT).show();
         return true;
     }
