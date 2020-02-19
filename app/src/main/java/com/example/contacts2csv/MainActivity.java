@@ -35,6 +35,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static MainActivity m_MA;
+    private boolean m_bWaitInser;    // 等待处理插入联系人的标志
     private boolean m_bInserting;    // 正在处理过程中的标志
     private boolean m_bOutputing;    // 正在处理过程中的标志
     private boolean m_bDeling;       // 正在处理过程中的标志
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_rbtnArrPhoto[0].setChecked(true);
         m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
 
-        m_iAggregateSameName = 1;           // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+        m_iAggregateSameName = 3;           // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
         m_bAggregateSameData = true;        // 聚合同名联系人同样内容的数据
         m_bAggregateAllSameData = true;     // 聚合所有联系人同样内容的数据
         m_bAggregateMimeSameData = true;    // 聚合所有联系人同类型同样内容的数据
@@ -234,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //setPhotoWidgetEnabled(false);
         m_etQuality.setText("100"); // 默认100
         m_etQuality.setFilters(new InputFilter[]{new InputFilterMinMax(1,100)});    //设置监听
+
+        m_bWaitInser = false;    // 等待处理插入联系人的标志
 
         //处理动态权限申请。权限不足，就进入申请权限死循环
         int iHasWriteStoragePermission = -11;
@@ -290,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
             case R.id.btn_insert:
                 //m_del.delAllContacts(this);
-                //delContact();
+                //delAndInsertContact();
                 m_sFileAbsolutePath = m_etFilePath.getText().toString();
                 createDialog(this, ExtraStrings.WARNDIALOG_TITLE,
                         ExtraStrings.INSERT_WARNDIALOG_MESSAGE + "\n\n" + m_sFileAbsolutePath,
@@ -307,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         true, ExtraStrings.DIALOG_TYPE_DEL_ALL);
                 //m_del.delAllContacts(this);
                 //m_insertGroup.delAllGroup(this);
-                //delContact();
+                //delAndInsertContact();
                 break;
             case R.id.btn_get_last_file:
                 m_sFileAbsolutePath = m_Fun.getNewAbsolutePath(m_sPathDownloads, ExtraStrings.OUTPUT_FILENAME, 1);
@@ -461,8 +464,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             m_insertGroup.delAllGroup(m_MA);
                             m_Fun.logString(checkeds[0]);
                         }
-                        // 该函数是为了避免 delContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
-                        delAndInsert();
+                        // 该函数是为了避免 delAndInsertContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
+                        m_bWaitInser = true;    // 等待处理插入联系人的标志
+                        InsertAfterDel();
                         break;
                     case ExtraStrings.DIALOG_TYPE_OUTPUT:
                         outputContact();
@@ -472,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             m_insertGroup.delAllGroup(m_MA);
                             //m_Fun.logString(checkeds[0]);
                         }
-                        delContact();
+                        delAndInsertContact();
                         break;
                 }
 
@@ -549,7 +553,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         @Override
         public void run() {
-            boolean bResult = m_insert.insertContacts(m_context, m_sPath);
+            boolean bResult = m_insert.insertAllContacts(m_context, m_sPath);
             if (bResult) {
                 m_handler.sendEmptyMessage(ExtraStrings.INSERT_SUCCESS);
             } else {
@@ -621,8 +625,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     // 导出联系人 End
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // 该函数是为了避免 delContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
-    private void delAndInsert() {
+    // 该函数是为了避免 delAndInsertContact() 处理上千条记录用时太长，对话框进程已经被清除，导致无法执行后面的 insertContact()
+    private void InsertAfterDel() {
         // 删除记录前先判断要导入的文件是否存在更为稳妥。避免出现不存在要导入的文件，又已经删除记录的情况
         // m_sFileAbsolutePath 中已经存放导入文件绝对路径
         if (TextUtils.isEmpty(m_sFileAbsolutePath)) {
@@ -635,15 +639,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             m_tvResult.setText(ExtraStrings.FAIL_FIRE_NOT_EXIST);
             return;
         }
-        delContact();
-        insertContact();
+        // 由于该操作在启动一个新线程开始删除操作后便立即返回，然后紧接着便会启动下面的insertContact()，
+        // 所以将导致删除操作和插入操作同时进行，这会导致许多问题。为避免这种情况，进行如下改进
+        // 设置 m_bWaitInser，在需要删除后进行插入操作时设置为 true；将 delContact() 改为 delAndInsertContact()，
+        // 等删除操作完成后，在 endDelContact() 函数中判断 m_bWaitInser == true，再启动插入操作 insertContact()
+        delAndInsertContact();
+        // insertContact();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 删除联系人 Begin
+    // 删除联系人完成后处理插入操作 Begin
     private Thread m_threadDel;
 
-    private void delContact() {
+    private void delAndInsertContact() {
         if (m_threadDel != null) {   //若已经启动线程，先终止清空
             m_threadDel.interrupt();
             m_threadDel = null;
@@ -662,6 +670,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_bDeling = false;
         if (!(m_bOutputing || m_bInserting || m_bDeling)) {
             setWidgetsEnable(true);
+        }
+        if (m_bWaitInser) {    // 等待处理插入联系人的标志
+            insertContact();
         }
     }
 

@@ -84,7 +84,7 @@ public class ContactInsert {
     }
 
     // 从文件读取全部联系人信息，并插入到 database
-    public boolean insertContacts(Context context, String sPath) {
+    public boolean insertAllContacts(Context context, String sPath) {
         init();
         ArrayList<String> arrList = readFile(sPath);        //从文件读取联系人信息存入arrList
         aryList2json(arrList, m_jsonInsertContact);         // 将 arrayList 转储到 json 中
@@ -129,7 +129,7 @@ public class ContactInsert {
                 switch (mime) {
                     //mimetype数据字段                       //存储json变量
                     case StructuredName.CONTENT_ITEM_TYPE:   //jsonG00StructName
-                        contactId = fun00_addMimeItem(mime, jsonItem, jsonMime, context);   // 专门处理 jsonG00StructName，用 fun00_addMimeItem() 处理
+                        contactId = fun00_addMimeName(mime, jsonItem, jsonMime, context);   // 专门处理 jsonG00StructName，用 fun00_addMimeName() 处理
                         //contactId = -1;   // 若 "displayName"、"lastName"、"firstName" 3个字段的值都为空，则为无名记录、不做处理
                         break;
                     case Phone.CONTENT_ITEM_TYPE:            //jsonG01Phone
@@ -288,8 +288,8 @@ public class ContactInsert {
     //java.lang.SecurityException: Permission Denial: writing com.android.providers.contacts.ContactsProvider2
     // uri content://com.android.contacts/raw_contacts from pid=5503, uid=10137
     // requires android.permission.WRITE_CONTACTS, or grantUriPermission()
-    // 专门处理 jsonG00StructName，用 fun00_addMimeItem() 处理
-    private int fun00_addMimeItem(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context) {
+    // 专门处理 jsonG00StructName，用 fun00_addMimeName() 处理
+    private int fun00_addMimeName(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context) {
         int contactId = -1;
         ContentValues cv = new ContentValues();
 
@@ -389,12 +389,14 @@ public class ContactInsert {
             return contactId;
         }
 
-        //Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
-        Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, null, null, null, null);
+        Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
+        //Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
-            String contactName = cursor.getString(cursor.getColumnIndex(StructuredName.DISPLAY_NAME));    // 待比较姓名
-            String lastName = cursor.getString(cursor.getColumnIndex(StructuredName.GIVEN_NAME));
-            String firstName = cursor.getString(cursor.getColumnIndex(StructuredName.FAMILY_NAME));
+            String contactName = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));    // 待比较姓名
+            //String lastName = cursor.getString(cursor.getColumnIndex(StructuredName.GIVEN_NAME));
+            //String firstName = cursor.getString(cursor.getColumnIndex(StructuredName.FAMILY_NAME));
+            String lastName = "";
+            String firstName = "";
             if (TextUtils.isEmpty(contactName)) {
                 contactName = "";
             }
@@ -418,14 +420,14 @@ public class ContactInsert {
                 updateName(contactId, longerName, context);
                 break;
             } else if (1 == iFlag) {            // 1 头部相同
-                if ((contactName.length() > name0.length() && 0 == contactName.indexOf(name0)) ||
+                if ((contactName.length() >= name0.length() && 0 == contactName.indexOf(name0)) ||
                         (contactName.length() < name0.length() && 0 == name0.indexOf(contactName))) {
                     contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
                     updateName(contactId, longerName, context);
                     break;
                 }
             } else if (2 == iFlag) {                                                // 2 尾部相同
-                if (contactName.length() > name0.length()) {
+                if (contactName.length() >= name0.length()) {
                     if (name0.equals(contactName.substring(contactName.length() - name0.length()))) {
                         contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
                         updateName(contactId, longerName, context);
