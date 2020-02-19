@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,8 +53,9 @@ public class ContactOutput {
 
     public JSONObject m_jsonContactOne;            //用于存放获取的单条记录
 
-    private JSONObject m_jsonContactData;            //用于存放获取的所有记录中间数据
-    private JSONObject m_jsonContactData2;           //用于存放获取的所有记录最终结果
+    private JSONObject m_jsonContactData1;         //用于存放获取的所有记录中间数据
+    private JSONObject m_jsonContactData2;         // 存放处理同名聚合后的中间变量
+    private JSONObject m_jsonContactData3;         //用于存放获取的所有记录最终结果
     private ContactHeader m_contactHeader;         //用于存放通讯录所有记录的表头信息
     private ContactHeader m_contactHeaderCount;    //用于存放获取的每条记录每一列的计数器
 
@@ -68,8 +70,8 @@ public class ContactOutput {
         m_contactHeader = new ContactHeader();      //用于存放通讯录所有记录的表头信息
     }
 
-    public String getCurTime () {
-        int time = (int)((SystemClock.elapsedRealtime() - m_lStartTimer) / 1000);
+    public String getCurTime() {
+        int time = (int) ((SystemClock.elapsedRealtime() - m_lStartTimer) / 1000);
         //String hh = new DecimalFormat("00").format(time / 3600);
         String mm = new DecimalFormat("00").format(time % 3600 / 60);
         String ss = new DecimalFormat("00").format(time % 60);
@@ -106,7 +108,7 @@ public class ContactOutput {
 
     public String getAllContacts() {
         m_iAnonymous = 0;  // 无名用户 anonymous 计数器
-        m_jsonContactData = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
+        m_jsonContactData1 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         m_contactHeader = new ContactHeader();      //用于存放通讯录所有记录的表头信息
 
         // 注意：mimetype 都尽量使用 Android 规范命名，避免使用硬字符串，以增强适应性
@@ -141,7 +143,7 @@ public class ContactOutput {
 
             m_contactHeaderCount = new ContactHeader();         //用于存放获取的每条记录每一列的计数器
             try {
-                m_jsonContactData.put(contactIdKey, new JSONObject(new LinkedHashMap()));
+                m_jsonContactData1.put(contactIdKey, new JSONObject(new LinkedHashMap()));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -173,12 +175,12 @@ public class ContactOutput {
                 m_Fun.logString(contactDataMime);
 
                 //System.out.println("contactDataMime = " + contactDataMime);
-                // 获取 cursorData 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
-                int ret = getContactsData(contactIdKey, contactDataMime, m_jsonContactData, cursorData);
+                // 获取 cursorData 中联系人数据最终存入 m_jsonContactData1。用该函数可以取代一系列判断代码块
+                int ret = getContactsData(contactIdKey, contactDataMime, m_jsonContactData1, cursorData);
                 if (-1 != ret) {
                     if (1 == ret) { // 只统计处理姓名字段是否成功
                         m_iSuccessCount++;
-                    } else if (0 == ret){
+                    } else if (0 == ret) {
                         m_iFailCount++;
                     }
                 }
@@ -188,63 +190,25 @@ public class ContactOutput {
         }
         cursorId.close();
 
+        m_jsonContactData2 = new JSONObject(new LinkedHashMap());   // 存放处理同名聚合后的中间变量
+        AggregateSameName(m_jsonContactData1, m_jsonContactData2);
+
         //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一
         //所以，最后再以mContactsHeader中各种数据大小的最终值为标准，再次将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
-        m_jsonContactData2 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
-        //dumpJsonContactData(m_jsonContactData, m_jsonContactData2);
-        filterJsonContactData(m_jsonContactData, m_jsonContactData2);
+        m_jsonContactData3 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
+        //dumpJsonContactData(m_jsonContactData1, m_jsonContactData3);
+        //filterJsonContactData(m_jsonContactData1, m_jsonContactData3);
+        filterJsonContactData(m_jsonContactData2, m_jsonContactData3);
 
         // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
-        m_Fun.Json2File(m_jsonContactData, m_sPathDownloads, "m_jsonContactData_1.txt");
+        m_Fun.Json2File(m_jsonContactData1, m_sPathDownloads, "m_jsonContactData1_1.txt");
         m_Fun.Json2File(m_jsonContactData2, m_sPathDownloads, "m_jsonContactData2_1.txt");
+        m_Fun.Json2File(m_jsonContactData3, m_sPathDownloads, "m_jsonContactData3_1.txt");
 
-        return traverseJSON(m_jsonContactData2);
+        return traverseJSON(m_jsonContactData3);
     }
 
-    // 根据联系人姓名("displayName")或者 contactId 获取该联系人所有字段，放入 m_jsonContactOne
-    public String getContactOne(int iContactId, Context context) {
-        m_jsonContactOne = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
-        String contactId = String.valueOf(iContactId);
-        String contactIdKey = "contact" + contactId;
-        m_Fun.logString(contactIdKey);
-
-        try {
-            m_jsonContactOne.put(contactIdKey, new JSONObject(new LinkedHashMap()));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // 查询联系人 data 表，具体查询表中的3个字段
-        //raw_contact_id		联系人ID，iContactId
-        //mimetype_id		    数据类型，MimeTypeId
-        //data1			        数据，data
-        Uri uriData = Data.CONTENT_URI;                                 // 查询表的 Uri 路径
-        // 注意：在 data 表中查询不到"mimetype_id"字段，只能查询到"mimetype"字段
-        String[] selectData = new String[]{Data.MIMETYPE, Data.DATA1, Data.RAW_CONTACT_ID};     // 要查询出来的列名(字段)数组
-        String whereData = Data.RAW_CONTACT_ID + " = ?";                // 选区(查询范围)       //String where = String.format("%s = ?", Groups._ID);
-        String whereArgsData[] = new String[]{contactId};               // 选择条件数组
-        String sortOrderData = Data.MIMETYPE;                           // 查询结果排序规则
-        // 注意：必须查询全部字段，不然很多数据无法读出，导致 App 崩溃
-        Cursor cursorData = context.getContentResolver().query(uriData, null, whereData, whereArgsData, sortOrderData);
-        while (cursorData.moveToNext()) {
-            int iColData = cursorData.getColumnIndex(Data.MIMETYPE);      // 注意：查询结果中没有"mimetype_id"字段，只有"mimetype"字段
-            if (iColData < 0) {
-                continue;
-            }
-            String contactDataMime = cursorData.getString(iColData);
-            // 获取 cursorData 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
-            int ret = getContactsData(contactIdKey, contactDataMime, m_jsonContactOne, cursorData);
-        }
-        cursorData.close();
-
-        // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
-        m_Fun.Json2File(m_jsonContactOne, m_sPathDownloads, "m_jsonContactOne_1.txt");
-
-
-        return traverseJSON(m_jsonContactOne);
-    }
-
-    // 获取 cursor 中联系人数据最终存入 m_jsonContactData。用该函数可以取代一系列判断代码块
+    // 获取 cursor 中联系人数据最终存入 m_jsonContactData1。用该函数可以取代一系列判断代码块
     private int getContactsData(String contactIdKey, String mimetype, JSONObject jsonContactData, Cursor cursor) {
         int ret = -1;
         // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
@@ -257,7 +221,7 @@ public class ContactOutput {
             case "fun01":       // "jsonG01Phone"，需要处理 xxx.TYPE_CUSTOM，用 fun00_dumpJson4lay() 处理
                 fun00_dumpJson4lay(contactIdKey, key1, jsonContactData, cursor, 1);
                 break;
-            case "fun02":       // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData 中，比如 jsonG00StructName，必须要循环处理
+            case "fun02":       // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData1 中，比如 jsonG00StructName，必须要循环处理
                 boolean bRet = fun02_dumpJson4layAll(contactIdKey, key1, jsonContactData, cursor);
                 if (key1.equals("jsonG00StructName")) {
                     ret = bRet ? 1 : 0;
@@ -311,6 +275,220 @@ public class ContactOutput {
         }
         return mimetype;
     }
+
+    // 在导入记录是处理联系人聚合，这种思路不稳定行不通
+    // 所以准备在导出联系人时处理，具体在已经得到 m_jsonContactData1 数据后，还未转储到 m_jsonContactData3 之前处理。
+    // 即在调用 filterJsonContactData(m_jsonContactData1, m_jsonContactData3) 之前处理
+    private void AggregateSameName(JSONObject jsonSource, JSONObject jsonTarget) {
+        //JSONObject属性遍历
+        try {
+            Iterator<String> it = jsonSource.keys();
+            while (it.hasNext()) {
+                String key = it.next(); //contact592、contact593、...
+                JSONObject json = jsonSource.getJSONObject(key);
+                if (json.length() == 0) {  // 若该条为空记录，便跳过
+                    continue;
+                }
+
+                if (m_MA.m_bFilterNameOnly) {   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
+                    Iterator<String> it2 = json.keys();
+                    while (it2.hasNext()) {
+                        String key2 = it2.next(); //displayName、lastName、firstName、...
+                        if (!(key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
+                            if (!TextUtils.isEmpty(json.getString(key2))) {
+                                dumpJsonAllFields2(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                            }
+                        }
+                    }
+                } else {
+                    dumpJsonAllFields2(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 一次处理一条联系人记录，key 为：contact592、contact593、...
+    private void dumpJsonAllFields2(String key, JSONObject jsonSource, JSONObject jsonTarget) {
+        try {
+            boolean bHasSameName = false;
+            if (m_MA.m_iAggregateSameName >= 0 && m_MA.m_iAggregateSameName <= 3) {    // 聚合同名联系人信息
+                // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
+                // m_iAggregateSameName : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+                if (bHasSameName = dealSameNameContact(jsonSource.getJSONObject(key), jsonTarget, m_MA.m_iAggregateSameName)) {
+                    m_MA.m_iSameName++;
+                }
+            }
+            if (!bHasSameName) {
+                jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
+                Iterator<String> it1 = jsonSource.getJSONObject(key).keys();
+                while (it1.hasNext()) {
+                    String key1 = it1.next().trim();        //key1 : "displayName"、"lastName"、"mobile"、...
+                    String val1 = jsonSource.getJSONObject(key).getString(key1).trim();
+                    if (!TextUtils.isEmpty(val1) && !hasSameField(jsonTarget.getJSONObject(key), val1)) { // 非空、非重复才转储
+                        jsonTarget.getJSONObject(key).put(key1, val1);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 查找 json 中是否已经存在同样类型同样内容的数据
+    private boolean hasSameField(JSONObject json, String val) {
+        boolean ret = false;
+        val = val.trim();
+        try {
+            Iterator<String> it = json.keys();
+            while (it.hasNext()) {
+                String key = it.next();
+                if (key.equals("displayName") || key.equals("lastName") || key.equals("firstName")) {
+                    continue;   // 跳过姓名字段
+                }
+                if (val.equals(json.getString(key))) {
+                    ret = true;
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    // 在 jsonTarget 中查找是否有 "displayName" 为 name 的联系人
+    private boolean dealSameNameContact(JSONObject jsonS, JSONObject jsonTarget, int iFlag) {
+        boolean ret = false;
+        try {
+            String contactName = jsonS.getString("displayName"); // 待转储联系人名称
+
+            Iterator<String> it1 = jsonTarget.keys();
+            while (it1.hasNext()) {
+                String key1 = it1.next(); //contact592、contact593、...
+                String name0 = jsonTarget.getJSONObject(key1).getString("displayName").trim();
+
+                // iFlag : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
+                if (0 == iFlag && name0.equalsIgnoreCase(contactName)) {                 // 0 完全相同
+                    ret = true;
+                    dumpFields(jsonS, jsonTarget.getJSONObject(key1));
+                    break;
+                } else if (1 == iFlag) {            // 1 头部相同
+                    if ((contactName.length() >= name0.length() && 0 == contactName.indexOf(name0)) ||
+                            (contactName.length() < name0.length() && 0 == name0.indexOf(contactName))) {
+                        ret = true;
+                        dumpFields(jsonS, jsonTarget.getJSONObject(key1));
+                        break;
+                    }
+                } else if (2 == iFlag) {                                                // 2 尾部相同
+                    if (contactName.length() >= name0.length()) {
+                        if (name0.equals(contactName.substring(contactName.length() - name0.length()))) {
+                            ret = true;
+                            dumpFields(jsonS, jsonTarget.getJSONObject(key1));
+                            break;
+                        }
+                    } else if (contactName.length() < name0.length()) {
+                        if (contactName.equals(name0.substring(name0.length() - contactName.length()))) {
+                            ret = true;
+                            dumpFields(jsonS, jsonTarget.getJSONObject(key1));
+                            break;
+                        }
+                    }
+                } else if (3 == iFlag && (-1 != contactName.indexOf(name0) || -1 != name0.indexOf(contactName))) {   // 3 任何位置相同
+                    ret = true;
+                    dumpFields(jsonS, jsonTarget.getJSONObject(key1));
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    // 单个联系人源数据 jsonS，单个联系人目标数据 jsonT
+    private void dumpFields(JSONObject jsonS, JSONObject jsonT) {
+        try {
+            Iterator<String> it = jsonS.keys();
+            while (it.hasNext()) {
+                String keyS = it.next();        //key1 : "displayName"、"lastName"、"mobile"、...
+                String valS = jsonS.getString(keyS).trim();
+                String valT = "";
+                if (jsonT.has(keyS)) {
+                    valT = jsonT.getString(keyS).trim();
+                }
+
+                if (keyS.equals("displayName") || keyS.equals("lastName") || keyS.equals("firstName")) {
+                    if (valS.length() > valT.length()) {
+                        jsonT.remove(keyS);
+                        jsonT.put(keyS, valS);
+                    }
+                } else {
+                    if (jsonT.has(keyS) && !valT.equals(valS) && !hasSameField(jsonT, valS)) { // 非空、非重复才转储
+                        jsonT.put(getNewkey(keyS, jsonT), valS);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 获取 json 没有的新 keynew
+    private String getNewkey(String key, JSONObject jsonT) {
+        String key2 = key.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        String keynew = key2;
+        int n = 2;
+        while (jsonT.has(keynew)) {
+            keynew = key2 + String.valueOf(n++);
+        }
+
+        return keynew;
+    }
+
+    //Android中如何修改json里某个字段的值.原创圣西罗的红与黑v 2017-09-27
+    //原文链接：https://blog.csdn.net/GXL_1899/article/details/78114314
+    //直接调用就可以.  第一个参数为key,第二个为值,第三个传一个整串json的jsonObject.
+    /**
+     * 解析Json数据.
+     * @param key    更换数据key
+     * @param value  更换Value
+     * @param object  解析对象
+     */
+    public void analyzeJson(String key, Object value, Object object) {
+        try {
+            if (object instanceof JSONArray) {
+                JSONArray jsonArray = (JSONArray) object;
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    analyzeJson(key, value, jsonObject);
+                }
+            } else if (object instanceof JSONObject) {
+                JSONObject jsonObject = (JSONObject) object;
+                Iterator iterator = jsonObject.keys();
+                while (iterator.hasNext()) {
+                    String jsonKey = iterator.next().toString();
+                    Object ob = jsonObject.get(jsonKey);
+                    if (ob != null) {
+                        if (ob instanceof JSONArray) {
+                            analyzeJson(key, value, ob);
+                        } else if (ob instanceof JSONObject) {
+                            analyzeJson(key, value, ob);
+                        } else {
+                            if (jsonKey.equals(key)) {
+                                jsonObject.put(key, value);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
     //m_jsonHeader->jsonG00StructName->displayName->__first
@@ -495,10 +673,10 @@ public class ContactOutput {
     }
 
     //这里放入的jsonObject是一个对象(引用或指针)，放了之后还可以进行操作
-    //m_jsonContactData.put("contact" + mIntSum, mJsonResult);
+    //m_jsonContactData1.put("contact" + mIntSum, mJsonResult);
     //mIntSum++;
     //...
-    //return traverseJSON(m_jsonContactData);
+    //return traverseJSON(m_jsonContactData1);
     //JSON(JavaScript Object Notation，JavaScript对象容器)
     public String traverseJSON(JSONObject json) {
         //pair: key0,key1,..,keyN  , value0,value1,...,valueN
@@ -618,7 +796,7 @@ public class ContactOutput {
     // D、若存在 "__mimetype_protocal" 字段，便取出 xxx.PROTOCOL(data5) 的值，作为子类型
     // E、若 data5 中取出的是自定义协议 PROTOCOL_CUSTOM(0)，就要取 CUSTOM_PROTOCOL(data6) 中的值，作为子类型
 
-    // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData 中。每次转储该种类的指定子类型的字段
+    // 取出4层 JSONObject 结构对应的信息转储到 m_jsonContactData1 中。每次转储该种类的指定子类型的字段
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标；int iPhone : 0 非电话号码；1 电话号码
     private boolean fun00_dumpJson4lay(String idKey, String key1, JSONObject jsonContactData, Cursor cursor, int iPhone) {
         boolean ret = false;
@@ -651,7 +829,7 @@ public class ContactOutput {
                     val = funRemove(val);       // 电话号码才处理
                 }
             }
-            ret = put2json4lay(idKey, key1, key2, val, prefix, jsonContactData);   // 将获取的数据存入 m_jsonContactData
+            ret = put2json4lay(idKey, key1, key2, val, prefix, jsonContactData);   // 将获取的数据存入 m_jsonContactData1
         }
         return ret;
     }
@@ -689,7 +867,7 @@ public class ContactOutput {
         return key2;
     }
 
-    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中。专门处理："jsonG09GroupMember"
+    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData1 中。专门处理："jsonG09GroupMember"
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
     // cursor : 查询游标
@@ -697,17 +875,17 @@ public class ContactOutput {
         String key2 = "groupId";
         String col = get4layColumnName(key1, key2);                      // 获取该类信息的在数据表中的列号(字段号)
         String groupId = cursor.getString(cursor.getColumnIndex(col));   // 获取数据表中的数据
-        put2json4lay(idKey, key1, key2, groupId, "", jsonContactData);           // 将获取的数据存入 m_jsonContactData
+        put2json4lay(idKey, key1, key2, groupId, "", jsonContactData);           // 将获取的数据存入 m_jsonContactData1
 
         key2 = "groupTitle";
         String groupTitle = "";     //由于新建联系人群组时一般是输入群组名称，所以在联系人信息中保存联系人群组名称
-        if (!TextUtils.isEmpty(groupId)){
+        if (!TextUtils.isEmpty(groupId)) {
             groupTitle = m_GroupOutput.getGroupTitle(groupId, m_MA);
         }
-        return put2json4lay(idKey, key1, key2, groupTitle, "", jsonContactData); // 将获取的数据存入 m_jsonContactData
+        return put2json4lay(idKey, key1, key2, groupTitle, "", jsonContactData); // 将获取的数据存入 m_jsonContactData1
     }
 
-    // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData 中，比如 jsonG00StructName，必须要循环处理
+    // 无需处理 xxx.TYPE_CUSTOM，将 cursor 中的数据循环转储到 m_jsonContactData1 中，比如 jsonG00StructName，必须要循环处理
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
     // cursor : 查询游标
@@ -730,10 +908,10 @@ public class ContactOutput {
                 if (TextUtils.isEmpty(data) && (key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
                     i++;
                 }
-                put2json4lay(idKey, key1, key2, data, "", jsonContactData);          // 将获取的数据存入 m_jsonContactData
+                put2json4lay(idKey, key1, key2, data, "", jsonContactData);          // 将获取的数据存入 m_jsonContactData1
 
                 if (bDealAnonymous && 3 == i) {   // 为无名记录添加名字
-                    m_jsonContactData.getJSONObject(idKey).put("displayName", "anonymous_" + (++m_iAnonymous));
+                    m_jsonContactData1.getJSONObject(idKey).put("displayName", "anonymous_" + (++m_iAnonymous));
                     bDealAnonymous = false;
                 }
             }
@@ -745,7 +923,7 @@ public class ContactOutput {
         return ret;
     }
 
-    // 将获取的数据存入 m_jsonContactData
+    // 将获取的数据存入 m_jsonContactData1
     // idKey : contactIdKey，如：contact1、contact2、...；
     // key1 : m_jsonHeader的key1，如：jsonG00StructName、jsonG07Note、jsonG09GroupMember；
     // key2："groupId"、"groupSourceId"、"__mimetype_xxx"、...
@@ -917,7 +1095,7 @@ public class ContactOutput {
     }
 
     //03、jsonG03Photo，头像。
-    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData 中，比如 jsonG00StructName
+    // 取出4层 JSONObject 结构对应的所有信息转储到 m_jsonContactData1 中，比如 jsonG00StructName
     // idKey : contactIdKey；key1 : m_jsonHeader的key1；cursor : 查询游标
     private boolean fun03_dumpPhoto(String idKey, String key1, Cursor cursor) {
         boolean ret = false;
@@ -943,7 +1121,7 @@ public class ContactOutput {
         }
         String filename = "";
         try {
-            filename = m_jsonContactData.getJSONObject(idKey).getString("displayName") + "_1";
+            filename = m_jsonContactData1.getJSONObject(idKey).getString("displayName") + "_1";
             filename = filename.replace(" ", "_");  // 文件名空格全部替换为"_"
         } catch (JSONException e) {
             filename = "anonymity_1";
