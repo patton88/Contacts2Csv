@@ -389,6 +389,7 @@ public class ContactInsert {
             return contactId;
         }
 
+        // 等待测试联系人查询
         Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
         //Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
