@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox m_chkNameOnly;
 
     public int m_iAggregateSameName;            // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
-    public boolean m_bHasSameName;              // 是否存在同名联系人记录
     public int m_iSameName;                     // 同名联系人记录计数器
     private CheckBox m_chkAggregateSameName;
     public boolean m_bAggregateSameData;        // 聚合同名联系人同样内容的数据
@@ -99,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     endInsertContact();
                     break;
                 case ExtraStrings.INSERT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, m_insert.getSuccessCount() - m_MA.m_iSameName,
-                            m_insert.getFailCount(), m_MA.m_iSameName, m_insert.getCurTime()));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_INSERT, m_insert.getSuccessCount(),
+                            m_insert.getFailCount(), m_insert.getCurTime()));
                     endInsertContact();
                     break;
                 case ExtraStrings.INSERT_COUNTING:
@@ -112,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ExtraStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT,
-                            m_output.getSuccessCount(), m_output.getFailCount(), m_output.getCurTime()));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT, m_output.getSuccessCount() - m_MA.m_iSameName,
+                            m_output.getFailCount(),  m_MA.m_iSameName, m_output.getCurTime()));
                     endOutputContact();
                     break;
                 case ExtraStrings.OUTPUT_COUNTING:

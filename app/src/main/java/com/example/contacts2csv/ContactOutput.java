@@ -191,7 +191,7 @@ public class ContactOutput {
         cursorId.close();
 
         m_jsonContactData2 = new JSONObject(new LinkedHashMap());   // 存放处理同名聚合后的中间变量
-        AggregateSameName(m_jsonContactData1, m_jsonContactData2);
+        AggregateSameName(m_jsonContactData1, m_jsonContactData2);  // 处理同名聚合
 
         //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一
         //所以，最后再以mContactsHeader中各种数据大小的最终值为标准，再次将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
@@ -276,6 +276,8 @@ public class ContactOutput {
         return mimetype;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Begin 处理同名聚合
     // 在导入记录是处理联系人聚合，这种思路不稳定行不通
     // 所以准备在导出联系人时处理，具体在已经得到 m_jsonContactData1 数据后，还未转储到 m_jsonContactData3 之前处理。
     // 即在调用 filterJsonContactData(m_jsonContactData1, m_jsonContactData3) 之前处理
@@ -489,6 +491,8 @@ public class ContactOutput {
         }
     }
 
+    // End 处理同名聚合
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //1、第一类型有4层结构，mJsonG00到mJsonG06、mJsonG08
     //m_jsonHeader->jsonG00StructName->displayName->__first

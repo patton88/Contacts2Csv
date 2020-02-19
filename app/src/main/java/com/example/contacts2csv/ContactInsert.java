@@ -293,26 +293,10 @@ public class ContactInsert {
         int contactId = -1;
         ContentValues cv = new ContentValues();
 
-//        m_MA.m_bHasSameName = false;
-//        if (m_MA.m_iAggregateSameName >= 0 && m_MA.m_iAggregateSameName <= 3) {    // 聚合同名联系人信息
-//            // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
-//            // m_iAggregateSameName : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
-//            contactId = hasContact(jsonItem, m_MA, m_MA.m_iAggregateSameName);
-//            if (contactId != -1) { // 存在同名记录
-//                m_MA.m_output.m_jsonContactOne = null;
-//                m_MA.m_output.getContactOne(contactId, context);
-//                m_MA.m_bHasSameName = true;
-//                m_MA.m_iSameName++;
-//                return contactId;
-//            }
-//        }
-
-        //if (-1 == contactId) {
         // 先新建一个联系人 Uri
         cv.put(RawContacts.AGGREGATION_MODE,RawContacts.AGGREGATION_MODE_DISABLED); // 禁用同名聚合，否则会丢失许多同名记录信息
         Uri uri = context.getContentResolver().insert(RawContacts.CONTENT_URI, cv); // 新建一个新的联系人 Uri
         contactId = (int)ContentUris.parseId(uri);                                  // 得到新建联系人 Uri 的 contactID
-        //}
 
         // 先在 raw_contact 表里面添加联系人id
 //        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
@@ -369,108 +353,6 @@ public class ContactInsert {
         return contactId;
     }
 
-    // 查找通讯录中是否存在姓名 jsonItem.getString("displayName") 的联系人，若有则返回联系人记录的 contactId，不存在则返回 -1
-    // iFlag : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
-    public int hasContact(JSONObject jsonItem, Context context, int iFlag) {
-        int contactId = -1;
-        String [] longerName = {"", "", ""};
-
-        String name0 = "";   // 新增记录姓名
-        String name1 = "";
-        String name2 = "";
-        try {
-            name0 = jsonItem.getString("displayName").trim();
-            name1 = jsonItem.getString("lastName").trim();
-            name2 = jsonItem.getString("firstName").trim();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (TextUtils.isEmpty(name0)) {
-            return contactId;
-        }
-
-        // 等待测试联系人查询
-        Cursor cursor = context.getContentResolver().query(Contacts.CONTENT_URI, null, null, null, null);
-        //Cursor cursor = context.getContentResolver().query(Data.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            String contactName = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));    // 待比较姓名
-            //String lastName = cursor.getString(cursor.getColumnIndex(StructuredName.GIVEN_NAME));
-            //String firstName = cursor.getString(cursor.getColumnIndex(StructuredName.FAMILY_NAME));
-            String lastName = "";
-            String firstName = "";
-            if (TextUtils.isEmpty(contactName)) {
-                contactName = "";
-            }
-            if (TextUtils.isEmpty(lastName)) {
-                lastName = "";
-            }
-            if (TextUtils.isEmpty(firstName)) {
-                firstName = "";
-            }
-            longerName[0] = (contactName.length() > name0.length()) ? contactName.trim() : name0;
-            longerName[1] = (lastName.length() > name1.length()) ? lastName.trim() : name1;
-            longerName[2] = (firstName.length() > name2.length()) ? firstName.trim() : name2;
-
-            //String类的toUpperCase()和toLowerCase()两个方法只对A~Z和a~z英文字母有效，对其余字符无任何效果。
-            contactName = contactName.toLowerCase().trim();
-            name0 = name0.toLowerCase().trim();
-
-            // iFlag : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
-            if (0 == iFlag && name0.equalsIgnoreCase(contactName)) {                 // 0 完全相同
-                contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
-                updateName(contactId, longerName, context);
-                break;
-            } else if (1 == iFlag) {            // 1 头部相同
-                if ((contactName.length() >= name0.length() && 0 == contactName.indexOf(name0)) ||
-                        (contactName.length() < name0.length() && 0 == name0.indexOf(contactName))) {
-                    contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
-                    updateName(contactId, longerName, context);
-                    break;
-                }
-            } else if (2 == iFlag) {                                                // 2 尾部相同
-                if (contactName.length() >= name0.length()) {
-                    if (name0.equals(contactName.substring(contactName.length() - name0.length()))) {
-                        contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
-                        updateName(contactId, longerName, context);
-                        break;
-                    }
-                } else if (contactName.length() < name0.length()) {
-                    if (contactName.equals(name0.substring(name0.length() - contactName.length()))) {
-                        contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
-                        updateName(contactId, longerName, context);
-                        break;
-                    }
-                }
-            } else if (3 == iFlag && (-1 != contactName.indexOf(name0) || -1 != name0.indexOf(contactName))) {   // 3 任何位置相同
-                contactId = cursor.getInt(cursor.getColumnIndex(Contacts._ID));
-                updateName(contactId, longerName, context);
-                break;
-            }
-        }
-        cursor.close();
-
-        return contactId;
-    }
-
-    // 更新联系人
-    public void updateName(int contactId, String [] nameArr, Context context)
-    {
-        // 这里没什么好说的，跟创建联系人那边大同小异
-        ContentResolver resolver = context.getContentResolver();
-        ContentValues values = new ContentValues();
-
-        //更新联系人姓名
-        values.clear();
-        values.put(StructuredName.DISPLAY_NAME, nameArr[0]);
-        values.put(StructuredName.GIVEN_NAME, nameArr[1]);
-        values.put(StructuredName.FAMILY_NAME, nameArr[2]);
-        //对im操作要注意：data2的数据类型若为3、Im.TYPE_OTHER、自定义类型，就要取Data.data3字段值，自定义的名称 Label
-        values.put(Data.DATA3, "");
-        String Where = Data.RAW_CONTACT_ID + " = ? and " + Data.MIMETYPE + " = ?";
-        String[] WhereParams = new String[]{"" + contactId, StructuredName.CONTENT_ITEM_TYPE};
-        resolver.update(Data.CONTENT_URI, values, Where, WhereParams);
-    }
-
     // 默认需要处理 xxx.TYPE_CUSTOM，用 fun01_addMimeItem() 处理
     private int fun01_addMimeItem(String mimeItem, JSONObject jsonItem, JSONObject jsonMime, Context context, int contactId) {
         ContentValues cv = new ContentValues();
@@ -492,14 +374,6 @@ public class ContactInsert {
                 e.printStackTrace();
                 continue;
             }
-
-//            if (m_MA.m_bHasSameName && hasValue(key1, val)) {    // 聚合同名联系人信息
-//                continue;
-//            }
-//
-//            if (m_MA.m_bAggregateMimeSameData && hasSameMimeValue(key1, val, n, jsonItem, jsonMime)) {    // 聚合所有联系人同类型同样内容的数据
-//                continue;
-//            }
 
             //必须每次清空，否则可能会有重复数据
             cv.clear();                                     //   对jsonItem中每条有内容的用户数据处理步骤
@@ -546,78 +420,6 @@ public class ContactInsert {
         }
 
         return contactId;
-    }
-
-    private boolean hasSameMimeValue(String oldKey1, String oldVal1, int oldN, JSONObject jsonItem, JSONObject jsonMime) {
-        boolean ret = false;
-        oldKey1 = oldKey1.trim();
-        oldKey1 = oldKey1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
-        oldVal1 = oldVal1.trim();
-
-        // 在 jsonItem 的前面 oldN - 1 个元素中的属于 jsonMime 类型中的元素，判断是否存在类似 oldKey1、oldVal1 的元素
-        Iterator<String> it1 = jsonItem.keys();
-        int n = 0;
-        while (it1.hasNext() && n < oldN) {
-            n++;
-            String key1 = it1.next().trim();       //key1: "displayName"、"lastName"、...、"mobile"、"mobile2"、...
-            String[] arr = findKey(jsonMime, key1);  // 返回数组 {keyNew2, keyHead}。arr[0] = "QqIm"; arr[1] = "other"
-            String val1 = "";
-            try {   // 数据为空、或者数据不属于 jsonMime 中的类型，便跳过处理，继续循环
-                val1 = jsonItem.getString(key1).trim();
-                if (TextUtils.isEmpty(val1) || !jsonMime.has(arr[0])) {
-                    continue;
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            String key2 = key1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
-            String val2 = val1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
-
-            if (key2.equals(oldKey1) && val2.equals(oldVal1)) {
-                ret = true;
-                break;
-            } else if (m_MA.m_bAggregateAllSameData && val2.equals(oldVal1)) {
-                ret = true;
-                break;
-            }
-        }
-
-        return ret;
-    }
-
-    private boolean hasValue(String key1, String val1) {
-        boolean ret = false;
-        key1 = key1.trim();
-        key1 = key1.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
-        Iterator<String> it0 = m_MA.m_output.m_jsonContactOne.keys();  // 只有一条数据
-
-        //JSONObject属性遍历
-        try {
-            JSONObject jsonContactOne = m_MA.m_output.m_jsonContactOne.getJSONObject(it0.next());  // 只有一条数据
-            Iterator<String> it = jsonContactOne.keys();
-            while (it.hasNext()) {
-                String key = it.next().trim(); //key : "displayName"、"lastName"、"homeNum"、"homeNum2"、...、"mobile"、"mobile2"、...
-                String key2 = key.replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
-                String val2 = jsonContactOne.getString(key).trim();
-                if (key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName")) {    // 跳过名字处理，名字不允许有多个
-                    continue;
-                }
-
-                if (key2.equals(key1) && val2.equals(val1)) {
-                    ret = true;
-                    break;
-                } else if (m_MA.m_bAggregateSameData && val2.equals(val1)) {
-                    ret = true;
-                    break;
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return ret;
     }
 
     private String getMime(JSONObject json, String key) {
@@ -693,7 +495,7 @@ public class ContactInsert {
         return keyRet;
     }
 
-        // 将 arrList 转储到 json 中
+    // 将 arrList 转储到 json 中
     private void aryList2json(ArrayList<String> arrList, JSONObject json) {
         String sHead[] = {};
         for (int i = 0; i < arrList.size(); i++) {
