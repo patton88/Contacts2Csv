@@ -330,7 +330,10 @@ public class ContactOutput {
                 while (it1.hasNext()) {
                     String key1 = it1.next().trim();        //key1 : "displayName"、"lastName"、"mobile"、...
                     String val1 = jsonSource.getJSONObject(key).getString(key1).trim();
-                    if (!TextUtils.isEmpty(val1) && !hasSameField(jsonTarget.getJSONObject(key), val1)) { // 非空、非重复才转储
+                    // 非空、非重复才转储，除姓名外内容相同便合并、不管数据类型
+                    //if (!TextUtils.isEmpty(val1) && !hasSameValueField(jsonTarget.getJSONObject(key), val1)) {
+                    // 非空、非重复才转储，实现同名记录同样类型同样内容的数据才合并
+                    if (!TextUtils.isEmpty(val1) && !hasSameMimeAndValueField(jsonTarget.getJSONObject(key), key1, val1)) {
                         jsonTarget.getJSONObject(key).put(key1, val1);
                     }
                 }
@@ -340,8 +343,32 @@ public class ContactOutput {
         }
     }
 
-    // 查找 json 中是否已经存在同样类型同样内容的数据
-    private boolean hasSameField(JSONObject json, String val) {
+    // 查找 jsonT 中是否已经存在同样类型同样内容的数据
+    private boolean hasSameMimeAndValueField(JSONObject jsonT, String keyS, String valS) {
+        boolean ret = false;
+        valS = valS.trim();
+        try {
+            Iterator<String> it = jsonT.keys();
+            while (it.hasNext()) {
+                String keyT = it.next();
+                if (keyT.equals("displayName") || keyT.equals("lastName") || keyT.equals("firstName")) {
+                    continue;   // 跳过姓名字段
+                }
+                // 大类型相同、内容相同才算相同
+                if (findKey5(keyS).equals(findKey5(keyT)) && valS.equals(jsonT.getString(keyT))) {
+                    ret = true;
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    // 查找 json 中是否已经存在同样内容的数据
+    private boolean hasSameValueField(JSONObject json, String val) {
         boolean ret = false;
         val = val.trim();
         try {
@@ -429,7 +456,10 @@ public class ContactOutput {
                         jsonT.put(keyS, valS);  // JSONObject 直接用 put 即可修改指定 value
                     }
                 } else {
-                    if (jsonT.has(keyS) && !valT.equals(valS) && !hasSameField(jsonT, valS)) { // 非空、非重复才转储
+                    // 非空、非重复才转储，除姓名外内容相同便合并、不管数据类型
+                    //if (!TextUtils.isEmpty(valS) && !hasSameValueField(jsonT, valS)) {
+                    // 非空、非重复才转储，实现同名记录同样类型同样内容的数据才合并
+                    if (!TextUtils.isEmpty(valS) && !hasSameMimeAndValueField(jsonT, keyS, valS)) {
                         jsonT.put(getNewkey(keyS, jsonT), valS);
                     }
                 }
@@ -665,7 +695,11 @@ public class ContactOutput {
         String keyTail = "";
         Iterator<String> it = jsonMime.keys();
         while (it.hasNext()) {
-            String key = it.next();                 //key 为："QqIm"、...
+            String key = it.next();                 //key 为："__mimetype_xxx"、"QqIm"、...
+            // 跳过前面的元素 "__mimetype_xxx"
+            if (key.length() > "__mimetype_".length() && key.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                continue;
+            }
             if (keyNew2.length() > key.length()) {  // 去 keyNew2 的头查找法。优化算法
                 keyHead = keyNew2.substring(0, keyNew2.length() - key.length());    // 取 keyNew 头部子串
                 keyTail = keyNew2.substring(keyNew2.length() - key.length());       // 取 keyNew 末尾子串
@@ -676,6 +710,111 @@ public class ContactOutput {
             }
         }
         return new String[]{keyNew2.trim(), keyHead.trim()};
+    }
+
+    // keyNew: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
+    // 返回数组 {keyNew2, keyHead}
+    // 遍历 jsonMime，若找到 keyNew 末尾含有 key 子串，则返回找到的 key、keyHead 组成的数组; 否则返回 keyNew2、keyHead 组成的数组
+    private String findKey3(JSONObject jsonMime, String keyNew) {
+        String keyNew2 = keyNew.trim().replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        String keyTail = "";
+        Iterator<String> it = jsonMime.keys();
+        while (it.hasNext()) {
+            String key = it.next().trim();                 //key 为："__mimetype_xxx"、"QqIm"、...
+            // 跳过前面的元素 "__mimetype_xxx"
+            if (key.length() > "__mimetype_".length() && key.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                continue;
+            }
+            if (keyNew2.length() > key.length()) {  // 去 keyNew2 的头查找法。优化算法
+                keyTail = keyNew2.substring(keyNew2.length() - key.length());       // 取 keyNew 末尾子串
+                if (keyTail.equals(key)) {
+                    keyNew2 = key;
+                    break;
+                }
+            }
+        }
+
+        return keyNew2;
+    }
+
+    // keyNew: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
+    // 遍历 m_jsonHeader，若找到 keyNew 末尾含有 key 子串，则返回找到的 key 的大类型("__mimetype_item"项的对应值)、否则返回空字符串。
+    // 比如 findKey5("otherQqIm") 返回 Im.CONTENT_ITEM_TYPE、findKey5("homeNum") 返回 Phone.CONTENT_ITEM_TYPE、...
+    private String findKey5(String keyNew) {
+        keyNew = keyNew.trim().replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        String keyTail = "";
+        String mimetype = "";
+
+        //JSONObject属性遍历
+        try {
+            Iterator<String> it1 = m_contactHeader.m_jsonHeader.keys();
+            while (it1.hasNext()) {
+                String key1 = it1.next().trim();       //key1: "jsonG00StructName"、"jsonG01Phone"、...
+                Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
+                while (it2.hasNext()) {
+                    String key2 = it2.next().trim();   //key2: "__mimetype_xxx"、"QqIm"、...
+
+                    //不能显示 "QqIm" 问题的原因。因为前面已经添加前缀变为 "otherQqIm"、"otherQqIm2"、...，而 m_contactHeader 中的原始字段名仍然是 "QqIm"，
+                    //  所以遍历 m_contactHeader 中的字段，无法存储已经改名的 "otherQqImx" 字段的值
+
+                    // 跳过前面的元素 "__mimetype_x"
+                    if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                        continue;
+                    }
+
+                    if (keyNew.length() > key2.length()) {  // 去 keyNew 的头查找法。优化算法
+                        keyTail = keyNew.substring(keyNew.length() - key2.length());       // 取 keyNew 末尾子串
+                        if (keyTail.equals(key2)) {
+                            mimetype = m_contactHeader.m_jsonHeader.getJSONObject(key1).getString("__mimetype_item");
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return mimetype;
+    }
+
+    // keyNew: "otherQqIm"、"otherQqIm2"、"otherQqIm3"、...
+    // 遍历 m_jsonHeader，若找到 keyNew 末尾含有 key 子串，则返回找到的 key、否则返回 keyNew2
+    private String findKey4(String keyNew) {
+        String keyNew2 = keyNew.trim().replaceAll("\\d+$", "").trim();    // java 正则去掉字符串末尾数字
+        String keyTail = "";
+
+        //JSONObject属性遍历
+        try {
+            Iterator<String> it1 = m_contactHeader.m_jsonHeader.keys();
+            while (it1.hasNext()) {
+                String key1 = it1.next().trim();       //key1: "jsonG00StructName"、"jsonG01Phone"、...
+                Iterator<String> it2 = m_contactHeader.m_jsonHeader.getJSONObject(key1).keys();
+                while (it2.hasNext()) {
+                    String key2 = it2.next().trim();   //key2: "__mimetype_xxx"、"QqIm"、...
+
+                    //不能显示 "QqIm" 问题的原因。因为前面已经添加前缀变为 "otherQqIm"、"otherQqIm2"、...，而 m_contactHeader 中的原始字段名仍然是 "QqIm"，
+                    //  所以遍历 m_contactHeader 中的字段，无法存储已经改名的 "otherQqImx" 字段的值
+
+                    // 跳过前面的元素 "__mimetype_x"
+                    if (key2.length() > "__mimetype_".length() && key2.substring(0, "__mimetype_".length()).equals("__mimetype_")) {
+                        continue;
+                    }
+
+                    if (keyNew2.length() > key2.length()) {  // 去 keyNew2 的头查找法。优化算法
+                        keyTail = keyNew2.substring(keyNew2.length() - key2.length());       // 取 keyNew 末尾子串
+                        if (keyTail.equals(key2)) {
+                            keyNew2 = key2;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return keyNew2;
     }
 
     //这里放入的jsonObject是一个对象(引用或指针)，放了之后还可以进行操作
