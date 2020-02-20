@@ -131,7 +131,7 @@ public class ContactOutput {
         m_iSuccessCount = 0;
         m_iFailCount = 0;
 
-        m_Fun.logString(m_iSum);
+        //m_Fun.logString(m_iSum);
 
         while (cursorId.moveToNext()) {
             //m_Fun.logFileds(cursorId);
@@ -139,7 +139,7 @@ public class ContactOutput {
             String contactId = cursorId.getString(iColId);
 
             String contactIdKey = "contact" + contactId;
-            m_Fun.logString(contactIdKey);
+            //m_Fun.logString(contactIdKey);
 
             m_contactHeaderCount = new ContactHeader();         //用于存放获取的每条记录每一列的计数器
             try {
@@ -165,14 +165,14 @@ public class ContactOutput {
             //System.out.println("cursorId.getCount() = " + cursorId.getCount());         //I/System.out: cursorId.getCount() = 4
             //System.out.println("cursorData.getCount() = " + cursorData.getCount());     //I/System.out: cursorData.getCount() = 25
 
-            m_Fun.logString(cursorData.getCount());
+            //m_Fun.logString(cursorData.getCount());
             while (cursorData.moveToNext()) {
                 int iColData = cursorData.getColumnIndex(Data.MIMETYPE);      // 注意：查询结果中没有"mimetype_id"字段，只有"mimetype"字段
                 if (iColData < 0) {
                     continue;
                 }
                 String contactDataMime = cursorData.getString(iColData);    // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
-                m_Fun.logString(contactDataMime);
+                //m_Fun.logString(contactDataMime);
 
                 //System.out.println("contactDataMime = " + contactDataMime);
                 // 获取 cursorData 中联系人数据最终存入 m_jsonContactData1。用该函数可以取代一系列判断代码块
@@ -282,6 +282,7 @@ public class ContactOutput {
     // 所以准备在导出联系人时处理，具体在已经得到 m_jsonContactData1 数据后，还未转储到 m_jsonContactData3 之前处理。
     // 即在调用 filterJsonContactData(m_jsonContactData1, m_jsonContactData3) 之前处理
     private void AggregateSameName(JSONObject jsonSource, JSONObject jsonTarget) {
+        m_MA.m_iSameName = 0;
         //JSONObject属性遍历
         try {
             Iterator<String> it = jsonSource.keys();
@@ -299,6 +300,7 @@ public class ContactOutput {
                         if (!(key2.equals("displayName") || key2.equals("lastName") || key2.equals("firstName"))) {
                             if (!TextUtils.isEmpty(json.getString(key2))) {
                                 dumpJsonAllFields2(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                                break;  // 必须添加该句，否则只有记录不为空便会执行一次，会执行许多次同样的操作
                             }
                         }
                     }
@@ -424,8 +426,7 @@ public class ContactOutput {
 
                 if (keyS.equals("displayName") || keyS.equals("lastName") || keyS.equals("firstName")) {
                     if (valS.length() > valT.length()) {
-                        jsonT.remove(keyS);
-                        jsonT.put(keyS, valS);
+                        jsonT.put(keyS, valS);  // JSONObject 直接用 put 即可修改指定 value
                     }
                 } else {
                     if (jsonT.has(keyS) && !valT.equals(valS) && !hasSameField(jsonT, valS)) { // 非空、非重复才转储
@@ -527,6 +528,7 @@ public class ContactOutput {
                             if (!TextUtils.isEmpty(json.getString(key2))) {
                                 jsonTarget.put(key, new JSONObject(new LinkedHashMap()));
                                 dumpJsonAllFields(key, jsonSource, jsonTarget); // 一次处理一条联系人记录
+                                break;  // 必须添加该句，否则只有记录不为空便会执行一次，会执行许多次同样的操作
                             }
                         }
                     }
