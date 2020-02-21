@@ -217,19 +217,19 @@ public class ContactOutput {
         }
         cursorId.close();
 
-        m_jsonContactData2 = new JSONObject(new LinkedHashMap());   // 存放处理同名聚合后的中间变量
-        AggregateSameName(m_jsonContactData1, m_jsonContactData2);  // 处理同名聚合
+        //m_jsonContactData2 = new JSONObject(new LinkedHashMap());   // 存放处理同名聚合后的中间变量
+        //AggregateSameName(m_jsonContactData1, m_jsonContactData2);  // 处理同名聚合
 
         //由于mContactsHeader中联系人的某种数据(比如mobile手机号)的最大值可能会不断增加，导致mJsonResult中数据长短不一
         //所以，最后再以mContactsHeader中各种数据大小的最终值为标准，再次将mJsonContactData.mJsonResult的所有字段填充到mJsonContactData2.mJsonResult中
         m_jsonContactData3 = new JSONObject(new LinkedHashMap());  //解决JsonObject数据固定顺序
         //dumpJsonContactData(m_jsonContactData1, m_jsonContactData3);
-        //filterJsonContactData(m_jsonContactData1, m_jsonContactData3);
-        filterJsonContactData(m_jsonContactData2, m_jsonContactData3);
+        filterJsonContactData(m_jsonContactData1, m_jsonContactData3);
+        //filterJsonContactData(m_jsonContactData2, m_jsonContactData3);
 
         // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
         m_Fun.Json2File(m_jsonContactData1, m_sPathDownloads, "m_jsonContactData1_1.txt");
-        m_Fun.Json2File(m_jsonContactData2, m_sPathDownloads, "m_jsonContactData2_1.txt");
+        //m_Fun.Json2File(m_jsonContactData2, m_sPathDownloads, "m_jsonContactData2_1.txt");
         m_Fun.Json2File(m_jsonContactData3, m_sPathDownloads, "m_jsonContactData3_1.txt");
 
         return traverseJSON(m_jsonContactData3);

@@ -120,8 +120,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     endOutputContact();
                     break;
                 case ExtraStrings.OUTPUT_SUCCESS:
-                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT, m_output.getSuccessCount() - m_MA.m_iSameName,
-                            m_output.getFailCount(),  m_MA.m_iSameName, m_output.getCurTime()));
+                    //m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT, m_output.getSuccessCount() - m_MA.m_iSameName,
+                    //        m_output.getFailCount(),  m_MA.m_iSameName, m_output.getCurTime()));
+                    m_tvResult.setText(String.format(ExtraStrings.SUCCESS_OUTPUT, m_output.getSuccessCount(),
+                            m_output.getFailCount(),  m_output.getCurTime()));
                     endOutputContact();
                     break;
                 case ExtraStrings.OUTPUT_COUNTING:

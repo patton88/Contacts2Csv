@@ -25,7 +25,8 @@ public class ExtraStrings {
     public static final String FAIL_INSERT = "导入联系人失败";
 
     public static final String OUTPUT_COUNT_UPDATE = "导出总数%d条，成功 %d 条，失败 %d 条，用时%s";
-    public static final String SUCCESS_OUTPUT = "导出成功 %d 条，失败 %d 条，合并 %d 条，用时%s";
+    public static final String SUCCESS_OUTPUT_AGGREGATE = "导出成功 %d 条，失败 %d 条，合并 %d 条，用时%s";
+    public static final String SUCCESS_OUTPUT = "导出成功 %d 条，失败 %d 条，用时%s";
     public static final String FAIL_OUTPUT = "导出联系人失败";
 
     public static final String DEL_COUNT_UPDATE = "删除总数%d条，成功 %d 条，失败 %d 条，用时%s";
