@@ -13,8 +13,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,15 +127,18 @@ public class ContactOutput {
         String whereId = Data.CONTACT_ID + " != ?";             // 选区(查询范围)，不等于某个值
         String whereArgsId[] = new String[]{"null"};            // 选择条件数组，只需要非空记录
         String sortOrderId = Data.CONTACT_ID;                   // 查询结果排序规则
-        Cursor cursorId = resolver.query(uriId, selectId, whereId, whereArgsId, sortOrderId);
+        Cursor cursorId = resolver.query(uriId, null, whereId, whereArgsId, sortOrderId);
 
         m_iSum = cursorId.getCount();                       // 导出联系人总数
         m_lStartTimer = SystemClock.elapsedRealtime();      // 计时器起始时间
         m_iSuccessCount = 0;
         m_iFailCount = 0;
-
         //m_Fun.logString(m_iSum);
 
+        // 输出 cursor 表中 n(0 表示所有) 个查询字段数据到文件，filePath 为目录路径，fileName为文件名
+        //m_Fun.cursor2file(cursorId, 0, m_sPathDownloads, "cursorId_1.txt");   // S10 记录众多时崩溃
+
+        int n = 0;
         while (cursorId.moveToNext()) {
             //m_Fun.logFileds(cursorId);
             int iColId = cursorId.getColumnIndex(sortOrderId);  //"contact_id"
@@ -157,31 +163,49 @@ public class ContactOutput {
             String[] selectData = new String[]{Data.MIMETYPE, Data.DATA1, Data.RAW_CONTACT_ID};     // 要查询出来的列名(字段)数组
             String whereData = Data.RAW_CONTACT_ID + " = ?";                // 选区(查询范围)       //String where = String.format("%s = ?", Groups._ID);
             String whereArgsData[] = new String[]{contactId};               // 选择条件数组
-            String sortOrderData = Data.MIMETYPE;                           // 查询结果排序规则
+            //String sortOrderData = Data.MIMETYPE;                           // 查询结果排序规则
+            String sortOrderData = Data.RAW_CONTACT_ID;                           // 查询结果排序规则
             // 注意：必须查询全部字段，不然很多数据无法读出，导致 App 崩溃
-            Cursor cursorData = resolver.query(uriData, null, whereData, whereArgsData, sortOrderData);
+            //Cursor cursorData = resolver.query(uriData, null, whereData, whereArgsData, sortOrderData);
+            Cursor cursorData = resolver.query(uriData, null, null, null, sortOrderData);
+
+            //List<String> rwList = new ArrayList<String>(Arrays.asList(arr));// 数组到链表转型的正确方法
 
             //System.out.println("contactId = " + contactId);
             //System.out.println("cursorId.getCount() = " + cursorId.getCount());         //I/System.out: cursorId.getCount() = 4
             //System.out.println("cursorData.getCount() = " + cursorData.getCount());     //I/System.out: cursorData.getCount() = 25
 
+            if (0 == n++) {
+                // 输出 cursor 表中 n(0 表示所有) 个查询字段数据到文件，filePath 为目录路径，fileName为文件名
+                //m_Fun.cursor2file(cursorData, 0, m_sPathDownloads, "cursorData_1.txt");   // S10 记录众多时崩溃
+            }
+
             //m_Fun.logString(cursorData.getCount());
             while (cursorData.moveToNext()) {
-                int iColData = cursorData.getColumnIndex(Data.MIMETYPE);      // 注意：查询结果中没有"mimetype_id"字段，只有"mimetype"字段
-                if (iColData < 0) {
-                    continue;
-                }
-                String contactDataMime = cursorData.getString(iColData);    // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
-                //m_Fun.logString(contactDataMime);
+                String contact_Id = cursorData.getString(cursorData.getColumnIndex(Data.RAW_CONTACT_ID));
 
-                //System.out.println("contactDataMime = " + contactDataMime);
-                // 获取 cursorData 中联系人数据最终存入 m_jsonContactData1。用该函数可以取代一系列判断代码块
-                int ret = getContactsData(contactIdKey, contactDataMime, m_jsonContactData1, cursorData);
-                if (-1 != ret) {
-                    if (1 == ret) { // 只统计处理姓名字段是否成功
-                        m_iSuccessCount++;
-                    } else if (0 == ret) {
-                        m_iFailCount++;
+                //T02-OK-三星S10中data表中查询到的id比raw_contacts中的小8
+                if (m_MA.m_bDealGalaxyS10) {
+                    contact_Id = String.valueOf(Integer.valueOf(contact_Id) + 8);   // contact_Id 加 8
+                }
+
+                if (contactId.equals(contact_Id)) {
+                    int iColData = cursorData.getColumnIndex(Data.MIMETYPE);      // 注意：查询结果中没有"mimetype_id"字段，只有"mimetype"字段
+                    if (iColData < 0) {
+                        continue;
+                    }
+                    String contactDataMime = cursorData.getString(iColData);    // mimetype：StructuredName.CONTENT_ITEM_TYPE、Phone.CONTENT_ITEM_TYPE、...
+                    //m_Fun.logString(contactDataMime);
+
+                    //System.out.println("contactDataMime = " + contactDataMime);
+                    // 获取 cursorData 中联系人数据最终存入 m_jsonContactData1。用该函数可以取代一系列判断代码块
+                    int ret = getContactsData(contactIdKey, contactDataMime, m_jsonContactData1, cursorData);
+                    if (-1 != ret) {
+                        if (1 == ret) { // 只统计处理姓名字段是否成功
+                            m_iSuccessCount++;
+                        } else if (0 == ret) {
+                            m_iFailCount++;
+                        }
                     }
                 }
             }

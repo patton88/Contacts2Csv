@@ -21,11 +21,15 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.example.contacts2csv.MainActivity.m_Fun;
 import static com.example.contacts2csv.MainActivity.m_MA;
+import static com.example.contacts2csv.MainActivity.m_sPathDownloads;
 
 /**
  * @author glsite.com
@@ -119,10 +123,10 @@ public class CommonFun {
     public String getFileNamePure(String PathAndName) {
         int start = PathAndName.lastIndexOf("/");   //没有找到返回 -1
         int end = PathAndName.lastIndexOf(".");
-        if(-1 == start){
+        if (-1 == start) {
             start = -1;
         }
-        if(-1 == end){
+        if (-1 == end) {
             end = PathAndName.length() - 1;
         }
         return PathAndName.substring(start + 1, end);
@@ -185,12 +189,12 @@ public class CommonFun {
         //I/System.out: str13 : Phones_7.txt
         //I/System.out: str14 : Receipt_6.txt
         int n = 0;
-        for (String name : filesNames){ //NamePhoneNicks_x.txt
+        for (String name : filesNames) { //NamePhoneNicks_x.txt
             String sp = getFileNamePure(name);
             //System.out.println("(sp.substring(0, namePure.length() - 1)).equals(namePure) = " + (sp.substring(0, namePure.length() - 1)).equals(namePure));
             //System.out.println("namePure = " + namePure);
             //System.out.println("sp.substring(0, namePure.length()) = " + sp.substring(0, namePure.length()));
-            if (sp.length() >= (namePure.length() + 2) && (sp.substring(0, namePure.length())).equals(namePure)){
+            if (sp.length() >= (namePure.length() + 2) && (sp.substring(0, namePure.length())).equals(namePure)) {
                 String s = sp.substring(namePure.length() + 1, sp.length());
                 if (isNum(s)) {
                     n = Math.max(n, Integer.valueOf(s));
@@ -200,7 +204,7 @@ public class CommonFun {
 
         // iFlag：0，不重名的新文件名称；iFlag：1，最新回执信息文件 Receipt_x.txt 名称
         if (iFlag < 0 || iFlag > 1 || (1 == iFlag && 0 == n)) {
-            return  "";  //iFlag非法，或者没有找到最新回执信息文件 Receipt_x.txt 名称
+            return "";  //iFlag非法，或者没有找到最新回执信息文件 Receipt_x.txt 名称
         } else if (0 == iFlag) {
             n = (0 == n) ? 1 : (n + 1);
         }
@@ -227,7 +231,7 @@ public class CommonFun {
         }
         int n = 0;
         String suffix = "";
-        for (String name : filesNames){         //NamePhoneNicks_x.png
+        for (String name : filesNames) {         //NamePhoneNicks_x.png
             suffix = getFileSuffix(name);
             //System.out.println("suffix = " + suffix);
 
@@ -239,7 +243,7 @@ public class CommonFun {
             if (pure.equals(filenamePure)) {
                 n = -1;
                 break;
-            } else if (pure.length() >= (filenamePure.length() + 2) && (pure.substring(0, filenamePure.length())).equals(filenamePure)){
+            } else if (pure.length() >= (filenamePure.length() + 2) && (pure.substring(0, filenamePure.length())).equals(filenamePure)) {
                 String s = pure.substring(filenamePure.length() + 1, pure.length());
                 if (isNum(s)) {
                     n = Math.max(n, Integer.valueOf(s));
@@ -250,7 +254,7 @@ public class CommonFun {
         String filenameNew = "";
         // iFlag：0，不重名的新文件名称；iFlag：1，最新文件 Wang_Wu_19 名称
         if (iFlag < 0 || iFlag > 1 || (1 == iFlag && 0 == n)) {
-            return  "";    //iFlag非法，或者没有找到最新回执信息文件 Receipt(_x).txt 名称
+            return "";    //iFlag非法，或者没有找到最新回执信息文件 Receipt(_x).txt 名称
         } else if (0 == iFlag) {
             n = (0 == n) ? 1 : (n + 1);
         } else if (1 == iFlag && -1 == n) {
@@ -349,10 +353,10 @@ public class CommonFun {
         return isNum.matches();
     }
 
-    public void printArr(String [] arr){
+    public void printArr(String[] arr) {
         int n = 1;
-        for(String s : arr) {
-            System.out.println("str" + n++ +" : " + s);
+        for (String s : arr) {
+            System.out.println("str" + n++ + " : " + s);
         }
     }
 
@@ -385,6 +389,58 @@ public class CommonFun {
         }
     }
 
+    // 输出 List<String> 完整结构到文件，filePath 为目录路径，fileName为文件名
+    public void list2File(List<String> list, String filePath, String fileName) {
+        String newFileName = GetNewFileName(filePath, fileName, 0);
+        String str = "";
+        for (int i = 0; i < list.size(); i++) {
+            str += (i > 0 ? "\n" : "") + list.get(i);
+        }
+        writeFile(filePath + "/" + newFileName, str);
+    }
+
+    // 输出 cursor 表中 n(0 表示所有) 个查询字段数据到文件，filePath 为目录路径，fileName为文件名
+    public void cursor2file(Cursor cursor, int n, String filePath, String fileName) {
+        String newFileName = GetNewFileName(filePath, fileName, 0);
+        List<String> list = new ArrayList<>();
+
+        if (0 == n) {
+            n = cursor.getCount();
+        }
+
+        //list.add(m_Fun.arr2csv(cursor.getColumnNames()));  // 放入表头。这种方式结果不对
+        String head = "";
+        for (int i = 0; i < n; i++) {
+            head += (i > 0 ? "," : "") + cursor.getColumnName(i);
+        }
+        list.add(head);  // 放入表头
+
+
+
+        cursor.moveToPosition(-1);  // 将游标移到第一条查询结果数据之前
+        while (cursor.moveToNext()) {
+            String line = "";
+            for (int i = 0; i < n; i++) {
+                line += (i > 0 ? "," : "") + cursor.getString(i);
+            }
+            list.add(line);  // 放入数据行
+        }
+        list2File(list, filePath, fileName);
+        //原来查询得到的cursor是指向第一条记录之前的，因此查询得到cursor后第一次调用moveToFirst或moveToNext都可以将cursor移动到第一条记录上。
+        //-1哪行神马都没有。cursor是个游标，初始位置是-1.通过movetonext获取到第一行，第二行...直到全部获取完。你给他传值-1如果取值的话。估计会报错吧
+        cursor.moveToPosition(-1);  // 将游标移到第一条查询结果数据之前
+    }
+
+    // 输出 cursor 查询到的所有字段名称
+    public void logCursor(Cursor cursor) {
+        String[] fileds = cursor.getColumnNames();
+        int len = fileds.length;
+        System.out.println("(test11) fields.length = " + len);
+        for (int i = 0; i < len; i++) {
+            System.out.println("\t(test11) col" + i + " : " + fileds[i]);
+        }
+    }
+
     // 输出 JSONObject 完整结构到文件，filePath 为目录路径，fileName为文件名
     public void Json2File(JSONObject json, String filePath, String fileName) {
         String newFileName = GetNewFileName(filePath, fileName, 0);
@@ -410,22 +466,20 @@ public class CommonFun {
         }
     }
 
-    // 输出 cursor 查询到的所有字段名称
-    public void logFileds(Cursor cursor) {
-        String [] fileds = cursor.getColumnNames();
-        int len = fileds.length;
-        System.out.println("(test11) fields.length = " + len);
-        for (int i = 0; i < len; i++) {
-            System.out.println("\t(test11) col" + i + " : " + fileds[i]);
-        }
-    }
-
-    public void logArray(String [] arr) {
+    public void logArray(String[] arr) {
         System.out.println("----- Begin : Array.length = " + arr.length + " -----------------------------------------");
         for (int i = 0; i < arr.length; i++) {
             System.out.println("array[" + i + "] = " + arr[i]);
         }
         System.out.println("----- End : Array.length = " + arr.length + " -----------------------------------------");
+    }
+
+    public String arr2csv(String[] arr) {
+        String csv = "";
+        for (int i = 0; i < arr.length; i++) {
+            csv += (i > 0 ? "," : "") + arr[i];
+        }
+        return csv;
     }
 
     public void logString(String str) {
@@ -449,7 +503,7 @@ public class CommonFun {
         ClipboardManager cm;
         ClipData m_ClipData;
         //获取剪贴板管理器：
-        cm = (ClipboardManager)m_MA.getSystemService(Context.CLIPBOARD_SERVICE);
+        cm = (ClipboardManager) m_MA.getSystemService(Context.CLIPBOARD_SERVICE);
         //android 获取 app 名称
         String sAppName = m_MA.getApplicationInfo().loadLabel(m_MA.getPackageManager()).toString();   // 获得app名称
         // 创建普通字符型ClipData
@@ -460,4 +514,5 @@ public class CommonFun {
 
         return true;
     }
+
 }

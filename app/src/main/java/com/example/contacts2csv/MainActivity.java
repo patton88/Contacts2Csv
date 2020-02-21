@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public boolean m_bDealPhoto;
     private CheckBox m_chkDealPhoto;
 
+    public boolean m_bDealGalaxyS10;  // 处理三星 GalaxyS10
+    private CheckBox m_chkGalaxyS10;
+
     public boolean m_bFilterNameOnly;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
     private CheckBox m_chkNameOnly;
 
@@ -181,6 +184,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void init() {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
+
+        m_bDealGalaxyS10 = true;            // 处理三星 GalaxyS10
 
         m_sFileAbsolutePath = "";
         m_output = new ContactOutput();     //导出联系人
