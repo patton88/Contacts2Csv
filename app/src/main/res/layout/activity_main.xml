@@ -29,58 +29,51 @@
         android:id="@+id/chk_deal_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:text="@string/deal_photo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_filepath" />
 
-    <RadioGroup
-        android:id="@+id/rbtn_group_photo_type"
-        android:orientation="horizontal"
-        android:layout_width="260dp"
+    <Spinner
+        android:id="@+id/spinner_photo_type"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chk_deal_photo">
-
-        <RadioButton
-            android:id="@+id/rbtn_png"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="@string/radio_png" />
-
-        <RadioButton
-            android:id="@+id/rbtn_jpg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/radio_jpg" />
-    </RadioGroup>
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/chk_deal_photo"
+        app:layout_constraintTop_toBottomOf="@+id/et_filepath" />
 
     <TextView
         android:id="@+id/tv_quality"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="16dp"
         android:text="@string/tv_quality"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@+id/spinner_photo_type"
+        app:layout_constraintTop_toBottomOf="@+id/et_filepath" />
 
     <EditText
         android:id="@+id/et_quality"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="2dp"
         android:ems="10"
         android:hint="@string/et_quality"
         android:inputType="numberDecimal"
         app:layout_constraintStart_toEndOf="@+id/tv_quality"
-        app:layout_constraintTop_toBottomOf="@+id/rbtn_group_photo_type" />
+        app:layout_constraintTop_toBottomOf="@+id/et_filepath" />
+
+    <CheckBox
+        android:id="@+id/chk_adapt_galaxy_s10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/chk_adapt_galaxy_s10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chk_deal_photo" />
 
     <CheckBox
         android:id="@+id/chk_filter_name_only"
@@ -89,13 +82,13 @@
         android:layout_marginTop="16dp"
         android:text="@string/tv_filter_name_only"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_quality" />
+        app:layout_constraintTop_toBottomOf="@+id/chk_adapt_galaxy_s10" />
 
     <Button
         android:id="@+id/btn_insert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="@string/btn_insert_contact"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.082"
@@ -106,7 +99,7 @@
         android:id="@+id/btn_del_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="@string/btn_del_all"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.14"
@@ -178,6 +171,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_get_last_file"
         android:hint="显示处理信息"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.25" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,10 +23,12 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     public TextView m_tvResult;
 
-    private RadioButton[] m_rbtnArrPhoto = new RadioButton[2];
     public static String m_sPathDownloads;    //存储数据的默认路径，无文件名
     public String m_sFileAbsolutePath;        //文件绝对路径，包括完整的目录和文件名
     public static CommonFun m_Fun;    //通用函数类
@@ -93,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView m_tvDlg;
 
     private String m_sAppName;
+
+    Spinner m_spinnerPhotoType;
 
     //线程消息处理对象
     public Handler m_handler = new Handler() {
@@ -218,11 +221,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_chkNameOnly.setChecked(m_bFilterNameOnly);
 
         m_tvResult = (TextView) findViewById(R.id.tv_result);
+
         m_tvPhote = (TextView) findViewById(R.id.chk_deal_photo);
-        m_rbtnArrPhoto[0] = (RadioButton) findViewById(R.id.rbtn_png);
-        // set png default
-        m_rbtnArrPhoto[0].setChecked(true);
-        m_rbtnArrPhoto[1] = (RadioButton) findViewById(R.id.rbtn_jpg);
+        m_spinnerPhotoType = (Spinner) this.findViewById(R.id.spinner_photo_type);  //获取mSpinnerGaps控件句柄，并设置参数
+        ArrayAdapter adapterGaps = new ArrayAdapter(this, android.R.layout.simple_spinner_item, new String[]{"png", "jpg"});
+        adapterGaps.setDropDownViewResource(android.R.layout.simple_list_item_1);   //设置Spinner控件下拉样式
+        m_spinnerPhotoType.setAdapter(adapterGaps);
 
         m_iAggregateSameName = 3;           // 聚合同名联系人信息 : 0 完全相同；1 头部相同；2 尾部相同；3 任何位置相同
         m_bAggregateSameData = true;        // 聚合同名联系人同样内容的数据
@@ -404,8 +408,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     //为处理联系人 Photo 设置控件状态
     private void setPhotoWidgetEnabled(boolean bEnable) {
-        m_rbtnArrPhoto[0].setEnabled(bEnable);
-        m_rbtnArrPhoto[1].setEnabled(bEnable);
+        m_spinnerPhotoType.setEnabled(bEnable);
         m_tvQuality.setEnabled(bEnable);
         m_etQuality.setEnabled(bEnable);
     }
