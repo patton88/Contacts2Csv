@@ -58,11 +58,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private TextView m_tvPhote;
     private TextView m_tvQuality;
-    private EditText m_etQuality;
+    public EditText m_etQuality;
     public boolean m_bDealPhoto;
     private CheckBox m_chkDealPhoto;
 
-    public boolean m_bDealGalaxyS10;  // 处理三星 GalaxyS10
+    public boolean m_bDealGalaxyS10;    // 修正三星 GalaxyS10 导出少8条记录问题
     private CheckBox m_chkGalaxyS10;
 
     public boolean m_bFilterNameOnly;   // 剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
@@ -215,11 +215,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnGetUniqueFile = (Button) findViewById(R.id.btn_get_unique_file);
         m_btnGetUniqueFile.setOnClickListener(this);
 
-        m_chkNameOnly = findViewById(R.id.chk_filter_name_only);
-        m_chkNameOnly.setOnClickListener(this);
-        m_bFilterNameOnly = false;   // 默认不选。剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
-        m_chkNameOnly.setChecked(m_bFilterNameOnly);
-
         m_tvResult = (TextView) findViewById(R.id.tv_result);
 
         m_tvPhote = (TextView) findViewById(R.id.chk_deal_photo);
@@ -246,6 +241,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //setPhotoWidgetEnabled(false);
         m_etQuality.setText("100"); // 默认100
         m_etQuality.setFilters(new InputFilter[]{new InputFilterMinMax(1,100)});    //设置监听
+
+        m_chkGalaxyS10 = findViewById(R.id.chk_adapt_galaxy_s10);
+        m_chkGalaxyS10.setOnClickListener(this);
+        m_bDealGalaxyS10 = false;    // 默认不处理，修正三星 GalaxyS10 导出少8条记录问题
+
+        m_chkNameOnly = findViewById(R.id.chk_filter_name_only);
+        m_chkNameOnly.setOnClickListener(this);
+        m_bFilterNameOnly = false;   // 默认不选。剔除 jsonSource 中只有用户名、没有任何其他信息的联系人记录
 
         m_bWaitInser = false;    // 等待处理插入联系人的标志
 
@@ -339,6 +342,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.chk_deal_photo:
                 m_bDealPhoto = m_chkDealPhoto.isChecked();
                 setPhotoWidgetEnabled(m_bDealPhoto);
+                break;
+            case R.id.chk_adapt_galaxy_s10:
+                m_bDealGalaxyS10 = m_chkGalaxyS10.isChecked();    // 修正三星 GalaxyS10 导出少8条记录问题
+                break;
             case R.id.chk_filter_name_only:
                 m_bFilterNameOnly = m_chkNameOnly.isChecked();
                 break;

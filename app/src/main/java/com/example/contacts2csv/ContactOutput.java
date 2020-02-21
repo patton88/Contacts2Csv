@@ -1296,7 +1296,14 @@ public class ContactOutput {
             filename = "anonymity_1";
             e.printStackTrace();
         }
-        ret = saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename, "png", 100);
+        int iQuality = 100;
+        iQuality = Integer.valueOf(m_MA.m_etQuality.getText().toString());
+        if (iQuality < 1 || iQuality > 100) {
+            iQuality = 100;
+        }
+        //ret = saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename, "png", 100);
+        ret = saveBmpFile(photoBmp, m_sPathDownloads + "/Photo", filename,
+                m_MA.m_spinnerPhotoType.getSelectedItem().toString(),iQuality);
         return ret;
     }
 
