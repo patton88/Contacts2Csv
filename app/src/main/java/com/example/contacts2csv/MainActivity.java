@@ -1,10 +1,13 @@
 package com.example.contacts2csv;
 
 import java.io.File;
+import java.io.FileOutputStream;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -289,8 +292,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_help:
-                createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
-                        false, ExtraStrings.DIALOG_TYPE_HELP);
+                //createDialog(this, ExtraStrings.HELP_DIALOG_TITLE, ExtraStrings.HELP_MESSAGE,
+                //        false, ExtraStrings.DIALOG_TYPE_HELP);
+                createHelpDialog(this, getString(R.string.dlg_help_title), ExtraStrings.HELP_MESSAGE, true);
                 if (m_bOutputing || m_bInserting || m_bDeling) {
                     setWidgetsEnable(false);
                 }
@@ -499,6 +503,56 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //builder.setNeutralButton(getString(R.string.dlg_save_btn_browse), null);
 
         builder.show();         // 使用show()方法显示对话框
+    }
+
+    public void createHelpDialog(Context context, String title, String message, boolean hasCancel) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(getString(R.string.dlg_help_btn_ok),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.cancel();
+                    }
+                });
+
+        // 为对话框设置中立按钮，复制按钮，点击后对话框不会关闭
+        builder.setNeutralButton(getString(R.string.dlg_help_copy), null);
+
+        if (hasCancel) {
+            //为对话框设置取消按钮，但是不添加监听
+            builder.setNegativeButton(getString(R.string.dlg_save_btn_save), null);
+        }
+
+        final AlertDialog dlgSave = builder.create();
+        //这里必须要先调show()方法，后面的getButton才有效
+        dlgSave.show();         // 使用show()方法显示对话框
+
+        dlgSave.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Android 内容复制到剪贴板
+                ClipboardManager cm;
+                ClipData m_ClipData;
+                //获取剪贴板管理器：
+                cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                // 创建普通字符型ClipData
+                m_ClipData = ClipData.newPlainText(m_sAppName, ExtraStrings.HELP_MESSAGE);
+                // 将ClipData内容放到系统剪贴板里。
+                cm.setPrimaryClip(m_ClipData);
+                Toast.makeText(MainActivity.this, getString(R.string.dlg_help_copy_info), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (hasCancel) {
+            // 获取到对话框上的取消按钮，然后对该按钮添加普通的View.OnClickListener。
+            dlgSave.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    m_Fun.SaveFile2(m_MA.m_sPathDownloads, getString(R.string.file_txt_help), ExtraStrings.HELP_MESSAGE);
+                }
+            });
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

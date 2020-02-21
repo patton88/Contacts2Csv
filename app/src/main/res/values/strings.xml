@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name_0">Contacts2Csv</string>
     <string name="hello">Hello World, ContactActivity!</string>
-    <string name="app_name">联系人导入导出工具</string>
+    <string name="app_name">CSV联系人导入导出工具</string>
     <string name="btn_insert_contact">导入联系人</string>
     <string name="read_file">导入文件</string>
     <string name="deal_photo">处理头像</string>
@@ -27,4 +27,13 @@
     <string name="rbtn_only_new">只保留新的</string>
 
     <string name="dlg_info_1">必须选择&#160;txt&#160;扩展名的文本文件！</string>
+
+    <string name="dlg_help_copy">复制</string>
+    <string name="dlg_help_title">帮助信息</string>
+    <string name="dlg_help_copy_info">帮助信息已复制到剪贴板</string>
+    <string name="dlg_help_btn_ok">确认</string>
+    <string name="file_txt_help">Help_1.txt</string>
+    <string name="dlg_save_btn_save">保存</string>
+    <string name="dlg_save_btn_cancel">取消</string>
+    <string name="dlg_save_info_2">成功保存文件：</string>
 </resources>

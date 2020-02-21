@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -462,6 +463,24 @@ public class CommonFun {
             writer.write(str);
             writer.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //将str字符串保存到绝对路径中：mInFilePath + "/" + m_sInFileName。自动更名，不会覆盖已有文件
+    // 比如：SaveFile2(m_sInFilePath, m_sInFileName, m_sPhoneNums)
+    public void SaveFile2(String filePath, String fileName, String str) {
+        try {
+            // 获得绝对路径：mInFilePath + "/" + m_sInFileName下面的新文件对象。
+            // iFlag：0，不重名的新文件对象；iFlag：1，最新回执信息文件 Receipt_x.txt 对象
+            //public File GetNewFile(String filePath, String fileName, int iFlag) {
+            File file = m_Fun.GetNewFile(filePath, fileName, 0);
+
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(str.getBytes());
+            fos.close();
+            Toast.makeText(m_MA, file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
