@@ -21,7 +21,7 @@
     <string name="tv_quality">图像质量：</string>
     <string name="et_quality">1到100</string>
 
-    <string name="chk_adapt_galaxy_s10">修正三星S10导出少8条记录问题</string>
+    <string name="chk_adapt_galaxy_s10">修正安卓10的三星S10导出少8条记录问题</string>
     <string name="tv_filter_name_only">剔除仅含姓名、无其他信息的联系人</string>
     <string name="rbtn_merge">合并</string>
     <string name="rbtn_only_old">只保留旧的</string>
