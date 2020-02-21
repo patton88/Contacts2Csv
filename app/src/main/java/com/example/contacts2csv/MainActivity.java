@@ -430,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_btnGetUniqueFile.setEnabled(bEnable);
 
         m_chkDealPhoto.setEnabled(bEnable);
+        m_chkGalaxyS10.setEnabled(bEnable);
         m_chkNameOnly.setEnabled(bEnable);
         setPhotoWidgetEnabled(bEnable && m_chkDealPhoto.isChecked());
 
