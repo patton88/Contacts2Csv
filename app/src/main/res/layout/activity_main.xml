@@ -57,7 +57,7 @@
 
     <EditText
         android:id="@+id/et_quality"
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:ems="10"
@@ -102,7 +102,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/btn_del_all"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.14"
+        app:layout_constraintHorizontal_bias="0.145"
         app:layout_constraintStart_toEndOf="@+id/btn_insert"
         app:layout_constraintTop_toBottomOf="@+id/chk_filter_name_only" />
 
@@ -124,7 +124,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/btn_browse_file"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.12"
+        app:layout_constraintHorizontal_bias="0.124"
         app:layout_constraintStart_toEndOf="@+id/btn_output"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
@@ -135,7 +135,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/btn_help"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.26"
+        app:layout_constraintHorizontal_bias="0.28"
         app:layout_constraintStart_toEndOf="@+id/btn_browse_file"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert" />
 
@@ -157,7 +157,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/btn_get_unique_file"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.288"
+        app:layout_constraintHorizontal_bias="0.303"
         app:layout_constraintStart_toEndOf="@+id/btn_get_last_file"
         app:layout_constraintTop_toBottomOf="@+id/btn_output" />
 

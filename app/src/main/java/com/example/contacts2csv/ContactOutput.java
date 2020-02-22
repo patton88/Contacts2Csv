@@ -90,7 +90,7 @@ public class ContactOutput {
     public boolean outputAllContacts(Context context, String sPath) {
         // 1、先导出群组信息到 Groups_xxx.txt，不用管该组有多少组成员
         String sGroups = m_GroupOutput.getContactsGroups2();    //获得群组信息
-        m_GroupOutput.saveGroupinfo2File(sGroups);              //将群组信息写入文件
+        //m_GroupOutput.saveGroupinfo2File(sGroups);              //将群组信息写入文件
 
         // 2、导出全部联系人，包含联系人属于哪些组的信息
         String sContacts = getAllContacts();
@@ -228,9 +228,9 @@ public class ContactOutput {
         //filterJsonContactData(m_jsonContactData2, m_jsonContactData3);
 
         // 输出 JSONObject 完整结构到文件，path 为文件绝对路径
-        m_Fun.Json2File(m_jsonContactData1, m_sPathDownloads, "m_jsonContactData1_1.txt");
+        //m_Fun.Json2File(m_jsonContactData1, m_sPathDownloads, "m_jsonContactData1_1.txt");
         //m_Fun.Json2File(m_jsonContactData2, m_sPathDownloads, "m_jsonContactData2_1.txt");
-        m_Fun.Json2File(m_jsonContactData3, m_sPathDownloads, "m_jsonContactData3_1.txt");
+        //m_Fun.Json2File(m_jsonContactData3, m_sPathDownloads, "m_jsonContactData3_1.txt");
 
         return traverseJSON(m_jsonContactData3);
     }
