@@ -193,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         m_sPathDownloads = getUserPath();
         m_Fun = new CommonFun();
 
+        setTitle("CSV联系人导入导出工具");   // 修改 App 标题
+
         m_bDealGalaxyS10 = true;            // 处理三星 GalaxyS10
 
         m_sFileAbsolutePath = "";
